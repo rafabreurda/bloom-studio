@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Star, CheckCircle2, ShoppingCart } from 'lucide-react';
+import { X, Star, CheckCircle2, ShoppingCart, Handshake } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { ClientSearchCombobox } from './ClientSearchCombobox';
@@ -29,9 +29,13 @@ export function AddAppointmentModal({
   const [sessionValue, setSessionValue] = useState(150);
   const [isVIP, setIsVIP] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isPartnership, setIsPartnership] = useState(false);
+  const [selectedPartnershipId, setSelectedPartnershipId] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<StockItem[]>([]);
   const [isManualPhone, setIsManualPhone] = useState(true);
   const finalTotal = Number(sessionValue) + selectedProducts.reduce((acc, curr) => acc + Number(curr.price), 0);
+
+  const selectedPartnership = partnerships.find(p => p.id === selectedPartnershipId);
 
   const handleClientSelect = (data: {
     name: string;
@@ -61,6 +65,9 @@ export function AddAppointmentModal({
       tags: isVIP ? ['VIP'] : [],
       paymentMethod: formData.get('paymentMethod') as 'Pix' | 'Cartão' | 'Dinheiro',
       isConfirmed,
+      isPartnership,
+      partnershipId: isPartnership ? selectedPartnershipId : undefined,
+      partnershipName: isPartnership ? selectedPartnership?.name : undefined,
     });
     
     onClose();
@@ -159,42 +166,82 @@ export function AddAppointmentModal({
           </div>
         </div>
 
-        {/* VIP & Confirmed */}
-        <div className="grid grid-cols-2 gap-4">
-          <label className="flex items-center gap-3 p-4 bg-secondary rounded-3xl border border-border/10 cursor-pointer hover:bg-muted transition-all">
+        {/* VIP, Confirmed & Partnership */}
+        <div className="grid grid-cols-3 gap-3">
+          <label className="flex items-center gap-2 p-3 md:p-4 bg-secondary rounded-3xl border border-border/10 cursor-pointer hover:bg-muted transition-all">
             <input 
               type="checkbox" 
               className="hidden" 
               checked={isVIP} 
               onChange={e => setIsVIP(e.target.checked)} 
             />
-            <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+            <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full border-2 flex items-center justify-center transition-all ${
               isVIP ? 'bg-primary border-primary shadow-xl' : 'border-muted-foreground'
             }`}>
-              <Star size={16} fill={isVIP ? "black" : "transparent"} className={isVIP ? 'text-primary-foreground' : ''} />
+              <Star size={14} fill={isVIP ? "black" : "transparent"} className={isVIP ? 'text-primary-foreground' : ''} />
             </div>
-            <span className={`text-[10px] font-black uppercase ${isVIP ? 'text-primary' : 'text-muted-foreground'}`}>
-              Cliente VIP
+            <span className={`text-[9px] md:text-[10px] font-black uppercase ${isVIP ? 'text-primary' : 'text-muted-foreground'}`}>
+              VIP
             </span>
           </label>
           
-          <label className="flex items-center gap-3 p-4 bg-secondary rounded-3xl border border-border/10 cursor-pointer transition-all hover:bg-muted">
+          <label className="flex items-center gap-2 p-3 md:p-4 bg-secondary rounded-3xl border border-border/10 cursor-pointer transition-all hover:bg-muted">
             <input 
               type="checkbox" 
               className="hidden" 
               checked={isConfirmed} 
               onChange={e => setIsConfirmed(e.target.checked)} 
             />
-            <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+            <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full border-2 flex items-center justify-center transition-all ${
               isConfirmed ? 'bg-success border-success text-success-foreground' : 'border-muted-foreground'
             }`}>
-              {isConfirmed && <CheckCircle2 size={16} />}
+              {isConfirmed && <CheckCircle2 size={14} />}
             </div>
-            <span className="text-[10px] font-black uppercase text-muted-foreground">
+            <span className="text-[9px] md:text-[10px] font-black uppercase text-muted-foreground">
               Confirmado
             </span>
           </label>
+
+          <label className="flex items-center gap-2 p-3 md:p-4 bg-secondary rounded-3xl border border-border/10 cursor-pointer transition-all hover:bg-muted">
+            <input 
+              type="checkbox" 
+              className="hidden" 
+              checked={isPartnership} 
+              onChange={e => {
+                setIsPartnership(e.target.checked);
+                if (!e.target.checked) setSelectedPartnershipId('');
+              }} 
+            />
+            <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+              isPartnership ? 'bg-violet-500 border-violet-500 text-white' : 'border-muted-foreground'
+            }`}>
+              {isPartnership && <Handshake size={14} />}
+            </div>
+            <span className={`text-[9px] md:text-[10px] font-black uppercase ${isPartnership ? 'text-violet-600' : 'text-muted-foreground'}`}>
+              Parceria
+            </span>
+          </label>
         </div>
+
+        {/* Partnership selector */}
+        {isPartnership && (
+          <div className="p-4 bg-violet-50 rounded-3xl border border-violet-200 space-y-2">
+            <p className="text-[10px] font-black uppercase text-violet-700 flex items-center gap-2">
+              <Handshake size={14} /> Selecione a Parceria
+            </p>
+            <select 
+              value={selectedPartnershipId}
+              onChange={(e) => setSelectedPartnershipId(e.target.value)}
+              className="w-full p-3 bg-white border border-violet-200 rounded-xl text-xs font-bold text-foreground"
+              required={isPartnership}
+            >
+              <option value="">Escolha uma parceria...</option>
+              {partnerships.map(p => (
+                <option key={p.id} value={p.id}>{p.name} ({p.discount}% desconto)</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Value & Payment */}
         <div className="grid grid-cols-2 gap-4">
@@ -223,7 +270,7 @@ export function AddAppointmentModal({
 
         {/* Total */}
         <div className={`p-6 rounded-[28px] text-primary-foreground flex justify-between items-center shadow-xl transition-all duration-500 ${
-          isVIP ? 'bg-gradient-gold' : 'bg-gray-100 text-gray-900'
+          isVIP ? 'bg-gradient-gold' : isPartnership ? 'bg-violet-500 text-white' : 'bg-gray-100 text-gray-900'
         }`}>
           <div>
             <p className="text-[10px] font-black uppercase opacity-60">Total</p>

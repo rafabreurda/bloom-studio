@@ -21,6 +21,7 @@ export const mockAppointments: Appointment[] = [
     paymentMethod: 'Pix',
     tags: ['VIP'],
     isConfirmed: true,
+    isPartnership: false,
     createdAt: new Date(),
     products: [{ productId: '1', name: 'Óleo Bronzeador', quantity: 1, price: 50 }]
   },
@@ -36,6 +37,9 @@ export const mockAppointments: Appointment[] = [
     paymentMethod: 'Cartão',
     tags: [],
     isConfirmed: false,
+    isPartnership: true,
+    partnershipId: '1',
+    partnershipName: 'Salão Bella Hair',
     createdAt: new Date(),
   },
   {
@@ -50,6 +54,7 @@ export const mockAppointments: Appointment[] = [
     paymentMethod: 'Dinheiro',
     tags: ['Fidelidade'],
     isConfirmed: true,
+    isPartnership: false,
     createdAt: new Date(),
     products: [{ productId: '2', name: 'Hidratante Pós-Bronze', quantity: 1, price: 50 }]
   },

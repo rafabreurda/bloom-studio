@@ -10,6 +10,9 @@ export interface Appointment {
   paymentMethod: 'Pix' | 'Cartão' | 'Dinheiro';
   tags: string[];
   isConfirmed: boolean;
+  isPartnership: boolean;
+  partnershipId?: string;
+  partnershipName?: string;
   createdAt: Date;
   products?: AppointmentProduct[];
 }
