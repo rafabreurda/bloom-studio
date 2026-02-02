@@ -1,170 +1,149 @@
 
-# Plano: Ícone de Troca de Administrador + Login Simplificado
+# Plano: Histórico de Fichas de Anamnese
 
 ## O Que Você Quer
 
-Transformar o ícone no canto "Período Ativo" em um botão para trocar de administrador, onde:
-- **Admin Chefe (você)**: É o único que precisa de senha para entrar
-- **Admin Pleno e Junior**: Podem ser selecionados sem senha (você controla quem pode acessar)
+Poder adicionar **múltiplas fichas de anamnese** para cada cliente, criando um histórico de avaliações ao longo do tempo. Isso permite:
+- Acompanhar a evolução da saúde do cliente
+- Comparar alterações em medicamentos, alergias, etc.
+- Ter registro de cada avaliação feita antes das sessões
 
 ```text
-┌─────────────────────────────────────┐
-│  🌞 BRONZE PRO                      │
-│  Master                             │
-│                                     │
-│  ○ Agenda                           │
-│  ○ Clientes                         │
-│  ○ Financeiro                       │
-│  ...                                │
-│                                     │
-│  ┌─────────────────────────────┐   │
-│  │ 👤 ← Clicável               │   │
-│  │ Período Ativo               │   │
-│  │ Admin Chefe                 │   │
-│  └─────────────────────────────┘   │
-└─────────────────────────────────────┘
-
-        ↓ Clica no ícone 👤
-
-┌─────────────────────────────────────┐
-│        Trocar Administrador         │
-│                                     │
-│  ┌────────────────────────────────┐ │
-│  │ 👑 Maria (Admin Chefe)     🔒  │ │  ← Precisa senha
-│  └────────────────────────────────┘ │
-│  ┌────────────────────────────────┐ │
-│  │ 👤 Ana (Admin Pleno)           │ │  ← Entra direto
-│  └────────────────────────────────┘ │
-│  ┌────────────────────────────────┐ │
-│  │ 👤 Julia (Admin Junior)        │ │  ← Entra direto
-│  └────────────────────────────────┘ │
-│                                     │
-│  [ Cancelar ]                       │
-└─────────────────────────────────────┘
-
-        ↓ Clica em Admin Chefe
-
-┌─────────────────────────────────────┐
-│        Olá, Maria!                  │
-│                                     │
-│  ┌──────────────────────────────┐  │
-│  │ Senha: ____________________  │  │
-│  │                              │  │
-│  │ ☐ Lembrar neste dispositivo  │  │
-│  │                              │  │
-│  │      [ ENTRAR ]              │  │
-│  └──────────────────────────────┘  │
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│  👤 Maria Silva                                      │
+│                                                     │
+│  📋 FICHAS DE ANAMNESE (3)                          │
+│                                                     │
+│  ┌─────────────────────────────────────────────┐   │
+│  │ 📅 15/01/2024 (mais recente)                │   │
+│  │ Pele: Tipo II - Clara                       │   │
+│  │ Alergias: Nenhuma                           │   │
+│  │ Medicamentos: Vitamina D                    │   │
+│  │                            [Ver Detalhes]   │   │
+│  └─────────────────────────────────────────────┘   │
+│                                                     │
+│  ┌─────────────────────────────────────────────┐   │
+│  │ 📅 08/12/2023                               │   │
+│  │ Pele: Tipo II - Clara                       │   │
+│  │ Alergias: Nenhuma                           │   │
+│  │ Medicamentos: Nenhum                        │   │
+│  │                            [Ver Detalhes]   │   │
+│  └─────────────────────────────────────────────┘   │
+│                                                     │
+│           [ + Nova Ficha de Anamnese ]              │
+└─────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Mudanças na Interface
 
-### 1. Ícone Clicável na Sidebar
+### 1. Modal de Cliente (ClientModal)
 
-O ícone ao lado de "Período Ativo" vira um botão que abre o modal de troca:
+A aba "Ficha de Anamnese" terá duas opções:
 
-| Antes | Depois |
-|-------|--------|
-| Ícone estático | Ícone clicável com hover effect |
-| Mostra apenas o role | Abre modal de seleção |
+| Cenário | Comportamento |
+|---------|---------------|
+| Novo Cliente | Formulário em branco para primeira ficha |
+| Cliente Existente | Lista das fichas anteriores + botão "Nova Ficha" |
 
-### 2. Modal de Seleção de Admin
+### 2. Modal de Histórico (ClientHistoryModal)
 
-- Lista todos os admins cadastrados
-- Ícone de cadeado 🔒 apenas no Admin Chefe
-- Clique em Admin Pleno/Junior → entra direto
-- Clique em Admin Chefe → pede senha
+A seção de anamnese mostrará:
+- Accordion/lista expansível com todas as fichas
+- Data de cada ficha destacada
+- Botão para criar nova ficha diretamente
 
-### 3. Persistência Local
+### 3. Nova Ficha
 
-Se marcar "Lembrar neste dispositivo", a próxima vez que clicar no Admin Chefe entra direto (senha salva localmente).
+Ao clicar "Nova Ficha":
+- Abre formulário pré-preenchido com dados da última ficha
+- Usuário atualiza o que mudou
+- Salva como novo registro com data atual
 
 ---
 
 ## Detalhes Técnicos
 
-### Banco de Dados (Supabase)
+### Mudança nas Interfaces (src/types/index.ts)
 
-Criar as seguintes tabelas:
+**Antes:**
+```typescript
+interface Client {
+  anamnesis?: AnamnesisForm;  // Uma única ficha
+}
+```
 
-**Tabela: `profiles`**
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| id | UUID | ID único |
-| name | TEXT | Nome do admin |
-| password_hash | TEXT | Senha (apenas Admin Chefe terá) |
-| created_at | TIMESTAMP | Data de criação |
+**Depois:**
+```typescript
+interface AnamnesisRecord {
+  id: string;
+  date: string;               // Data da avaliação
+  skinType: string;
+  allergies: string;
+  medications: string;
+  healthConditions: string;
+  lastTanning?: string;
+  observations: string;
+  createdBy?: string;         // Nome do admin que criou
+}
 
-**Tabela: `user_roles`**
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| user_id | UUID | Referência ao profile |
-| role | TEXT | 'admin_chefe', 'admin_pleno', 'admin_junior' |
-
-**Tabela: `admin_permissions`**
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| user_id | UUID | Referência ao profile |
-| agenda, clientes, etc | BOOLEAN | Permissões granulares |
-
-### Arquivos a Criar
-
-| Arquivo | Descrição |
-|---------|-----------|
-| `src/contexts/AuthContext.tsx` | Contexto de autenticação global |
-| `src/hooks/useAuth.ts` | Hook para acessar admin logado |
-| `src/components/layout/AdminSwitchModal.tsx` | Modal de troca de admin |
+interface Client {
+  anamnesisHistory: AnamnesisRecord[];  // Histórico de fichas
+}
+```
 
 ### Arquivos a Modificar
 
 | Arquivo | Alteração |
 |---------|-----------|
-| `src/components/layout/Sidebar.tsx` | Ícone clicável + integração com modal |
-| `src/pages/Index.tsx` | Usar AuthContext para role |
-| `src/components/config/AdminSection.tsx` | CRUD de admins via Supabase |
-| `src/App.tsx` | Adicionar AuthProvider |
+| `src/types/index.ts` | Adicionar `AnamnesisRecord` e mudar `anamnesis` para `anamnesisHistory` |
+| `src/components/clients/ClientModal.tsx` | Modificar aba anamnese para criar nova ficha e listar anteriores |
+| `src/components/clients/ClientHistoryModal.tsx` | Mostrar todas as fichas com accordion expansível |
+| `src/data/mockData.ts` | Atualizar mock clients com array de anamneses |
+
+### Novo Componente (Opcional)
+
+| Arquivo | Descrição |
+|---------|-----------|
+| `src/components/clients/AnamnesisFormModal.tsx` | Modal separado para criar/editar ficha de anamnese |
 
 ---
 
-## Fluxo de Autenticação
+## Fluxo de Uso
 
 ```text
-1. Abrir sistema
-      ↓
-2. Verificar se tem admin salvo localmente
-      ↓
-   SIM → Carregar permissões → Entrar
-      ↓
-   NÃO → Mostrar modal de seleção
-      ↓
-3. Usuário seleciona admin
-      ↓
-   Admin Chefe? → Pedir senha
-      ↓
-   Outros? → Entrar direto
-      ↓
-4. Carregar permissões e entrar
+1. Abrir ficha do cliente
+       ↓
+2. Ver histórico de anamneses (lista com datas)
+       ↓
+3. Clicar "Nova Ficha"
+       ↓
+4. Formulário abre pré-preenchido com última ficha
+       ↓
+5. Atualizar campos necessários
+       ↓
+6. Salvar → nova ficha adicionada ao histórico
 ```
 
 ---
 
-## Segurança
+## Visualização no Histórico do Cliente
 
-- Senha do Admin Chefe armazenada com hash seguro no banco
-- Armazenamento local usa criptografia básica
-- Admin Chefe pode ver/resetar a própria senha nas configurações
-- Admin Pleno/Junior não têm acesso à aba Administradores
+A seção "Ficha de Anamnese" será transformada em "Histórico de Anamnese":
+
+- Cada ficha aparece como um item com data
+- Clicando expande para ver detalhes completos
+- Ficha mais recente aparece aberta por padrão
+- Badge indica quantas fichas existem
 
 ---
 
 ## Ordem de Implementação
 
-1. Criar tabelas no Supabase (profiles, user_roles, admin_permissions)
-2. Configurar funções de hash/verificação de senha
-3. Criar AuthContext e useAuth hook
-4. Criar AdminSwitchModal
-5. Modificar Sidebar para ícone clicável
-6. Integrar AdminSection com Supabase
-7. Criar Admin Chefe inicial (você define a senha)
+1. Atualizar tipos em `src/types/index.ts` (adicionar `AnamnesisRecord`, mudar `Client`)
+2. Atualizar dados de exemplo em `src/data/mockData.ts`
+3. Criar componente `AnamnesisFormModal.tsx` para formulário isolado
+4. Modificar `ClientModal.tsx` para gerenciar múltiplas fichas
+5. Modificar `ClientHistoryModal.tsx` com accordion de fichas
+6. Atualizar `ClientsView.tsx` para trabalhar com o novo formato
