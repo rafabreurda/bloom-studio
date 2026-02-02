@@ -74,25 +74,28 @@ export function AgendaHeader({
           </p>
         </div>
         <div className="flex-1">
-          <h2 className="text-lg font-black text-gray-900 capitalize leading-tight">
+          <h2 className="text-lg font-black capitalize leading-tight" style={{ color: 'hsl(var(--agenda-foreground))' }}>
             {getHeaderLabel()}
           </h2>
           <div className="flex items-center gap-4 mt-1">
             <button 
               onClick={goToPrev}
-              className="p-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200"
+              className="p-2 rounded-lg hover:opacity-80 transition-opacity"
+              style={{ backgroundColor: 'hsl(var(--agenda-muted))', color: 'hsl(var(--agenda-foreground))' }}
             >
               <ChevronLeft size={20} />
             </button>
             <button 
               onClick={goToToday}
-              className="text-[10px] font-black text-gray-500 hover:text-gray-900 uppercase"
+              className="text-[10px] font-black uppercase hover:opacity-70"
+              style={{ color: 'hsl(var(--agenda-muted-foreground))' }}
             >
               Hoje
             </button>
             <button 
               onClick={goToNext}
-              className="p-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200"
+              className="p-2 rounded-lg hover:opacity-80 transition-opacity"
+              style={{ backgroundColor: 'hsl(var(--agenda-muted))', color: 'hsl(var(--agenda-foreground))' }}
             >
               <ChevronRight size={20} />
             </button>
@@ -103,7 +106,10 @@ export function AgendaHeader({
       {/* Controls */}
       <div className="flex flex-col sm:flex-row items-stretch gap-2">
         {/* View Mode Toggle */}
-        <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200">
+        <div 
+          className="flex p-1 rounded-xl border"
+          style={{ backgroundColor: 'hsl(var(--agenda-muted))', borderColor: 'hsl(var(--agenda-border))' }}
+        >
           {(['day', 'week', 'month'] as ViewMode[]).map(mode => (
             <button
               key={mode}
@@ -111,8 +117,9 @@ export function AgendaHeader({
               className={`flex-1 px-3 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
                 viewMode === mode 
                   ? 'bg-primary text-primary-foreground shadow-lg' 
-                  : 'text-gray-500 hover:text-gray-900'
+                  : ''
               }`}
+              style={viewMode !== mode ? { color: 'hsl(var(--agenda-muted-foreground))' } : undefined}
             >
               {mode === 'day' ? 'Dia' : mode === 'week' ? 'Semana' : 'Mês'}
             </button>
