@@ -104,17 +104,30 @@ export function ClientSearchCombobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+      <PopoverContent 
+        className="w-[--radix-popover-trigger-width] p-0 z-[200]" 
+        align="start"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Digite nome ou telefone..."
             value={searchValue}
             onValueChange={setSearchValue}
+            autoFocus
           />
-          <CommandList>
-            <CommandEmpty className="py-3 text-center text-sm">
-              Nenhum cliente encontrado
-            </CommandEmpty>
+          <CommandList className="max-h-[250px]">
+            {filteredClients.length === 0 && filteredPartnerships.length === 0 && searchValue.trim() === '' && (
+              <div className="py-3 text-center text-sm text-muted-foreground">
+                Digite para buscar...
+              </div>
+            )}
+            
+            {filteredClients.length === 0 && filteredPartnerships.length === 0 && searchValue.trim() !== '' && (
+              <div className="py-3 text-center text-sm text-muted-foreground">
+                Nenhum cliente encontrado
+              </div>
+            )}
 
             {filteredClients.length > 0 && (
               <CommandGroup heading="Clientes">
