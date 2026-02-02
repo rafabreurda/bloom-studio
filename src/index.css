@@ -6,27 +6,27 @@
 
 @layer base {
   :root {
-    /* Core Brand - Amber/Gold */
-    --background: 0 0% 0%;
-    --foreground: 43 96% 56%;
+    /* Core Brand - White Theme with Black/Gold accents */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
 
-    --card: 240 6% 6%;
-    --card-foreground: 43 96% 56%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 10%;
 
-    --popover: 240 6% 4%;
-    --popover-foreground: 43 96% 56%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
 
     --primary: 43 96% 56%;
     --primary-foreground: 0 0% 0%;
 
-    --secondary: 240 4% 10%;
-    --secondary-foreground: 43 60% 50%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 30%;
 
-    --muted: 240 4% 12%;
-    --muted-foreground: 32 80% 25%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
 
     --accent: 32 94% 44%;
-    --accent-foreground: 0 0% 0%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -34,8 +34,8 @@
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
-    --border: 32 80% 20%;
-    --input: 32 80% 20%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
     --ring: 43 96% 56%;
 
     --radius: 1rem;
@@ -56,31 +56,31 @@
     --zinc-900: 240 6% 10%;
     --zinc-950: 240 6% 6%;
 
-    /* Sidebar */
-    --sidebar-background: 0 0% 0%;
+    /* Sidebar - Keep dark for contrast */
+    --sidebar-background: 0 0% 5%;
     --sidebar-foreground: 43 96% 56%;
     --sidebar-primary: 43 96% 56%;
     --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 240 4% 10%;
+    --sidebar-accent: 240 4% 12%;
     --sidebar-accent-foreground: 43 96% 56%;
     --sidebar-border: 32 80% 20%;
     --sidebar-ring: 43 96% 56%;
 
-    /* Agenda White Theme */
+    /* Agenda Theme - Same as main */
     --agenda-background: 0 0% 100%;
     --agenda-foreground: 0 0% 10%;
     --agenda-card: 0 0% 98%;
-    --agenda-border: 0 0% 85%;
+    --agenda-border: 0 0% 88%;
     --agenda-muted: 0 0% 96%;
     --agenda-muted-foreground: 0 0% 45%;
 
     /* Gradients */
     --gradient-gold: linear-gradient(135deg, hsl(32, 95%, 44%), hsl(43, 96%, 56%));
-    --gradient-premium: linear-gradient(135deg, hsl(240, 6%, 6%), hsl(0, 0%, 0%));
+    --gradient-premium: linear-gradient(135deg, hsl(0, 0%, 98%), hsl(0, 0%, 100%));
 
     /* Shadows */
     --shadow-gold: 0 10px 40px -10px hsl(43 96% 56% / 0.25);
-    --shadow-card: 0 25px 50px -12px hsl(0 0% 0% / 0.5);
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.08);
   }
 
   .dark {
@@ -130,11 +130,11 @@
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: hsl(0 0% 0%);
+    background: hsl(0 0% 95%);
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: hsl(26 90% 37%);
+    background: hsl(43 96% 56%);
     border-radius: 10px;
   }
   
