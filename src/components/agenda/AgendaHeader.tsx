@@ -62,7 +62,7 @@ export function AgendaHeader({
   };
 
   return (
-    <div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 bg-card p-4 md:p-5 rounded-2xl md:rounded-3xl border border-border shrink-0">
+    <div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 p-4 md:p-5 rounded-2xl md:rounded-3xl shrink-0 agenda-header agenda-card border agenda-border">
       {/* Date Display */}
       <div className="flex items-center gap-4">
         <div className="text-center bg-primary px-4 py-2 rounded-xl border border-accent min-w-[60px]">
@@ -74,25 +74,25 @@ export function AgendaHeader({
           </p>
         </div>
         <div className="flex-1">
-          <h2 className="text-lg font-black text-foreground capitalize leading-tight">
+          <h2 className="text-lg font-black text-gray-900 capitalize leading-tight">
             {getHeaderLabel()}
           </h2>
           <div className="flex items-center gap-4 mt-1">
             <button 
               onClick={goToPrev}
-              className="p-2 bg-secondary rounded-lg text-foreground"
+              className="p-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200"
             >
               <ChevronLeft size={20} />
             </button>
             <button 
               onClick={goToToday}
-              className="text-[10px] font-black text-muted-foreground hover:text-foreground uppercase"
+              className="text-[10px] font-black text-gray-500 hover:text-gray-900 uppercase"
             >
               Hoje
             </button>
             <button 
               onClick={goToNext}
-              className="p-2 bg-secondary rounded-lg text-foreground"
+              className="p-2 bg-gray-100 rounded-lg text-gray-700 hover:bg-gray-200"
             >
               <ChevronRight size={20} />
             </button>
@@ -103,7 +103,7 @@ export function AgendaHeader({
       {/* Controls */}
       <div className="flex flex-col sm:flex-row items-stretch gap-2">
         {/* View Mode Toggle */}
-        <div className="flex bg-secondary p-1 rounded-xl border border-border/10">
+        <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200">
           {(['day', 'week', 'month'] as ViewMode[]).map(mode => (
             <button
               key={mode}
@@ -111,7 +111,7 @@ export function AgendaHeader({
               className={`flex-1 px-3 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
                 viewMode === mode 
                   ? 'bg-primary text-primary-foreground shadow-lg' 
-                  : 'text-muted-foreground hover:text-foreground'
+                  : 'text-gray-500 hover:text-gray-900'
               }`}
             >
               {mode === 'day' ? 'Dia' : mode === 'week' ? 'Semana' : 'Mês'}

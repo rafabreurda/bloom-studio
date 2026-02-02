@@ -76,7 +76,7 @@ export function AgendaView({
   };
 
   return (
-    <div className="flex flex-col gap-4 h-full overflow-hidden">
+    <div className="flex flex-col gap-4 h-full overflow-hidden agenda-container">
       <StockAlert stock={stock} onNavigate={onNavigate} />
       
       <AgendaHeader
@@ -90,9 +90,9 @@ export function AgendaView({
 
       {/* Conditional View Rendering */}
       {viewMode === 'day' && (
-        <div className="flex-1 bg-card rounded-2xl md:rounded-3xl shadow-2xl border border-border overflow-hidden flex flex-col">
+        <div className="flex-1 rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col agenda-card border agenda-border">
           <div className="flex-1 overflow-y-auto custom-scrollbar">
-            <div className="divide-y divide-border">
+            <div className="divide-y agenda-border">
               {timeSlots.map(time => {
                 const appointment = appointments.find(a => a.date === dateStr && a.time === time);
                 const block = blocks.find(b => b.date === dateStr && b.time === time);

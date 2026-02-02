@@ -59,9 +59,9 @@ export function AgendaWeekView({
   const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
   return (
-    <div className="flex-1 bg-card rounded-2xl md:rounded-3xl shadow-2xl border border-border overflow-hidden flex flex-col">
+    <div className="flex-1 bg-white rounded-2xl md:rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col">
       {/* Week Header */}
-      <div className="grid grid-cols-7 border-b border-border bg-secondary/50">
+      <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
         {weekDays.map((day, idx) => {
           const isToday = day.toDateString() === today.toDateString();
           const isSelected = day.toDateString() === selectedDate.toDateString();
@@ -70,11 +70,11 @@ export function AgendaWeekView({
             <button
               key={idx}
               onClick={() => onDayClick(day)}
-              className={`p-3 text-center transition-all hover:bg-secondary ${
-                isSelected ? 'bg-primary/10' : ''
+              className={`p-3 text-center transition-all hover:bg-gray-100 ${
+                isSelected ? 'bg-amber-50' : ''
               }`}
             >
-              <p className="text-[10px] font-bold text-muted-foreground uppercase">
+              <p className="text-[10px] font-bold text-gray-500 uppercase">
                 {dayNames[idx]}
               </p>
               <p className={`text-lg font-black mt-1 ${
@@ -82,7 +82,7 @@ export function AgendaWeekView({
                   ? 'bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center mx-auto' 
                   : isSelected 
                     ? 'text-primary' 
-                    : 'text-foreground'
+                    : 'text-gray-900'
               }`}>
                 {day.getDate()}
               </p>
@@ -92,7 +92,7 @@ export function AgendaWeekView({
       </div>
 
       {/* Week Grid */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
         <div className="grid grid-cols-7 min-h-[400px]">
           {weekDays.map((day, idx) => {
             const dayAppointments = getAppointmentsForDay(day);
@@ -102,13 +102,13 @@ export function AgendaWeekView({
             return (
               <div 
                 key={idx}
-                className={`border-r border-border last:border-r-0 p-2 min-h-[300px] ${
-                  isBlocked ? 'bg-muted/50' : isToday ? 'bg-primary/5' : ''
+                className={`border-r border-gray-200 last:border-r-0 p-2 min-h-[300px] ${
+                  isBlocked ? 'bg-gray-100' : isToday ? 'bg-amber-50/30' : 'bg-white'
                 }`}
               >
                 {isBlocked ? (
                   <div className="flex items-center justify-center h-full">
-                    <div className="text-center text-muted-foreground">
+                    <div className="text-center text-gray-400">
                       <Lock size={24} className="mx-auto mb-2" />
                       <p className="text-[10px] font-bold uppercase">Bloqueado</p>
                     </div>
@@ -121,7 +121,7 @@ export function AgendaWeekView({
                           onDayClick(day);
                           onAddClick('09:00');
                         }}
-                        className="w-full h-16 border-2 border-dashed border-border rounded-lg flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                        className="w-full h-16 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-gray-400 hover:border-primary hover:text-primary transition-colors"
                       >
                         <Plus size={20} />
                       </button>
@@ -141,13 +141,13 @@ export function AgendaWeekView({
                             }`}
                           >
                             <div className="flex items-center gap-1">
-                              <span className="text-[10px] font-bold text-muted-foreground">
+                              <span className="text-[10px] font-bold text-gray-500">
                                 {appo.time}
                               </span>
                               {isVIP && <Star size={10} className="text-amber-500" fill="#f59e0b" />}
                               {appo.isConfirmed && <CheckCircle2 size={10} className="text-emerald-500" />}
                             </div>
-                            <p className="text-xs font-bold text-foreground truncate mt-0.5">
+                            <p className="text-xs font-bold text-gray-900 truncate mt-0.5">
                               {appo.clientName}
                             </p>
                           </button>
@@ -155,7 +155,7 @@ export function AgendaWeekView({
                       })
                     )}
                     {dayAppointments.length > 5 && (
-                      <p className="text-[10px] font-bold text-muted-foreground text-center">
+                      <p className="text-[10px] font-bold text-gray-500 text-center">
                         +{dayAppointments.length - 5} mais
                       </p>
                     )}

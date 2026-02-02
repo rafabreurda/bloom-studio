@@ -66,6 +66,14 @@
     --sidebar-border: 32 80% 20%;
     --sidebar-ring: 43 96% 56%;
 
+    /* Agenda White Theme */
+    --agenda-background: 0 0% 100%;
+    --agenda-foreground: 0 0% 10%;
+    --agenda-card: 0 0% 98%;
+    --agenda-border: 0 0% 85%;
+    --agenda-muted: 0 0% 96%;
+    --agenda-muted-foreground: 0 0% 45%;
+
     /* Gradients */
     --gradient-gold: linear-gradient(135deg, hsl(32, 95%, 44%), hsl(43, 96%, 56%));
     --gradient-premium: linear-gradient(135deg, hsl(240, 6%, 6%), hsl(0, 0%, 0%));
@@ -143,10 +151,42 @@
     border: 3px solid hsl(38 92% 50%) !important;
   }
 
-  /* Agenda White Background Override */
-  .agenda-white {
-    background: white !important;
-    color: black !important;
+  /* Agenda White Theme */
+  .agenda-container {
+    --local-bg: hsl(var(--agenda-background));
+    --local-fg: hsl(var(--agenda-foreground));
+    --local-card: hsl(var(--agenda-card));
+    --local-border: hsl(var(--agenda-border));
+    --local-muted: hsl(var(--agenda-muted));
+    --local-muted-fg: hsl(var(--agenda-muted-foreground));
+  }
+
+  .agenda-container,
+  .agenda-container .agenda-card,
+  .agenda-container .agenda-header {
+    background-color: var(--local-bg) !important;
+    color: var(--local-fg) !important;
+  }
+
+  .agenda-container .agenda-card {
+    background-color: var(--local-card) !important;
+    border-color: var(--local-border) !important;
+  }
+
+  .agenda-container .agenda-text-muted {
+    color: var(--local-muted-fg) !important;
+  }
+
+  .agenda-container .agenda-border {
+    border-color: var(--local-border) !important;
+  }
+
+  .agenda-container .agenda-slot {
+    background-color: var(--local-bg) !important;
+  }
+
+  .agenda-container .agenda-slot:hover {
+    background-color: var(--local-muted) !important;
   }
 
   /* Tap targets for mobile */

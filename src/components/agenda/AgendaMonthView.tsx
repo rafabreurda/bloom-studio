@@ -70,12 +70,12 @@ export function AgendaMonthView({
   const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
   return (
-    <div className="flex-1 bg-card rounded-2xl md:rounded-3xl shadow-2xl border border-border overflow-hidden flex flex-col">
+    <div className="flex-1 bg-white rounded-2xl md:rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col">
       {/* Month Header */}
-      <div className="grid grid-cols-7 border-b border-border bg-secondary/50">
+      <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
         {dayNames.map((name, idx) => (
           <div key={idx} className="p-3 text-center">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase">
+            <p className="text-[10px] font-bold text-gray-500 uppercase">
               {name}
             </p>
           </div>
@@ -83,7 +83,7 @@ export function AgendaMonthView({
       </div>
 
       {/* Month Grid */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
         <div className="grid grid-cols-7 h-full">
           {monthDays.map((day, idx) => {
             const isCurrentMonth = day.getMonth() === currentMonth;
@@ -97,9 +97,9 @@ export function AgendaMonthView({
               <button
                 key={idx}
                 onClick={() => onDayClick(day)}
-                className={`min-h-[80px] md:min-h-[100px] p-1 md:p-2 border-b border-r border-border text-left transition-all hover:bg-secondary/50 ${
+                className={`min-h-[80px] md:min-h-[100px] p-1 md:p-2 border-b border-r border-gray-200 text-left transition-all hover:bg-gray-50 ${
                   !isCurrentMonth ? 'opacity-40' : ''
-                } ${isBlocked ? 'bg-muted/50' : ''} ${isToday ? 'bg-primary/5' : ''}`}
+                } ${isBlocked ? 'bg-gray-100' : ''} ${isToday ? 'bg-amber-50/30' : 'bg-white'}`}
               >
                 {/* Day Number */}
                 <div className="flex items-center justify-between mb-1">
@@ -108,11 +108,11 @@ export function AgendaMonthView({
                       ? 'bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center' 
                       : isSelected 
                         ? 'text-primary' 
-                        : 'text-foreground'
+                        : 'text-gray-900'
                   }`}>
                     {day.getDate()}
                   </span>
-                  {isBlocked && <Lock size={12} className="text-muted-foreground" />}
+                  {isBlocked && <Lock size={12} className="text-gray-400" />}
                   {hasVIP && !isBlocked && <Star size={12} className="text-amber-500" fill="#f59e0b" />}
                 </div>
 
@@ -138,7 +138,7 @@ export function AgendaMonthView({
                       </div>
                     ))}
                     {dayAppointments.length > 2 && (
-                      <p className="text-[8px] font-bold text-muted-foreground px-1">
+                      <p className="text-[8px] font-bold text-gray-500 px-1">
                         +{dayAppointments.length - 2}
                       </p>
                     )}
@@ -148,7 +148,7 @@ export function AgendaMonthView({
                 {/* Appointments Count Badge */}
                 {!isBlocked && dayAppointments.length > 0 && (
                   <div className="hidden md:block absolute bottom-1 right-1">
-                    <span className="text-[9px] font-bold text-muted-foreground">
+                    <span className="text-[9px] font-bold text-gray-500">
                       {dayAppointments.length} agend.
                     </span>
                   </div>
