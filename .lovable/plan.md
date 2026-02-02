@@ -1,206 +1,161 @@
 
+# Plano: Ícone de Troca de Administrador + Login Simplificado
 
-# Plano: Sistema de Seleção de Admin com Senha Persistente
+## O Que Você Quer
 
-## Resumo do Funcionamento
-
-### Como Vai Funcionar na Prática
-
-1. **Ao abrir o sistema**: Aparece uma tela perguntando "Quem está entrando?" com uma lista de admins cadastrados
-2. **Primeiro acesso de cada admin**: Digita a senha uma única vez
-3. **Próximos acessos**: O sistema já lembra a senha (salva localmente no dispositivo)
-4. **Admin Chefe**: Pode ver/editar todas as senhas na aba "Administradores" das configurações
+Transformar o ícone no canto "Período Ativo" em um botão para trocar de administrador, onde:
+- **Admin Chefe (você)**: É o único que precisa de senha para entrar
+- **Admin Pleno e Junior**: Podem ser selecionados sem senha (você controla quem pode acessar)
 
 ```text
-┌──────────────────────────────────────────────────────────────┐
-│                    🌞 BRONZE PRO                              │
-│                                                               │
-│                   Quem está entrando?                         │
-│                                                               │
-│    ┌─────────────────────────────────────────────────┐       │
-│    │  👑  Maria (Admin Chefe)                        │       │
-│    └─────────────────────────────────────────────────┘       │
-│    ┌─────────────────────────────────────────────────┐       │
-│    │  👤  Ana (Admin Pleno)                          │       │
-│    └─────────────────────────────────────────────────┘       │
-│    ┌─────────────────────────────────────────────────┐       │
-│    │  👤  Julia (Admin Junior)                       │       │
-│    └─────────────────────────────────────────────────┘       │
-│                                                               │
-└──────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│  🌞 BRONZE PRO                      │
+│  Master                             │
+│                                     │
+│  ○ Agenda                           │
+│  ○ Clientes                         │
+│  ○ Financeiro                       │
+│  ...                                │
+│                                     │
+│  ┌─────────────────────────────┐   │
+│  │ 👤 ← Clicável               │   │
+│  │ Período Ativo               │   │
+│  │ Admin Chefe                 │   │
+│  └─────────────────────────────┘   │
+└─────────────────────────────────────┘
 
-        ↓ Clica em um admin
+        ↓ Clica no ícone 👤
 
-┌──────────────────────────────────────────────────────────────┐
-│                    🌞 BRONZE PRO                              │
-│                                                               │
-│                   Olá, Maria!                                 │
-│                                                               │
-│    ┌───────────────────────────────────────┐                 │
-│    │  Senha: ___________________________  │                 │
-│    │                                       │                 │
-│    │  ☐ Lembrar neste dispositivo         │                 │
-│    │                                       │                 │
-│    │         [  ENTRAR  ]                 │                 │
-│    └───────────────────────────────────────┘                 │
-│                                                               │
-└──────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│        Trocar Administrador         │
+│                                     │
+│  ┌────────────────────────────────┐ │
+│  │ 👑 Maria (Admin Chefe)     🔒  │ │  ← Precisa senha
+│  └────────────────────────────────┘ │
+│  ┌────────────────────────────────┐ │
+│  │ 👤 Ana (Admin Pleno)           │ │  ← Entra direto
+│  └────────────────────────────────┘ │
+│  ┌────────────────────────────────┐ │
+│  │ 👤 Julia (Admin Junior)        │ │  ← Entra direto
+│  └────────────────────────────────┘ │
+│                                     │
+│  [ Cancelar ]                       │
+└─────────────────────────────────────┘
 
-        ↓ Senha correta + "Lembrar" marcado = Próxima vez entra direto
+        ↓ Clica em Admin Chefe
+
+┌─────────────────────────────────────┐
+│        Olá, Maria!                  │
+│                                     │
+│  ┌──────────────────────────────┐  │
+│  │ Senha: ____________________  │  │
+│  │                              │  │
+│  │ ☐ Lembrar neste dispositivo  │  │
+│  │                              │  │
+│  │      [ ENTRAR ]              │  │
+│  └──────────────────────────────┘  │
+└─────────────────────────────────────┘
 ```
 
 ---
 
-## O Que Será Criado
+## Mudanças na Interface
 
-### 1. Tela de Seleção de Admin (`AdminLoginPage.tsx`)
+### 1. Ícone Clicável na Sidebar
 
-- Lista todos os admins cadastrados (cards clicáveis)
-- Ao clicar, pede a senha
-- Opção "Lembrar neste dispositivo" salva a senha localmente
-- Se já tem senha salva, entra automaticamente
+O ícone ao lado de "Período Ativo" vira um botão que abre o modal de troca:
 
-### 2. Banco de Dados (Supabase)
+| Antes | Depois |
+|-------|--------|
+| Ícone estático | Ícone clicável com hover effect |
+| Mostra apenas o role | Abre modal de seleção |
 
-**Tabela: `profiles`**
-| Campo | Descrição |
-|-------|-----------|
-| id | ID único |
-| name | Nome do admin |
-| password_hash | Senha criptografada |
-| role | 'admin_chefe', 'admin_pleno' ou 'admin_junior' |
-| created_at | Data de criação |
+### 2. Modal de Seleção de Admin
 
-**Tabela: `user_roles`** (segurança)
-| Campo | Descrição |
-|-------|-----------|
-| user_id | Referência ao profile |
-| role | Tipo de admin |
+- Lista todos os admins cadastrados
+- Ícone de cadeado 🔒 apenas no Admin Chefe
+- Clique em Admin Pleno/Junior → entra direto
+- Clique em Admin Chefe → pede senha
 
-**Tabela: `admin_permissions`**
-| Campo | Descrição |
-|-------|-----------|
-| user_id | Referência ao profile |
-| agenda | Acesso à agenda |
-| clientes | Acesso a clientes |
-| financeiro | Acesso ao financeiro |
-| estoque | Acesso ao estoque |
-| fornecedores | Acesso a fornecedores |
-| parcerias | Acesso a parcerias |
-| lista_espera | Acesso à lista de espera |
+### 3. Persistência Local
 
-### 3. Modificações na Aba Administradores
-
-O Admin Chefe verá:
-- Lista de todos os admins
-- **Campo de senha visível** para cada admin
-- Botão para redefinir senha
-- Permissões customizáveis para cada Junior
-
-### 4. Bloqueios na Agenda
-
-O sistema **já suporta** bloqueio de múltiplos dias através da opção "Período" no modal de bloqueio. Você pode:
-- Selecionar data inicial e data final
-- Todos os dias no intervalo serão bloqueados
+Se marcar "Lembrar neste dispositivo", a próxima vez que clicar no Admin Chefe entra direto (senha salva localmente).
 
 ---
 
 ## Detalhes Técnicos
 
-### Armazenamento de Senha Local
+### Banco de Dados (Supabase)
 
-Para que o admin não precise digitar a senha toda vez:
+Criar as seguintes tabelas:
 
-```typescript
-// Ao marcar "Lembrar neste dispositivo"
-localStorage.setItem(`admin_${adminId}_auth`, encryptedPassword);
+**Tabela: `profiles`**
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | UUID | ID único |
+| name | TEXT | Nome do admin |
+| password_hash | TEXT | Senha (apenas Admin Chefe terá) |
+| created_at | TIMESTAMP | Data de criação |
 
-// Ao abrir o sistema
-const savedAuth = localStorage.getItem(`admin_${adminId}_auth`);
-if (savedAuth && validateAuth(savedAuth)) {
-  // Entra automaticamente
-}
-```
+**Tabela: `user_roles`**
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| user_id | UUID | Referência ao profile |
+| role | TEXT | 'admin_chefe', 'admin_pleno', 'admin_junior' |
 
-### Segurança das Senhas no Banco
+**Tabela: `admin_permissions`**
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| user_id | UUID | Referência ao profile |
+| agenda, clientes, etc | BOOLEAN | Permissões granulares |
 
-As senhas são armazenadas com hash seguro usando função do Supabase:
-
-```sql
--- Função para hash de senha
-CREATE OR REPLACE FUNCTION hash_password(password TEXT)
-RETURNS TEXT AS $$
-BEGIN
-  RETURN crypt(password, gen_salt('bf'));
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Função para verificar senha
-CREATE OR REPLACE FUNCTION verify_password(password TEXT, hash TEXT)
-RETURNS BOOLEAN AS $$
-BEGIN
-  RETURN hash = crypt(password, hash);
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-```
-
-### Verificação de Role (Evita Escalação de Privilégios)
-
-```sql
-CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role app_role)
-RETURNS BOOLEAN AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.user_roles
-    WHERE user_id = _user_id AND role = _role
-  )
-$$ LANGUAGE SQL SECURITY DEFINER;
-```
-
-### Fluxo de Autenticação
-
-```text
-1. Abrir App
-      ↓
-2. Verificar se tem sessão salva localmente
-      ↓
-   SIM → Validar com banco → Entrar
-      ↓
-   NÃO → Mostrar lista de admins
-      ↓
-3. Usuário clica em admin
-      ↓
-4. Pedir senha
-      ↓
-5. Validar com banco
-      ↓
-6. Se "Lembrar" → Salvar localmente
-      ↓
-7. Carregar permissões e entrar
-```
-
----
-
-## Arquivos a Criar
+### Arquivos a Criar
 
 | Arquivo | Descrição |
 |---------|-----------|
-| `src/pages/AdminLoginPage.tsx` | Tela de seleção e login de admin |
-| `src/contexts/AuthContext.tsx` | Contexto global de autenticação |
-| `src/hooks/useAuth.ts` | Hook para acessar dados do admin logado |
-| `src/hooks/usePermissions.ts` | Hook para verificar permissões |
+| `src/contexts/AuthContext.tsx` | Contexto de autenticação global |
+| `src/hooks/useAuth.ts` | Hook para acessar admin logado |
+| `src/components/layout/AdminSwitchModal.tsx` | Modal de troca de admin |
 
----
-
-## Arquivos a Modificar
+### Arquivos a Modificar
 
 | Arquivo | Alteração |
 |---------|-----------|
-| `src/App.tsx` | Adicionar rota de login e proteção |
-| `src/pages/Index.tsx` | Verificar autenticação antes de mostrar |
-| `src/components/layout/Sidebar.tsx` | Mostrar menu baseado nas permissões reais |
-| `src/components/layout/TopBar.tsx` | Adicionar nome do admin e botão sair |
-| `src/components/config/AdminSection.tsx` | Campo de senha visível + CRUD com Supabase |
-| `src/components/config/ConfigView.tsx` | Esconder aba Administradores para não-chefes |
+| `src/components/layout/Sidebar.tsx` | Ícone clicável + integração com modal |
+| `src/pages/Index.tsx` | Usar AuthContext para role |
+| `src/components/config/AdminSection.tsx` | CRUD de admins via Supabase |
+| `src/App.tsx` | Adicionar AuthProvider |
+
+---
+
+## Fluxo de Autenticação
+
+```text
+1. Abrir sistema
+      ↓
+2. Verificar se tem admin salvo localmente
+      ↓
+   SIM → Carregar permissões → Entrar
+      ↓
+   NÃO → Mostrar modal de seleção
+      ↓
+3. Usuário seleciona admin
+      ↓
+   Admin Chefe? → Pedir senha
+      ↓
+   Outros? → Entrar direto
+      ↓
+4. Carregar permissões e entrar
+```
+
+---
+
+## Segurança
+
+- Senha do Admin Chefe armazenada com hash seguro no banco
+- Armazenamento local usa criptografia básica
+- Admin Chefe pode ver/resetar a própria senha nas configurações
+- Admin Pleno/Junior não têm acesso à aba Administradores
 
 ---
 
@@ -208,21 +163,8 @@ $$ LANGUAGE SQL SECURITY DEFINER;
 
 1. Criar tabelas no Supabase (profiles, user_roles, admin_permissions)
 2. Configurar funções de hash/verificação de senha
-3. Configurar RLS (segurança)
-4. Criar contexto de autenticação
-5. Criar página de login/seleção de admin
-6. Modificar AdminSection para mostrar/editar senhas
-7. Integrar permissões na Sidebar
-8. Adicionar botão de logout e nome no TopBar
-9. Criar Admin Chefe inicial (você!)
-
----
-
-## Cadastro Inicial
-
-Ao implementar, criarei o primeiro Admin Chefe para você poder entrar:
-
-- **Nome**: Admin Chefe
-- **Senha**: Você definirá na primeira execução
-- **Role**: admin_chefe (acesso total)
-
+3. Criar AuthContext e useAuth hook
+4. Criar AdminSwitchModal
+5. Modificar Sidebar para ícone clicável
+6. Integrar AdminSection com Supabase
+7. Criar Admin Chefe inicial (você define a senha)
