@@ -36,14 +36,14 @@ export function AdminSection({ admins, onAdd, onUpdate, onDelete }: AdminSection
   const [showModal, setShowModal] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<AdminUser | null>(null);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [role, setRole] = useState<'Admin Pleno' | 'Admin Junior'>('Admin Pleno');
   const [permissions, setPermissions] = useState<AdminJuniorPermissions>(defaultPermissions);
 
   const openAddModal = () => {
     setEditingAdmin(null);
     setName('');
-    setEmail('');
+    setPhone('');
     setRole('Admin Pleno');
     setPermissions(defaultPermissions);
     setShowModal(true);
@@ -52,7 +52,7 @@ export function AdminSection({ admins, onAdd, onUpdate, onDelete }: AdminSection
   const openEditModal = (admin: AdminUser) => {
     setEditingAdmin(admin);
     setName(admin.name);
-    setEmail(admin.email);
+    setPhone(admin.phone);
     setRole(admin.role);
     setPermissions(admin.permissions || defaultPermissions);
     setShowModal(true);
@@ -64,14 +64,14 @@ export function AdminSection({ admins, onAdd, onUpdate, onDelete }: AdminSection
       onUpdate({
         ...editingAdmin,
         name,
-        email,
+        phone,
         role,
         permissions: role === 'Admin Junior' ? permissions : undefined,
       });
     } else {
       onAdd({
         name,
-        email,
+        phone,
         role,
         permissions: role === 'Admin Junior' ? permissions : undefined,
       });
@@ -117,7 +117,7 @@ export function AdminSection({ admins, onAdd, onUpdate, onDelete }: AdminSection
                 <div key={admin.id} className="flex items-center justify-between p-3 bg-background rounded-xl border border-border">
                   <div>
                     <p className="font-bold text-sm">{admin.name}</p>
-                    <p className="text-xs text-muted-foreground">{admin.email}</p>
+                    <p className="text-xs text-muted-foreground">{admin.phone}</p>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => openEditModal(admin)} className="p-2 text-muted-foreground hover:text-primary">
@@ -149,7 +149,7 @@ export function AdminSection({ admins, onAdd, onUpdate, onDelete }: AdminSection
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-bold text-sm">{admin.name}</p>
-                      <p className="text-xs text-muted-foreground">{admin.email}</p>
+                      <p className="text-xs text-muted-foreground">{admin.phone}</p>
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => openEditModal(admin)} className="p-2 text-muted-foreground hover:text-primary">
@@ -207,13 +207,14 @@ export function AdminSection({ admins, onAdd, onUpdate, onDelete }: AdminSection
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                  E-mail *
+                  WhatsApp *
                 </label>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   className="input-bronze"
+                  placeholder="(11) 99999-9999"
                   required
                 />
               </div>
