@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { StockAlert } from './StockAlert';
 import { AgendaHeader } from './AgendaHeader';
 import { TimeSlot } from './TimeSlot';
 import { AgendaWeekView } from './AgendaWeekView';
@@ -77,8 +76,6 @@ export function AgendaView({
 
   return (
     <div className="flex flex-col gap-4 h-full overflow-hidden agenda-container">
-      <StockAlert stock={stock} onNavigate={onNavigate} />
-      
       <AgendaHeader
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
