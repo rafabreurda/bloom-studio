@@ -1,149 +1,148 @@
 
-# Plano: Histórico de Fichas de Anamnese
+# Plano: Busca de Clientes no Agendamento
 
 ## O Que Você Quer
 
-Poder adicionar **múltiplas fichas de anamnese** para cada cliente, criando um histórico de avaliações ao longo do tempo. Isso permite:
-- Acompanhar a evolução da saúde do cliente
-- Comparar alterações em medicamentos, alergias, etc.
-- Ter registro de cada avaliação feita antes das sessões
+1. No modal de **Novo Bronze** (agendamento), poder buscar e selecionar um cliente já cadastrado em **Clientes** ou **Parcerias**
+2. Manter o visual da **Agenda com fundo branco e letras pretas** (que já existe no CSS)
 
-```text
-┌─────────────────────────────────────────────────────┐
-│  👤 Maria Silva                                      │
-│                                                     │
-│  📋 FICHAS DE ANAMNESE (3)                          │
-│                                                     │
-│  ┌─────────────────────────────────────────────┐   │
-│  │ 📅 15/01/2024 (mais recente)                │   │
-│  │ Pele: Tipo II - Clara                       │   │
-│  │ Alergias: Nenhuma                           │   │
-│  │ Medicamentos: Vitamina D                    │   │
-│  │                            [Ver Detalhes]   │   │
-│  └─────────────────────────────────────────────┘   │
-│                                                     │
-│  ┌─────────────────────────────────────────────┐   │
-│  │ 📅 08/12/2023                               │   │
-│  │ Pele: Tipo II - Clara                       │   │
-│  │ Alergias: Nenhuma                           │   │
-│  │ Medicamentos: Nenhum                        │   │
-│  │                            [Ver Detalhes]   │   │
-│  └─────────────────────────────────────────────┘   │
-│                                                     │
-│           [ + Nova Ficha de Anamnese ]              │
-└─────────────────────────────────────────────────────┘
+---
+
+## Situação Atual
+
+O modal `AddAppointmentModal` atualmente tem apenas campos de texto livre para "Nome" e "WhatsApp", sem conexão com os clientes cadastrados.
+
+A agenda já possui variáveis CSS para tema branco:
+```css
+--agenda-background: 0 0% 100%;    /* Branco */
+--agenda-foreground: 0 0% 10%;     /* Preto */
 ```
 
 ---
 
-## Mudanças na Interface
+## Mudanças Planejadas
 
-### 1. Modal de Cliente (ClientModal)
+### 1. AddAppointmentModal - Busca de Clientes
 
-A aba "Ficha de Anamnese" terá duas opções:
+Substituir o campo de texto "Nome" por um **Combobox de busca** que permite:
+- Digitar para buscar clientes cadastrados
+- Ver resultados separados por categoria: **Clientes** e **Parcerias**
+- Selecionar um cliente existente (preenche nome e telefone automaticamente)
+- OU digitar um nome novo (cliente avulso)
 
-| Cenário | Comportamento |
-|---------|---------------|
-| Novo Cliente | Formulário em branco para primeira ficha |
-| Cliente Existente | Lista das fichas anteriores + botão "Nova Ficha" |
+```text
+┌─────────────────────────────────────────────────────┐
+│  NOVO BRONZE                                    [X] │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  🔍 [ Buscar cliente...              ▼ ]            │
+│  ┌─────────────────────────────────────────────┐   │
+│  │ CLIENTES                                    │   │
+│  │ ○ Maria Silva - (11) 99999-1111      ⭐ VIP │   │
+│  │ ○ Ana Costa - (11) 98877-6655              │   │
+│  │ ○ Julia Santos - (11) 97766-5544           │   │
+│  │                                             │   │
+│  │ PARCERIAS                                   │   │
+│  │ ○ Salão Bella Hair - (11) 94567-8901       │   │
+│  │ ○ Gym Fitness Center - (11) 95678-9012     │   │
+│  │                                             │   │
+│  │ ─────────────────────────────────────────  │   │
+│  │ ➕ Usar "Maria" como cliente avulso        │   │
+│  └─────────────────────────────────────────────┘   │
+│                                                     │
+│  📱 [ (11) 99999-1111              ]  ← Preenchido │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
 
-### 2. Modal de Histórico (ClientHistoryModal)
+### 2. Props do Modal
 
-A seção de anamnese mostrará:
-- Accordion/lista expansível com todas as fichas
-- Data de cada ficha destacada
-- Botão para criar nova ficha diretamente
+O modal precisará receber:
+- `clients: Client[]` - Lista de clientes cadastrados
+- `partnerships: Partnership[]` - Lista de parcerias
 
-### 3. Nova Ficha
+### 3. Comportamento ao Selecionar
 
-Ao clicar "Nova Ficha":
-- Abre formulário pré-preenchido com dados da última ficha
-- Usuário atualiza o que mudou
-- Salva como novo registro com data atual
+| Ação | Resultado |
+|------|-----------|
+| Seleciona cliente | Nome e telefone preenchidos automaticamente, marca VIP se aplicável |
+| Seleciona parceria | Nome e telefone da parceria preenchidos |
+| Digita nome novo | Campo telefone fica editável para informar |
 
 ---
 
 ## Detalhes Técnicos
 
-### Mudança nas Interfaces (src/types/index.ts)
-
-**Antes:**
-```typescript
-interface Client {
-  anamnesis?: AnamnesisForm;  // Uma única ficha
-}
-```
-
-**Depois:**
-```typescript
-interface AnamnesisRecord {
-  id: string;
-  date: string;               // Data da avaliação
-  skinType: string;
-  allergies: string;
-  medications: string;
-  healthConditions: string;
-  lastTanning?: string;
-  observations: string;
-  createdBy?: string;         // Nome do admin que criou
-}
-
-interface Client {
-  anamnesisHistory: AnamnesisRecord[];  // Histórico de fichas
-}
-```
-
 ### Arquivos a Modificar
 
 | Arquivo | Alteração |
 |---------|-----------|
-| `src/types/index.ts` | Adicionar `AnamnesisRecord` e mudar `anamnesis` para `anamnesisHistory` |
-| `src/components/clients/ClientModal.tsx` | Modificar aba anamnese para criar nova ficha e listar anteriores |
-| `src/components/clients/ClientHistoryModal.tsx` | Mostrar todas as fichas com accordion expansível |
-| `src/data/mockData.ts` | Atualizar mock clients com array de anamneses |
+| `src/components/modals/AddAppointmentModal.tsx` | Adicionar combobox de busca com clientes e parcerias, receber novas props |
+| `src/pages/Index.tsx` | Passar `clients` e `partnerships` para o modal |
 
-### Novo Componente (Opcional)
+### Componentes Utilizados
 
-| Arquivo | Descrição |
-|---------|-----------|
-| `src/components/clients/AnamnesisFormModal.tsx` | Modal separado para criar/editar ficha de anamnese |
+O projeto já possui os componentes necessários:
+- `Command` (cmdk) - Para busca com filtro
+- `Popover` - Para dropdown
+- Ícones do Lucide: `Search`, `User`, `Users`, `Star`
 
----
+### Estrutura do Combobox
 
-## Fluxo de Uso
+```typescript
+// Estado
+const [open, setOpen] = useState(false);
+const [searchValue, setSearchValue] = useState('');
+const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+const [selectedPartnership, setSelectedPartnership] = useState<Partnership | null>(null);
 
-```text
-1. Abrir ficha do cliente
-       ↓
-2. Ver histórico de anamneses (lista com datas)
-       ↓
-3. Clicar "Nova Ficha"
-       ↓
-4. Formulário abre pré-preenchido com última ficha
-       ↓
-5. Atualizar campos necessários
-       ↓
-6. Salvar → nova ficha adicionada ao histórico
+// Ao selecionar cliente
+const handleSelectClient = (client: Client) => {
+  setSelectedClient(client);
+  setClientName(client.name);
+  setClientPhone(client.phone);
+  setIsVIP(client.isVIP);
+  setOpen(false);
+};
+
+// Ao selecionar parceria
+const handleSelectPartnership = (partnership: Partnership) => {
+  setSelectedPartnership(partnership);
+  setClientName(partnership.name);
+  setClientPhone(partnership.contact);
+  setOpen(false);
+};
 ```
 
 ---
 
-## Visualização no Histórico do Cliente
+## Sobre o Tema Branco da Agenda
 
-A seção "Ficha de Anamnese" será transformada em "Histórico de Anamnese":
+O CSS já define o tema branco para a agenda através das classes:
+- `.agenda-container` - Container principal
+- `.agenda-card` - Cards internos
+- `.agenda-slot` - Slots de horário
 
-- Cada ficha aparece como um item com data
-- Clicando expande para ver detalhes completos
-- Ficha mais recente aparece aberta por padrão
-- Badge indica quantas fichas existem
+Essas classes já aplicam:
+- Fundo branco (`--agenda-background`)
+- Texto preto (`--agenda-foreground`)
+- Bordas cinza claro (`--agenda-border`)
+
+Se algo não estiver aparecendo branco, verificarei se as classes corretas estão aplicadas nos componentes.
 
 ---
 
 ## Ordem de Implementação
 
-1. Atualizar tipos em `src/types/index.ts` (adicionar `AnamnesisRecord`, mudar `Client`)
-2. Atualizar dados de exemplo em `src/data/mockData.ts`
-3. Criar componente `AnamnesisFormModal.tsx` para formulário isolado
-4. Modificar `ClientModal.tsx` para gerenciar múltiplas fichas
-5. Modificar `ClientHistoryModal.tsx` com accordion de fichas
-6. Atualizar `ClientsView.tsx` para trabalhar com o novo formato
+1. Modificar `AddAppointmentModal.tsx`:
+   - Adicionar novas props (clients, partnerships)
+   - Criar estado para busca e seleção
+   - Implementar Combobox com Command + Popover
+   - Grupos separados para Clientes e Parcerias
+   - Auto-preenchimento ao selecionar
+
+2. Atualizar `Index.tsx`:
+   - Passar clients e partnerships para o modal
+
+3. Verificar tema branco da agenda:
+   - Confirmar que classes agenda-* estão aplicadas corretamente
