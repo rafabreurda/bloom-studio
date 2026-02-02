@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Save, Building2, CreditCard, Users, Tag, Bell, Download, MessageSquare, Image } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
-import { SystemConfig, AdminUser, ClientTag, WhatsAppTemplate } from '@/types';
+import { SystemConfig, ClientTag, WhatsAppTemplate } from '@/types';
 import { AdminSection } from './AdminSection';
 import { TagsSection } from './TagsSection';
 import { MessagesSection } from './MessagesSection';
@@ -47,27 +47,7 @@ export function ConfigView({ config, onConfigChange, onExportBackup }: ConfigVie
     }
   };
 
-  const handleAdminAdd = (admin: Omit<AdminUser, 'id'>) => {
-    const newAdmin = { ...admin, id: Date.now().toString() };
-    onConfigChange({ ...config, admins: [...config.admins, newAdmin] });
-    toast.success('Administrador adicionado!');
-  };
-
-  const handleAdminUpdate = (admin: AdminUser) => {
-    onConfigChange({
-      ...config,
-      admins: config.admins.map(a => a.id === admin.id ? admin : a)
-    });
-    toast.success('Administrador atualizado!');
-  };
-
-  const handleAdminDelete = (id: string) => {
-    onConfigChange({
-      ...config,
-      admins: config.admins.filter(a => a.id !== id)
-    });
-    toast.success('Administrador removido!');
-  };
+  // Admin management is now handled by AdminSection using Supabase directly
 
   const handleTagUpdate = (tags: ClientTag[]) => {
     onConfigChange({ ...config, clientTags: tags });
@@ -220,12 +200,7 @@ export function ConfigView({ config, onConfigChange, onExportBackup }: ConfigVie
         )}
 
         {activeSection === 'admins' && (
-          <AdminSection
-            admins={config.admins}
-            onAdd={handleAdminAdd}
-            onUpdate={handleAdminUpdate}
-            onDelete={handleAdminDelete}
-          />
+          <AdminSection />
         )}
 
         {activeSection === 'tags' && (
