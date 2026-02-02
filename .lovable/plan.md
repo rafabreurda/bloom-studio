@@ -1,197 +1,173 @@
 
-# Plano: Melhorias na Agenda, Bloqueios e Acesso ao Cliente
 
-## Problemas Identificados
+# Plano: Sistema de Login e Permissões com Supabase
 
-1. **Agenda** - Os botões de "Semana" e "Mês" estão funcionando visualmente, mas a view continua mostrando apenas o modo "Dia" (não há implementação real para week/month)
-2. **Bloqueios** - Atualmente só permite bloquear um único dia ou horário, sem opção de intervalo de datas (ex: dia 02 a dia 10)
-3. **Clique no Nome do Cliente na Agenda** - Não existe interação ao clicar no nome do cliente no TimeSlot - precisa abrir o histórico completo
+## Resumo
 
----
-
-## 1. Implementar Visualizações de Semana e Mês na Agenda
-
-### AgendaView.tsx
-Criar renderização condicional baseada no `viewMode`:
-
-**Modo Dia (atual):** Lista de horários 08:00-22:00 para um único dia
-
-**Modo Semana:** 
-- Grid de 7 colunas (Dom-Sáb)
-- Header com os 7 dias da semana selecionada
-- Células mostrando resumo de agendamentos por dia
-- Navegação anterior/próxima semana
-
-**Modo Mês:**
-- Calendário visual com todos os dias do mês
-- Indicadores visuais de dias com agendamentos
-- Navegação anterior/próximo mês
-
-### AgendaHeader.tsx
-- Ajustar navegação para respeitar o modo de visualização:
-  - Dia: -1/+1 dia
-  - Semana: -7/+7 dias
-  - Mês: -1/+1 mês
-
-### Novos Componentes
-- `AgendaWeekView.tsx` - Grid semanal com resumo
-- `AgendaMonthView.tsx` - Calendário mensal
+Vou implementar um sistema completo de autenticação onde:
+- **Admin Chefe** faz login e pode adicionar outros administradores
+- Senha é pedida **apenas no primeiro acesso** (depois fica logado)
+- **Permissões personalizáveis** para cada admin (você escolhe o que cada um vê)
 
 ---
 
-## 2. Bloqueios com Intervalo de Datas
+## Como Vai Funcionar
 
-### BlockModal.tsx
-Adicionar terceira opção de tipo de bloqueio:
+### Primeiro Acesso (Seu Login)
+1. Ao abrir o sistema pela primeira vez, você verá uma tela de login
+2. Digite seu e-mail e senha para entrar como **Admin Chefe**
+3. Nas próximas vezes, o sistema já vai lembrar de você (fica logado)
+
+### Adicionando Outros Administradores
+1. Vá em **Configurações > Administradores**
+2. Clique em **"Adicionar"** e preencha:
+   - Nome
+   - E-mail
+   - Tipo: **Pleno** (acesso total) ou **Junior** (acesso limitado)
+3. Se for Junior, marque as permissões desejadas
+4. O novo admin receberá um e-mail para criar a senha
+
+### Controlando o que Cada Um Vê
+- **Admin Pleno**: Vê tudo igual você (exceto configurações de admins)
+- **Admin Junior**: Você escolhe via checkboxes:
+  - [ ] Agenda
+  - [ ] Clientes  
+  - [ ] Estoque
+  - [ ] Lista de Espera
+  - [ ] Financeiro
+  - [ ] Fornecedores
+  - [ ] Parcerias
+
+---
+
+## Fluxo Visual
 
 ```text
-┌─────────────┬─────────────┬─────────────┐
-│ Dia Inteiro │    Hora     │  Período    │
-└─────────────┴─────────────┴─────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                     TELA DE LOGIN                            │
+│                                                             │
+│     ┌───────────────────────────────────────┐              │
+│     │  E-mail: _________________________   │              │
+│     │  Senha:  _________________________   │              │
+│     │                                       │              │
+│     │         [  ENTRAR  ]                 │              │
+│     └───────────────────────────────────────┘              │
+│                                                             │
+│     Esqueceu a senha? Clique aqui                          │
+└─────────────────────────────────────────────────────────────┘
+
+        ↓ Após login bem-sucedido
+
+┌─────────────────────────────────────────────────────────────┐
+│  BRONZE PRO          Olá, Maria! (Admin Chefe) [Sair]       │
+├─────────────────────────────────────────────────────────────┤
+│  📅 Agenda                                                  │
+│  👥 Clientes                                                │
+│  💰 Financeiro                                              │
+│  ...                                                        │
+│  ⚙️ Configurações  ← Adicionar/gerenciar admins aqui        │
+└─────────────────────────────────────────────────────────────┘
 ```
-
-**Tipo "Período":**
-- Campo "Data Inicial" (date picker)
-- Campo "Data Final" (date picker)
-- Campo "Motivo"
-
-### Lógica de Criação
-Quando tipo = 'dateRange':
-- Gerar múltiplos blocos (um para cada dia do intervalo)
-- Ou criar um único bloco com `startDate` e `endDate`
-
-### Block Type (types/index.ts)
-```typescript
-interface Block {
-  id: string;
-  date: string;
-  endDate?: string;        // NOVO - para intervalos
-  time: string | null;
-  type: 'allDay' | 'timeRange' | 'dateRange';  // NOVO tipo
-  reason: string;
-  createdAt: Date;
-}
-```
-
-### Verificação na Agenda
-Atualizar lógica de verificação de bloqueio para considerar intervalos de data.
-
----
-
-## 3. Clique no Nome do Cliente na Agenda
-
-### TimeSlot.tsx
-Adicionar interação ao clicar no nome do cliente:
-
-```typescript
-interface TimeSlotProps {
-  // ... props existentes
-  onClientClick?: (clientName: string, phone: string) => void;  // NOVO
-}
-```
-
-No componente, tornar o nome clicável:
-```tsx
-<button 
-  onClick={() => onClientClick?.(appointment.clientName, appointment.phone)}
-  className="font-black text-gray-900 text-sm hover:underline cursor-pointer"
->
-  {appointment.clientName}
-</button>
-```
-
-### AgendaView.tsx
-- Receber lista de `clients` como prop
-- Buscar cliente pelo nome/telefone
-- Abrir `ClientHistoryModal` com os dados completos
-
-### Index.tsx
-- Passar `clients` para AgendaView
-- Criar estado para controlar modal de histórico do cliente
-- Adicionar `ClientHistoryModal` na renderização
-
-### ClientHistoryModal.tsx
-Já existe e mostra:
-- Dados cadastrais (nome, telefone, email, endereço, CPF, aniversário)
-- Ficha de anamnese completa
-- Tags do cliente
-- Histórico de sessões e compras com datas e valores
-- Observações
-
----
-
-## Arquivos a Criar
-
-| Arquivo | Descrição |
-|---------|-----------|
-| `src/components/agenda/AgendaWeekView.tsx` | Visualização semanal com grid de 7 dias |
-| `src/components/agenda/AgendaMonthView.tsx` | Visualização mensal com calendário |
-
----
-
-## Arquivos a Modificar
-
-| Arquivo | Alterações |
-|---------|------------|
-| `src/types/index.ts` | Adicionar `endDate` e tipo `dateRange` ao Block |
-| `src/components/agenda/AgendaView.tsx` | Renderização condicional por viewMode, receber clients, callback para cliente |
-| `src/components/agenda/AgendaHeader.tsx` | Ajustar navegação por semana/mês |
-| `src/components/agenda/TimeSlot.tsx` | Tornar nome do cliente clicável |
-| `src/components/modals/BlockModal.tsx` | Adicionar opção de período (dateRange) |
-| `src/pages/Index.tsx` | Passar clients para AgendaView, gerenciar modal de histórico |
 
 ---
 
 ## Detalhes Técnicos
 
-### Cálculo de Semana
-```typescript
-const getWeekDays = (date: Date) => {
-  const start = new Date(date);
-  start.setDate(start.getDate() - start.getDay()); // Início da semana (Domingo)
-  
-  return Array.from({ length: 7 }, (_, i) => {
-    const day = new Date(start);
-    day.setDate(start.getDate() + i);
-    return day;
-  });
-};
-```
+### 1. Integração com Supabase
 
-### Verificação de Bloqueio com Intervalo
-```typescript
-const isBlocked = (date: string, blocks: Block[]) => {
-  return blocks.some(block => {
-    if (block.type === 'dateRange' && block.endDate) {
-      const checkDate = new Date(date.split('/').reverse().join('-'));
-      const start = new Date(block.date.split('/').reverse().join('-'));
-      const end = new Date(block.endDate.split('/').reverse().join('-'));
-      return checkDate >= start && checkDate <= end;
-    }
-    return block.date === date;
-  });
-};
-```
+Será necessário conectar o Supabase ao projeto para:
+- Autenticação de usuários (login/logout)
+- Armazenar perfis e roles dos administradores
+- Armazenar as permissões de cada Admin Junior
 
-### Busca de Cliente pelo Agendamento
-```typescript
-const findClientByAppointment = (appointment: Appointment, clients: Client[]) => {
-  // Buscar por telefone (mais preciso)
-  return clients.find(c => c.phone === appointment.phone) 
-    // Fallback por nome
-    || clients.find(c => c.name.toLowerCase() === appointment.clientName.toLowerCase());
-};
-```
+### 2. Estrutura do Banco de Dados
+
+**Tabela: profiles**
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | UUID | ID do usuário (referência auth.users) |
+| name | texto | Nome do administrador |
+| created_at | data | Data de criação |
+| updated_at | data | Última atualização |
+
+**Tabela: user_roles**
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | UUID | ID único |
+| user_id | UUID | Referência ao usuário |
+| role | enum | 'admin_chefe', 'admin_pleno', 'admin_junior' |
+
+**Tabela: admin_permissions**
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | UUID | ID único |
+| user_id | UUID | Referência ao usuário |
+| agenda | boolean | Acesso à agenda |
+| clientes | boolean | Acesso a clientes |
+| financeiro | boolean | Acesso ao financeiro |
+| estoque | boolean | Acesso ao estoque |
+| fornecedores | boolean | Acesso a fornecedores |
+| parcerias | boolean | Acesso a parcerias |
+| lista_espera | boolean | Acesso à lista de espera |
+
+### 3. Segurança (RLS)
+
+- Apenas Admin Chefe pode ver/editar outros administradores
+- Cada usuário só vê dados conforme suas permissões
+- Roles armazenadas em tabela separada (não no perfil)
+- Funções SECURITY DEFINER para verificar permissões
+
+### 4. Componentes a Criar
+
+| Componente | Descrição |
+|------------|-----------|
+| `LoginPage.tsx` | Tela de login com e-mail/senha |
+| `AuthProvider.tsx` | Contexto de autenticação global |
+| `ProtectedRoute.tsx` | Proteção de rotas por role |
+| `useAuth.ts` | Hook para acessar dados do usuário |
+| `usePermissions.ts` | Hook para verificar permissões |
+
+### 5. Arquivos a Modificar
+
+| Arquivo | Alteração |
+|---------|-----------|
+| `App.tsx` | Adicionar AuthProvider e rotas protegidas |
+| `Index.tsx` | Verificar autenticação, mostrar nome do usuário |
+| `Sidebar.tsx` | Mostrar menu baseado nas permissões reais |
+| `AdminSection.tsx` | Integrar com Supabase para CRUD de admins |
+| `TopBar.tsx` | Adicionar botão de logout e nome do usuário |
+
+### 6. Fluxo de Convite de Admin
+
+1. Admin Chefe preenche nome/e-mail do novo admin
+2. Sistema cria entrada no banco com role e permissões
+3. Supabase envia e-mail de convite automaticamente
+4. Novo admin clica no link e cria senha
+5. No primeiro login, já tem as permissões definidas
 
 ---
 
-## Fluxo de Implementação
+## Ordem de Implementação
 
-1. Atualizar tipos (Block com dateRange)
-2. Modificar BlockModal para suportar intervalo de datas
-3. Criar AgendaWeekView
-4. Criar AgendaMonthView
-5. Atualizar AgendaView com renderização condicional
-6. Atualizar AgendaHeader com navegação correta
-7. Tornar nome do cliente clicável no TimeSlot
-8. Conectar tudo no Index.tsx
+1. **Conectar Supabase** ao projeto (Lovable Cloud ou externo)
+2. **Criar tabelas** no banco (profiles, user_roles, admin_permissions)
+3. **Configurar RLS** para segurança
+4. **Criar componentes** de autenticação (Login, AuthProvider)
+5. **Integrar AdminSection** com Supabase
+6. **Atualizar Sidebar/TopBar** para usar permissões reais
+7. **Testar fluxo completo** de login e convite
+
+---
+
+## Próximo Passo Necessário
+
+Para iniciar, preciso que você **conecte o Supabase** ao projeto. Posso fazer isso de duas formas:
+
+**Opção 1 - Lovable Cloud (Recomendado):**
+Cria um backend automático sem precisar de conta externa
+
+**Opção 2 - Supabase Externo:**
+Conecta a um projeto Supabase que você já tenha
+
+Qual você prefere?
+
