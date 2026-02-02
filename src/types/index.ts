@@ -50,13 +50,39 @@ export interface AnamnesisForm {
 export interface AnamnesisRecord {
   id: string;
   date: string;
-  skinType: string;
-  allergies: string;
-  medications: string;
-  healthConditions: string;
-  lastTanning?: string;
-  observations: string;
+  // Tipo de Pele
+  skinTexture: 'normal' | 'seca' | 'oleosa' | 'mista' | '';
+  phototype: 'I' | 'II' | 'III' | 'IV' | 'V' | 'VI' | '';
+  tansSunExposure: boolean | null;
+  // Histórico de Bronzeamento
+  previousTanning: boolean | null;
+  exfoliation: boolean | null;
+  waxing: 'mais_24h' | 'menos_24h' | 'nao' | '';
+  // Condições de Saúde
+  skinTreatment: boolean | null;
+  skinTreatmentDetails?: string;
+  skinAllergies: boolean | null;
+  skinAllergiesDetails?: string;
+  openWounds: boolean | null;
+  bruises: boolean | null;
+  medications: boolean | null;
+  medicationsDetails?: string;
+  heavySweating: boolean | null;
+  pregnancy: boolean | null;
+  skinDiseases: boolean | null;
+  skinDiseasesDetails?: string;
+  // Autorizações
+  orientationsAccepted: boolean;
+  photoAuthorization: boolean;
+  // Outros
+  howDiscovered?: string;
+  observations?: string;
   createdBy?: string;
+  // Legacy fields (para compatibilidade)
+  skinType?: string;
+  allergies?: string;
+  healthConditions?: string;
+  lastTanning?: string;
 }
 
 export interface ClientHistoryItem {
