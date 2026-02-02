@@ -67,14 +67,30 @@ export const mockClients: Client[] = [
     notes: 'Cliente frequente, prefere horários matutinos',
     tags: ['vip'],
     isVIP: true,
-    anamnesis: {
-      skinType: 'Tipo II - Clara',
-      allergies: 'Nenhuma conhecida',
-      medications: 'Nenhuma',
-      healthConditions: 'Nenhuma',
-      lastTanning: '2024-01-10',
-      observations: 'Pele sensível ao sol'
-    },
+    anamnesisHistory: [
+      {
+        id: 'a1',
+        date: '2024-01-15',
+        skinType: 'Tipo II - Clara',
+        allergies: 'Nenhuma conhecida',
+        medications: 'Vitamina D',
+        healthConditions: 'Nenhuma',
+        lastTanning: '2024-01-10',
+        observations: 'Pele sensível ao sol, melhorou com hidratação',
+        createdBy: 'Admin'
+      },
+      {
+        id: 'a2',
+        date: '2023-12-08',
+        skinType: 'Tipo II - Clara',
+        allergies: 'Nenhuma conhecida',
+        medications: 'Nenhuma',
+        healthConditions: 'Nenhuma',
+        lastTanning: '2023-11-20',
+        observations: 'Pele sensível ao sol',
+        createdBy: 'Admin'
+      },
+    ],
     history: [
       { id: '1', date: '2024-01-15', type: 'session', description: 'Sessão Bronze Natural 20min', value: 150 },
       { id: '2', date: '2024-01-15', type: 'purchase', description: 'Óleo Bronzeador Premium', value: 89 },
@@ -107,13 +123,18 @@ export const mockClients: Client[] = [
     cpf: '456.789.123-00',
     tags: ['fidelidade'],
     isVIP: false,
-    anamnesis: {
-      skinType: 'Tipo III - Morena Clara',
-      allergies: 'Nenhuma',
-      medications: 'Nenhuma',
-      healthConditions: 'Nenhuma',
-      observations: ''
-    },
+    anamnesisHistory: [
+      {
+        id: 'a3',
+        date: '2024-01-18',
+        skinType: 'Tipo III - Morena Clara',
+        allergies: 'Nenhuma',
+        medications: 'Nenhuma',
+        healthConditions: 'Nenhuma',
+        observations: '',
+        createdBy: 'Admin'
+      },
+    ],
     history: [
       { id: '1', date: '2024-01-18', type: 'session', description: 'Sessão Bronze Premium 25min', value: 180 },
       { id: '2', date: '2024-01-10', type: 'session', description: 'Sessão Bronze Natural 20min', value: 150 },
