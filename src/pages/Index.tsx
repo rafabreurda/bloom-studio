@@ -7,6 +7,14 @@ import { AgendaView } from '@/components/agenda/AgendaView';
 import { FinanceView } from '@/components/finance/FinanceView';
 import { WaitingListView } from '@/components/waitinglist/WaitingListView';
 import { ConfigView } from '@/components/config/ConfigView';
+import { ClientsView } from '@/components/clients/ClientsView';
+import { ClientModal } from '@/components/clients/ClientModal';
+import { StockView } from '@/components/stock/StockView';
+import { StockModal } from '@/components/stock/StockModal';
+import { SuppliersView } from '@/components/suppliers/SuppliersView';
+import { SupplierModal } from '@/components/suppliers/SupplierModal';
+import { PartnershipsView } from '@/components/partnerships/PartnershipsView';
+import { PartnershipModal } from '@/components/partnerships/PartnershipModal';
 import { AddAppointmentModal } from '@/components/modals/AddAppointmentModal';
 import { BlockModal } from '@/components/modals/BlockModal';
 import { WaitlistModal } from '@/components/modals/WaitlistModal';
@@ -18,6 +26,10 @@ import {
   Appointment,
   Block,
   WaitingItem,
+  Client,
+  StockItem,
+  Supplier,
+  Partnership,
 } from '@/types';
 import {
   mockAppointments,
@@ -25,6 +37,9 @@ import {
   mockWaitingList,
   mockFinances,
   mockStock,
+  mockClients,
+  mockSuppliers,
+  mockPartnerships,
   defaultConfig,
   chartEvolutionData,
   chartDistributionData,
@@ -40,17 +55,31 @@ const Index = () => {
   const [currentRole, setCurrentRole] = useState<UserRole>('Admin Chefe');
   const [systemConfig, setSystemConfig] = useState<SystemConfig>(defaultConfig);
   
-  // Data state (mock - would be from database in real app)
+  // Data state
   const [appointments, setAppointments] = useState(mockAppointments);
   const [blocks, setBlocks] = useState(mockBlocks);
   const [waitingList, setWaitingList] = useState(mockWaitingList);
+  const [clients, setClients] = useState(mockClients);
+  const [stock, setStock] = useState(mockStock);
+  const [suppliers, setSuppliers] = useState(mockSuppliers);
+  const [partnerships, setPartnerships] = useState(mockPartnerships);
   
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [showRestrictedModal, setShowRestrictedModal] = useState(false);
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [showStockModal, setShowStockModal] = useState(false);
+  const [showSupplierModal, setShowSupplierModal] = useState(false);
+  const [showPartnershipModal, setShowPartnershipModal] = useState(false);
   const [newAppoTime, setNewAppoTime] = useState('');
+  
+  // Editing state
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [editingStock, setEditingStock] = useState<StockItem | null>(null);
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [editingPartnership, setEditingPartnership] = useState<Partnership | null>(null);
 
   // Handlers
   const handleTabChange = (tabId: TabId) => {
@@ -115,6 +144,135 @@ const Index = () => {
     setShowAddModal(true);
   };
 
+  // Client handlers
+  const handleAddClient = (client: Omit<Client, 'id' | 'createdAt'>) => {
+    if (editingClient) {
+      setClients(clients.map(c => 
+        c.id === editingClient.id 
+          ? { ...c, ...client }
+          : c
+      ));
+      toast.success('Cliente atualizado!');
+    } else {
+      const newClient: Client = {
+        ...client,
+        id: Date.now().toString(),
+        createdAt: new Date(),
+      };
+      setClients([...clients, newClient]);
+      toast.success('Cliente cadastrado!');
+    }
+    setEditingClient(null);
+  };
+
+  const handleEditClient = (client: Client) => {
+    setEditingClient(client);
+    setShowClientModal(true);
+  };
+
+  const handleDeleteClient = (id: string) => {
+    setClients(clients.filter(c => c.id !== id));
+    toast.success('Cliente removido!');
+  };
+
+  // Stock handlers
+  const handleAddStock = (item: Omit<StockItem, 'id'>) => {
+    if (editingStock) {
+      setStock(stock.map(s => 
+        s.id === editingStock.id 
+          ? { ...s, ...item }
+          : s
+      ));
+      toast.success('Produto atualizado!');
+    } else {
+      const newItem: StockItem = {
+        ...item,
+        id: Date.now().toString(),
+      };
+      setStock([...stock, newItem]);
+      toast.success('Produto cadastrado!');
+    }
+    setEditingStock(null);
+  };
+
+  const handleEditStock = (item: StockItem) => {
+    setEditingStock(item);
+    setShowStockModal(true);
+  };
+
+  const handleDeleteStock = (id: string) => {
+    setStock(stock.filter(s => s.id !== id));
+    toast.success('Produto removido!');
+  };
+
+  const handleAdjustQuantity = (id: string, delta: number) => {
+    setStock(stock.map(s => 
+      s.id === id 
+        ? { ...s, quantity: Math.max(0, s.quantity + delta) }
+        : s
+    ));
+  };
+
+  // Supplier handlers
+  const handleAddSupplier = (supplier: Omit<Supplier, 'id'>) => {
+    if (editingSupplier) {
+      setSuppliers(suppliers.map(s => 
+        s.id === editingSupplier.id 
+          ? { ...s, ...supplier }
+          : s
+      ));
+      toast.success('Fornecedor atualizado!');
+    } else {
+      const newSupplier: Supplier = {
+        ...supplier,
+        id: Date.now().toString(),
+      };
+      setSuppliers([...suppliers, newSupplier]);
+      toast.success('Fornecedor cadastrado!');
+    }
+    setEditingSupplier(null);
+  };
+
+  const handleEditSupplier = (supplier: Supplier) => {
+    setEditingSupplier(supplier);
+    setShowSupplierModal(true);
+  };
+
+  const handleDeleteSupplier = (id: string) => {
+    setSuppliers(suppliers.filter(s => s.id !== id));
+    toast.success('Fornecedor removido!');
+  };
+
+  // Partnership handlers
+  const handleAddPartnership = (partnership: Omit<Partnership, 'id'>) => {
+    if (editingPartnership) {
+      setPartnerships(partnerships.map(p => 
+        p.id === editingPartnership.id 
+          ? { ...p, ...partnership }
+          : p
+      ));
+      toast.success('Parceria atualizada!');
+    } else {
+      const newPartnership: Partnership = {
+        ...partnership,
+        id: Date.now().toString(),
+      };
+      setPartnerships([...partnerships, newPartnership]);
+      toast.success('Parceria cadastrada!');
+    }
+    setEditingPartnership(null);
+  };
+
+  const handleEditPartnership = (partnership: Partnership) => {
+    setEditingPartnership(partnership);
+    setShowPartnershipModal(true);
+  };
+
+  const handleDeletePartnership = (id: string) => {
+    setPartnerships(partnerships.filter(p => p.id !== id));
+    toast.success('Parceria removida!');
+  };
+
   return (
     <div className="min-h-screen bg-background flex font-sans antialiased text-foreground overflow-hidden">
       <Sidebar
@@ -142,12 +300,25 @@ const Index = () => {
             <AgendaView
               appointments={appointments}
               blocks={blocks}
-              stock={mockStock}
+              stock={stock}
               onNavigate={handleTabChange}
               onAddClick={handleAddClick}
               onBlockClick={() => setShowBlockModal(true)}
               onDeleteBlock={handleDeleteBlock}
               pixKey={systemConfig.pixKey}
+            />
+          )}
+
+          {activeTab === 'clientes' && (
+            <ClientsView
+              clients={clients}
+              onAddClick={() => {
+                setEditingClient(null);
+                setShowClientModal(true);
+              }}
+              onEditClick={handleEditClient}
+              onDeleteClick={handleDeleteClient}
+              onSendMessage={handleSendWhatsApp}
             />
           )}
 
@@ -157,6 +328,45 @@ const Index = () => {
               evolutionData={chartEvolutionData}
               distributionData={chartDistributionData}
               mixData={chartMixData}
+            />
+          )}
+
+          {activeTab === 'estoque' && (
+            <StockView
+              stock={stock}
+              onAddClick={() => {
+                setEditingStock(null);
+                setShowStockModal(true);
+              }}
+              onEditClick={handleEditStock}
+              onDeleteClick={handleDeleteStock}
+              onAdjustQuantity={handleAdjustQuantity}
+            />
+          )}
+
+          {activeTab === 'fornecedores' && (
+            <SuppliersView
+              suppliers={suppliers}
+              onAddClick={() => {
+                setEditingSupplier(null);
+                setShowSupplierModal(true);
+              }}
+              onEditClick={handleEditSupplier}
+              onDeleteClick={handleDeleteSupplier}
+              onSendMessage={handleSendWhatsApp}
+            />
+          )}
+
+          {activeTab === 'parcerias' && (
+            <PartnershipsView
+              partnerships={partnerships}
+              onAddClick={() => {
+                setEditingPartnership(null);
+                setShowPartnershipModal(true);
+              }}
+              onEditClick={handleEditPartnership}
+              onDeleteClick={handleDeletePartnership}
+              onSendMessage={handleSendWhatsApp}
             />
           )}
 
@@ -175,12 +385,6 @@ const Index = () => {
               onConfigChange={setSystemConfig}
             />
           )}
-
-          {['clientes', 'estoque', 'fornecedores', 'parcerias'].includes(activeTab) && (
-            <div className="flex flex-col items-center justify-center h-full text-center py-20 opacity-30 mt-20 font-black uppercase tracking-widest">
-              Módulo {activeTab} em Adaptação
-            </div>
-          )}
         </div>
       </main>
 
@@ -196,7 +400,7 @@ const Index = () => {
             defaultTime={newAppoTime}
             onClose={() => setShowAddModal(false)}
             onAdd={handleAddAppointment}
-            stock={mockStock}
+            stock={stock}
           />
         </div>
       )}
@@ -216,6 +420,58 @@ const Index = () => {
           <WaitlistModal
             onClose={() => setShowWaitlistModal(false)}
             onAdd={handleAddWaiting}
+          />
+        </div>
+      )}
+
+      {showClientModal && (
+        <div className="fixed inset-0 bg-background/90 z-[150] flex items-end md:items-center justify-center p-0 md:p-4 backdrop-blur-md">
+          <ClientModal
+            client={editingClient}
+            onClose={() => {
+              setShowClientModal(false);
+              setEditingClient(null);
+            }}
+            onSave={handleAddClient}
+          />
+        </div>
+      )}
+
+      {showStockModal && (
+        <div className="fixed inset-0 bg-background/90 z-[150] flex items-end md:items-center justify-center p-0 md:p-4 backdrop-blur-md">
+          <StockModal
+            item={editingStock}
+            onClose={() => {
+              setShowStockModal(false);
+              setEditingStock(null);
+            }}
+            onSave={handleAddStock}
+          />
+        </div>
+      )}
+
+      {showSupplierModal && (
+        <div className="fixed inset-0 bg-background/90 z-[150] flex items-end md:items-center justify-center p-0 md:p-4 backdrop-blur-md">
+          <SupplierModal
+            supplier={editingSupplier}
+            onClose={() => {
+              setShowSupplierModal(false);
+              setEditingSupplier(null);
+            }}
+            onSave={handleAddSupplier}
+          />
+        </div>
+      )}
+
+      {showPartnershipModal && (
+        <div className="fixed inset-0 bg-background/90 z-[150] flex items-end md:items-center justify-center p-0 md:p-4 backdrop-blur-md">
+          <PartnershipModal
+            partnership={editingPartnership}
+            onClose={() => {
+              setShowPartnershipModal(false);
+              setEditingPartnership(null);
+            }}
+            onSave={handleAddPartnership}
           />
         </div>
       )}
