@@ -1,15 +1,27 @@
 import { useState } from 'react';
-import { Plus, Trash2, Edit2, UserPlus, X, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, UserPlus, X, CheckCircle2, Crown, User } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { Checkbox } from '@/components/ui/checkbox';
-import { AdminUser, AdminJuniorPermissions } from '@/types';
+import { AdminJuniorPermissions } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAdminsCRUD } from '@/hooks/useAdminsCRUD';
+import { AdminWithRole, getDisplayRole } from '@/types/admin';
 
-interface AdminSectionProps {
-  admins: AdminUser[];
-  onAdd: (admin: Omit<AdminUser, 'id'>) => void;
-  onUpdate: (admin: AdminUser) => void;
-  onDelete: (id: string) => void;
+interface AdminSectionProps {}
+
+// Map DB permissions to frontend format
+function mapDbPermissions(perm: AdminWithRole['permissions']): AdminJuniorPermissions {
+  if (!perm) return defaultPermissions;
+  return {
+    agenda: perm.agenda,
+    clientes: perm.clientes,
+    estoque: perm.estoque,
+    listaEspera: perm.lista_espera,
+    financeiro: perm.financeiro,
+    fornecedores: perm.fornecedores,
+    parcerias: perm.parcerias,
+  };
 }
 
 const defaultPermissions: AdminJuniorPermissions = {
@@ -32,9 +44,23 @@ const permissionLabels: Record<keyof AdminJuniorPermissions, string> = {
   parcerias: 'Parcerias',
 };
 
-export function AdminSection({ admins, onAdd, onUpdate, onDelete }: AdminSectionProps) {
+// Labels for DB permission keys
+const dbPermissionLabels: Record<string, string> = {
+  agenda: 'Agenda',
+  clientes: 'Clientes',
+  estoque: 'Estoque',
+  lista_espera: 'Lista de Espera',
+  financeiro: 'Financeiro',
+  fornecedores: 'Fornecedores',
+  parcerias: 'Parcerias',
+  config: 'Configurações',
+};
+
+export function AdminSection({}: AdminSectionProps) {
+  const { admins, refreshAdmins, currentAdmin } = useAuth();
+  const { createAdmin, updateAdmin, deleteAdmin, isLoading } = useAdminsCRUD();
   const [showModal, setShowModal] = useState(false);
-  const [editingAdmin, setEditingAdmin] = useState<AdminUser | null>(null);
+  const [editingAdmin, setEditingAdmin] = useState<AdminWithRole | null>(null);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState<'Admin Pleno' | 'Admin Junior'>('Admin Pleno');
@@ -49,42 +75,62 @@ export function AdminSection({ admins, onAdd, onUpdate, onDelete }: AdminSection
     setShowModal(true);
   };
 
-  const openEditModal = (admin: AdminUser) => {
+  const openEditModal = (admin: AdminWithRole) => {
     setEditingAdmin(admin);
     setName(admin.name);
-    setPhone(admin.phone);
-    setRole(admin.role);
-    setPermissions(admin.permissions || defaultPermissions);
+    setPhone(admin.phone || '');
+    // Map DB role to frontend role
+    const roleMap: Record<string, 'Admin Pleno' | 'Admin Junior'> = {
+      'admin_pleno': 'Admin Pleno',
+      'admin_junior': 'Admin Junior',
+    };
+    setRole(roleMap[admin.role] || 'Admin Pleno');
+    setPermissions(mapDbPermissions(admin.permissions));
     setShowModal(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (editingAdmin) {
-      onUpdate({
-        ...editingAdmin,
+      const success = await updateAdmin(editingAdmin.id, {
         name,
         phone,
         role,
         permissions: role === 'Admin Junior' ? permissions : undefined,
       });
+      if (success) {
+        await refreshAdmins();
+        setShowModal(false);
+      }
     } else {
-      onAdd({
+      const success = await createAdmin({
         name,
         phone,
         role,
         permissions: role === 'Admin Junior' ? permissions : undefined,
       });
+      if (success) {
+        await refreshAdmins();
+        setShowModal(false);
+      }
     }
-    setShowModal(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    const success = await deleteAdmin(id);
+    if (success) {
+      await refreshAdmins();
+    }
   };
 
   const togglePermission = (key: keyof AdminJuniorPermissions) => {
     setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const plenoAdmins = admins.filter(a => a.role === 'Admin Pleno');
-  const juniorAdmins = admins.filter(a => a.role === 'Admin Junior');
+  // Filter admins by role (exclude admin_chefe as they're shown separately)
+  const plenoAdmins = admins.filter(a => a.role === 'admin_pleno');
+  const juniorAdmins = admins.filter(a => a.role === 'admin_junior');
 
   return (
     <>
@@ -123,7 +169,7 @@ export function AdminSection({ admins, onAdd, onUpdate, onDelete }: AdminSection
                     <button onClick={() => openEditModal(admin)} className="p-2 text-muted-foreground hover:text-primary">
                       <Edit2 size={16} />
                     </button>
-                    <button onClick={() => onDelete(admin.id)} className="p-2 text-muted-foreground hover:text-destructive">
+                    <button onClick={() => handleDelete(admin.id)} className="p-2 text-muted-foreground hover:text-destructive" disabled={isLoading}>
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -155,20 +201,23 @@ export function AdminSection({ admins, onAdd, onUpdate, onDelete }: AdminSection
                       <button onClick={() => openEditModal(admin)} className="p-2 text-muted-foreground hover:text-primary">
                         <Edit2 size={16} />
                       </button>
-                      <button onClick={() => onDelete(admin.id)} className="p-2 text-muted-foreground hover:text-destructive">
+                      <button onClick={() => handleDelete(admin.id)} className="p-2 text-muted-foreground hover:text-destructive" disabled={isLoading}>
                         <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
                   {admin.permissions && (
                     <div className="flex flex-wrap gap-1">
-                      {Object.entries(admin.permissions).map(([key, value]) => (
-                        value && (
+                      {Object.entries(admin.permissions).map(([key, value]) => {
+                        // Skip non-boolean fields and config permission
+                        if (typeof value !== 'boolean' || key === 'id' || key === 'user_id' || key === 'created_at' || key === 'updated_at' || key === 'config') return null;
+                        if (!value) return null;
+                        return (
                           <span key={key} className="px-2 py-0.5 bg-primary/20 text-primary text-[10px] font-bold rounded-full">
-                            {permissionLabels[key as keyof AdminJuniorPermissions]}
+                            {dbPermissionLabels[key] || key}
                           </span>
-                        )
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
