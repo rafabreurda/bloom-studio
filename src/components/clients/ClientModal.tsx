@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Star, CheckCircle2, FileText, Plus, Calendar, ChevronRight } from 'lucide-react';
+import { X, Star, CheckCircle2, FileText, Plus, Calendar, ChevronRight, Check, XIcon, Camera, AlertTriangle } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { Client, AnamnesisRecord, ClientTag } from '@/types';
@@ -103,6 +103,58 @@ export function ClientModal({ client, tags, onClose, onSave }: ClientModalProps)
 
   const activeTags = tags.filter(t => t.isActive);
   const latestRecord = anamnesisHistory.length > 0 ? anamnesisHistory[0] : undefined;
+
+  // Helper to render boolean indicator
+  const BoolIndicator = ({ value, warning = false }: { value: boolean | null; warning?: boolean }) => {
+    if (value === null) return <span className="text-muted-foreground">-</span>;
+    if (value) {
+      return warning ? (
+        <span className="text-amber-500 flex items-center gap-1">
+          <AlertTriangle size={12} /> Sim
+        </span>
+      ) : (
+        <span className="text-emerald-500 flex items-center gap-1">
+          <Check size={12} /> Sim
+        </span>
+      );
+    }
+    return (
+      <span className="text-emerald-500 flex items-center gap-1">
+        <Check size={12} /> Não
+      </span>
+    );
+  };
+
+  const skinTextureLabels: Record<string, string> = {
+    normal: 'Normal',
+    seca: 'Seca',
+    oleosa: 'Oleosa',
+    mista: 'Mista',
+  };
+
+  const phototypeLabels: Record<string, string> = {
+    I: 'I - Muito Clara',
+    II: 'II - Clara',
+    III: 'III - Morena Clara',
+    IV: 'IV - Morena',
+    V: 'V - Morena Escura',
+    VI: 'VI - Negra',
+  };
+
+  const waxingLabels: Record<string, string> = {
+    mais_24h: 'Mais de 24h',
+    menos_24h: 'Menos de 24h',
+    nao: 'Não',
+  };
+
+  const getRecordSummary = (record: AnamnesisRecord) => {
+    const parts = [];
+    if (record.phototype) parts.push(`Fototipo ${record.phototype}`);
+    if (record.skinTexture) parts.push(skinTextureLabels[record.skinTexture]);
+    // Legacy support
+    if (!record.phototype && record.skinType) parts.push(record.skinType);
+    return parts.length > 0 ? parts.join(' • ') : 'Ficha de anamnese';
+  };
 
   return (
     <>
@@ -339,61 +391,238 @@ export function ClientModal({ client, tags, onClose, onSave }: ClientModalProps)
                               )}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {record.skinType || 'Tipo de pele não informado'}
+                              {getRecordSummary(record)}
                             </p>
                           </div>
                         </div>
-                        <ChevronRight
-                          size={20}
-                          className={`text-muted-foreground transition-transform ${
-                            expandedRecordId === record.id ? 'rotate-90' : ''
-                          }`}
-                        />
+                        <div className="flex items-center gap-2">
+                          {record.photoAuthorization && (
+                            <Camera size={14} className="text-primary" />
+                          )}
+                          <ChevronRight
+                            size={20}
+                            className={`text-muted-foreground transition-transform ${
+                              expandedRecordId === record.id ? 'rotate-90' : ''
+                            }`}
+                          />
+                        </div>
                       </button>
 
                       {expandedRecordId === record.id && (
                         <div className="px-4 pb-4 pt-0 border-t border-border mt-0">
-                          <div className="grid grid-cols-2 gap-3 text-sm pt-4">
-                            {record.skinType && (
-                              <div>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Tipo de Pele</p>
-                                <p className="text-foreground">{record.skinType}</p>
+                          <div className="space-y-4 pt-4">
+                            {/* Tipo de Pele */}
+                            <div className="space-y-2">
+                              <h5 className="text-[10px] font-black uppercase text-primary tracking-widest">
+                                Tipo de Pele
+                              </h5>
+                              <div className="grid grid-cols-2 gap-3 text-sm">
+                                {record.skinTexture && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Textura</p>
+                                    <p className="text-foreground">{skinTextureLabels[record.skinTexture]}</p>
+                                  </div>
+                                )}
+                                {record.phototype && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Fototipo</p>
+                                    <p className="text-foreground">{phototypeLabels[record.phototype]}</p>
+                                  </div>
+                                )}
+                                {record.tansSunExposure !== null && record.tansSunExposure !== undefined && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Bronzeia ao Sol</p>
+                                    <p className="text-foreground"><BoolIndicator value={record.tansSunExposure} /></p>
+                                  </div>
+                                )}
+                                {/* Legacy support */}
+                                {record.skinType && !record.phototype && (
+                                  <div className="col-span-2">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Tipo de Pele</p>
+                                    <p className="text-foreground">{record.skinType}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Histórico */}
+                            {(record.previousTanning !== null || record.exfoliation !== null || record.waxing) && (
+                              <div className="space-y-2">
+                                <h5 className="text-[10px] font-black uppercase text-primary tracking-widest">
+                                  Histórico de Bronzeamento
+                                </h5>
+                                <div className="grid grid-cols-2 gap-3 text-sm">
+                                  {record.previousTanning !== null && record.previousTanning !== undefined && (
+                                    <div>
+                                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Bronze Anterior</p>
+                                      <p className="text-foreground"><BoolIndicator value={record.previousTanning} /></p>
+                                    </div>
+                                  )}
+                                  {record.exfoliation !== null && record.exfoliation !== undefined && (
+                                    <div>
+                                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Esfoliação</p>
+                                      <p className="text-foreground"><BoolIndicator value={record.exfoliation} /></p>
+                                    </div>
+                                  )}
+                                  {record.waxing && (
+                                    <div>
+                                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Depilação</p>
+                                      <p className={`text-foreground ${record.waxing === 'menos_24h' ? 'text-amber-500' : ''}`}>
+                                        {waxingLabels[record.waxing]}
+                                        {record.waxing === 'menos_24h' && <AlertTriangle size={12} className="inline ml-1" />}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             )}
-                            {record.allergies && (
-                              <div>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Alergias</p>
-                                <p className="text-foreground">{record.allergies}</p>
+
+                            {/* Condições de Saúde */}
+                            <div className="space-y-2">
+                              <h5 className="text-[10px] font-black uppercase text-primary tracking-widest">
+                                Condições de Saúde
+                              </h5>
+                              <div className="grid grid-cols-2 gap-3 text-sm">
+                                {record.skinTreatment !== null && record.skinTreatment !== undefined && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Tratamento de Pele</p>
+                                    <p className="text-foreground">
+                                      <BoolIndicator value={record.skinTreatment} warning />
+                                      {record.skinTreatmentDetails && (
+                                        <span className="text-xs text-muted-foreground ml-1">({record.skinTreatmentDetails})</span>
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                                {record.skinAllergies !== null && record.skinAllergies !== undefined && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Alergias</p>
+                                    <p className="text-foreground">
+                                      <BoolIndicator value={record.skinAllergies} warning />
+                                      {record.skinAllergiesDetails && (
+                                        <span className="text-xs text-muted-foreground ml-1">({record.skinAllergiesDetails})</span>
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                                {/* Legacy allergies */}
+                                {record.allergies && !record.skinAllergies && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Alergias</p>
+                                    <p className="text-foreground">{record.allergies}</p>
+                                  </div>
+                                )}
+                                {record.openWounds !== null && record.openWounds !== undefined && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Ferimentos/Tatuagem</p>
+                                    <p className="text-foreground"><BoolIndicator value={record.openWounds} warning /></p>
+                                  </div>
+                                )}
+                                {record.bruises !== null && record.bruises !== undefined && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Hematomas</p>
+                                    <p className="text-foreground"><BoolIndicator value={record.bruises} warning /></p>
+                                  </div>
+                                )}
+                                {record.medications !== null && record.medications !== undefined && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Medicamentos</p>
+                                    <p className="text-foreground">
+                                      <BoolIndicator value={record.medications} warning />
+                                      {record.medicationsDetails && (
+                                        <span className="text-xs text-muted-foreground ml-1">({record.medicationsDetails})</span>
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                                {record.heavySweating !== null && record.heavySweating !== undefined && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Transpiração Forte</p>
+                                    <p className="text-foreground"><BoolIndicator value={record.heavySweating} /></p>
+                                  </div>
+                                )}
+                                {record.pregnancy !== null && record.pregnancy !== undefined && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Gravidez</p>
+                                    <p className="text-foreground"><BoolIndicator value={record.pregnancy} warning /></p>
+                                  </div>
+                                )}
+                                {record.skinDiseases !== null && record.skinDiseases !== undefined && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Vitiligo/Psoríase/Melasma</p>
+                                    <p className="text-foreground">
+                                      <BoolIndicator value={record.skinDiseases} warning />
+                                      {record.skinDiseasesDetails && (
+                                        <span className="text-xs text-muted-foreground ml-1">({record.skinDiseasesDetails})</span>
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                                {/* Legacy health conditions */}
+                                {record.healthConditions && (
+                                  <div className="col-span-2">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Condições de Saúde</p>
+                                    <p className="text-foreground">{record.healthConditions}</p>
+                                  </div>
+                                )}
                               </div>
-                            )}
-                            {record.medications && (
-                              <div>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Medicamentos</p>
-                                <p className="text-foreground">{record.medications}</p>
+                            </div>
+
+                            {/* Autorizações */}
+                            <div className="space-y-2">
+                              <h5 className="text-[10px] font-black uppercase text-primary tracking-widest">
+                                Autorizações
+                              </h5>
+                              <div className="grid grid-cols-2 gap-3 text-sm">
+                                <div>
+                                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Orientações</p>
+                                  <p className="text-foreground">
+                                    <BoolIndicator value={record.orientationsAccepted} />
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                                    <Camera size={10} /> Uso de Imagem
+                                  </p>
+                                  <p className="text-foreground">
+                                    <BoolIndicator value={record.photoAuthorization} />
+                                  </p>
+                                </div>
                               </div>
-                            )}
-                            {record.healthConditions && (
-                              <div>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Condições de Saúde</p>
-                                <p className="text-foreground">{record.healthConditions}</p>
-                              </div>
-                            )}
-                            {record.lastTanning && (
-                              <div>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Último Bronze</p>
-                                <p className="text-foreground">{new Date(record.lastTanning).toLocaleDateString('pt-BR')}</p>
-                              </div>
-                            )}
-                            {record.createdBy && (
-                              <div>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Criado por</p>
-                                <p className="text-foreground">{record.createdBy}</p>
-                              </div>
-                            )}
-                            {record.observations && (
-                              <div className="col-span-2">
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase">Observações</p>
-                                <p className="text-foreground">{record.observations}</p>
+                            </div>
+
+                            {/* Outros */}
+                            {(record.howDiscovered || record.observations || record.createdBy || record.lastTanning) && (
+                              <div className="space-y-2">
+                                <h5 className="text-[10px] font-black uppercase text-primary tracking-widest">
+                                  Outros
+                                </h5>
+                                <div className="grid grid-cols-2 gap-3 text-sm">
+                                  {record.howDiscovered && (
+                                    <div>
+                                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Como Descobriu</p>
+                                      <p className="text-foreground">{record.howDiscovered}</p>
+                                    </div>
+                                  )}
+                                  {record.createdBy && (
+                                    <div>
+                                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Criado por</p>
+                                      <p className="text-foreground">{record.createdBy}</p>
+                                    </div>
+                                  )}
+                                  {record.lastTanning && (
+                                    <div>
+                                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Último Bronze</p>
+                                      <p className="text-foreground">{new Date(record.lastTanning).toLocaleDateString('pt-BR')}</p>
+                                    </div>
+                                  )}
+                                  {record.observations && (
+                                    <div className="col-span-2">
+                                      <p className="text-[10px] font-bold text-muted-foreground uppercase">Observações</p>
+                                      <p className="text-foreground">{record.observations}</p>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             )}
                           </div>
