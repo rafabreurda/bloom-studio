@@ -30,6 +30,7 @@ export interface Client {
   birthday?: string;
   cpf?: string;
   anamnesis?: AnamnesisForm;
+  anamnesisHistory?: AnamnesisRecord[];
   notes?: string;
   tags: string[];
   isVIP: boolean;
@@ -44,6 +45,18 @@ export interface AnamnesisForm {
   healthConditions: string;
   lastTanning?: string;
   observations: string;
+}
+
+export interface AnamnesisRecord {
+  id: string;
+  date: string;
+  skinType: string;
+  allergies: string;
+  medications: string;
+  healthConditions: string;
+  lastTanning?: string;
+  observations: string;
+  createdBy?: string;
 }
 
 export interface ClientHistoryItem {
