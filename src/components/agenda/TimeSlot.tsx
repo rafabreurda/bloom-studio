@@ -1,4 +1,4 @@
-import { Plus, X, Star, CheckCircle2, Copy, MessageSquare } from 'lucide-react';
+import { Plus, X, Star, CheckCircle2, Copy, MessageSquare, Handshake } from 'lucide-react';
 import { Appointment, Block } from '@/types';
 
 interface TimeSlotProps {
@@ -23,6 +23,7 @@ export function TimeSlot({
   onClientClick,
 }: TimeSlotProps) {
   const isVIP = appointment?.tags?.includes('VIP');
+  const isPartnership = appointment?.isPartnership;
 
   return (
     <div 
@@ -64,7 +65,9 @@ export function TimeSlot({
             className={`h-full w-full rounded-xl p-3 md:p-4 flex justify-between items-center shadow-sm ${
               isVIP 
                 ? 'vip-border vip-glow' 
-                : `border-l-4 ${appointment.status === 'Agendado' ? 'border-l-emerald-500' : 'border-l-amber-400'}`
+                : isPartnership
+                  ? 'border-l-4 border-l-violet-500'
+                  : `border-l-4 ${appointment.status === 'Agendado' ? 'border-l-emerald-500' : 'border-l-amber-400'}`
             }`}
             style={{ 
               backgroundColor: 'hsl(var(--agenda-background))', 
@@ -79,6 +82,13 @@ export function TimeSlot({
                 <Star size={10} fill="black" /> VIP
               </div>
             )}
+
+            {/* Partnership Badge */}
+            {isPartnership && !isVIP && (
+              <div className="absolute -top-3 -right-2 bg-violet-500 text-white px-2 py-0.5 rounded-full text-[9px] font-black flex items-center gap-1 shadow-lg border border-white">
+                <Handshake size={10} /> PARCERIA
+              </div>
+            )}
             
             {/* Client Info - Clickable */}
             <button 
@@ -87,9 +97,12 @@ export function TimeSlot({
             >
               <div className="flex items-center gap-1">
                 {isVIP && <Star size={12} className="text-amber-500" fill="#f59e0b" />}
+                {isPartnership && !isVIP && <Handshake size={12} className="text-violet-500" />}
                 <span 
-                  className={`font-black text-sm md:text-base truncate hover:underline ${isVIP ? 'text-amber-600' : ''}`}
-                  style={!isVIP ? { color: 'hsl(var(--agenda-foreground))' } : undefined}
+                  className={`font-black text-sm md:text-base truncate hover:underline ${
+                    isVIP ? 'text-amber-600' : isPartnership ? 'text-violet-600' : ''
+                  }`}
+                  style={!isVIP && !isPartnership ? { color: 'hsl(var(--agenda-foreground))' } : undefined}
                 >
                   {appointment.clientName}
                 </span>
@@ -99,6 +112,9 @@ export function TimeSlot({
                 className="text-[10px] md:text-xs font-bold truncate"
                 style={{ color: 'hsl(var(--agenda-muted-foreground))' }}
               >
+                {isPartnership && appointment.partnershipName ? (
+                  <span className="text-violet-500">{appointment.partnershipName} • </span>
+                ) : null}
                 Total R$ {appointment.totalValue || appointment.value} • {appointment.paymentMethod || '—'}
               </p>
             </button>

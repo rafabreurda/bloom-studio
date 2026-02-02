@@ -3,10 +3,12 @@
 @tailwind utilities;
 
 /* BRONZE PRO Master - Premium Tanning Studio Design System */
+/* Theme: Standard (White/Black) for Admin Pleno/Junior */
+/* Theme: Chefe (Black/Gold) for Admin Chefe */
 
 @layer base {
   :root {
-    /* Core Brand - White Theme with Black/Gold accents */
+    /* Standard Theme - White with Black text */
     --background: 0 0% 100%;
     --foreground: 0 0% 10%;
 
@@ -16,8 +18,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
 
-    --primary: 43 96% 56%;
-    --primary-foreground: 0 0% 0%;
+    --primary: 0 0% 10%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 96%;
     --secondary-foreground: 0 0% 30%;
@@ -25,7 +27,7 @@
     --muted: 0 0% 94%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 32 94% 44%;
+    --accent: 0 0% 20%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -36,7 +38,7 @@
 
     --border: 0 0% 88%;
     --input: 0 0% 88%;
-    --ring: 43 96% 56%;
+    --ring: 0 0% 10%;
 
     --radius: 1rem;
 
@@ -56,7 +58,61 @@
     --zinc-900: 240 6% 10%;
     --zinc-950: 240 6% 6%;
 
-    /* Sidebar - Keep dark for contrast */
+    /* Sidebar - White/Black for standard */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 10%;
+    --sidebar-primary: 0 0% 10%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 0 0% 88%;
+    --sidebar-ring: 0 0% 10%;
+
+    /* Agenda Theme */
+    --agenda-background: 0 0% 100%;
+    --agenda-foreground: 0 0% 10%;
+    --agenda-card: 0 0% 98%;
+    --agenda-border: 0 0% 88%;
+    --agenda-muted: 0 0% 96%;
+    --agenda-muted-foreground: 0 0% 45%;
+
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, hsl(0, 0%, 20%), hsl(0, 0%, 10%));
+    --gradient-premium: linear-gradient(135deg, hsl(0, 0%, 98%), hsl(0, 0%, 100%));
+
+    /* Shadows */
+    --shadow-gold: 0 10px 40px -10px hsl(0 0% 0% / 0.25);
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.08);
+  }
+
+  /* ADMIN CHEFE THEME - Black/Gold Premium */
+  .theme-chefe {
+    --background: 0 0% 0%;
+    --foreground: 43 96% 56%;
+
+    --card: 240 6% 6%;
+    --card-foreground: 43 96% 56%;
+
+    --popover: 240 6% 4%;
+    --popover-foreground: 43 96% 56%;
+
+    --primary: 43 96% 56%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 240 4% 10%;
+    --secondary-foreground: 43 60% 50%;
+
+    --muted: 240 4% 12%;
+    --muted-foreground: 32 80% 35%;
+
+    --accent: 32 94% 44%;
+    --accent-foreground: 0 0% 0%;
+
+    --border: 32 80% 20%;
+    --input: 32 80% 20%;
+    --ring: 43 96% 56%;
+
+    /* Sidebar - Dark with Gold for Chefe */
     --sidebar-background: 0 0% 5%;
     --sidebar-foreground: 43 96% 56%;
     --sidebar-primary: 43 96% 56%;
@@ -66,43 +122,21 @@
     --sidebar-border: 32 80% 20%;
     --sidebar-ring: 43 96% 56%;
 
-    /* Agenda Theme - Same as main */
-    --agenda-background: 0 0% 100%;
-    --agenda-foreground: 0 0% 10%;
-    --agenda-card: 0 0% 98%;
-    --agenda-border: 0 0% 88%;
-    --agenda-muted: 0 0% 96%;
-    --agenda-muted-foreground: 0 0% 45%;
+    /* Agenda - Dark theme for Chefe */
+    --agenda-background: 240 6% 6%;
+    --agenda-foreground: 43 96% 56%;
+    --agenda-card: 240 4% 10%;
+    --agenda-border: 32 80% 20%;
+    --agenda-muted: 240 4% 12%;
+    --agenda-muted-foreground: 32 80% 35%;
 
     /* Gradients */
     --gradient-gold: linear-gradient(135deg, hsl(32, 95%, 44%), hsl(43, 96%, 56%));
-    --gradient-premium: linear-gradient(135deg, hsl(0, 0%, 98%), hsl(0, 0%, 100%));
+    --gradient-premium: linear-gradient(135deg, hsl(240, 6%, 6%), hsl(240, 6%, 4%));
 
     /* Shadows */
     --shadow-gold: 0 10px 40px -10px hsl(43 96% 56% / 0.25);
-    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.08);
-  }
-
-  .dark {
-    --background: 0 0% 0%;
-    --foreground: 43 96% 56%;
-    --card: 240 6% 6%;
-    --card-foreground: 43 96% 56%;
-    --popover: 240 6% 4%;
-    --popover-foreground: 43 96% 56%;
-    --primary: 43 96% 56%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 240 4% 10%;
-    --secondary-foreground: 43 60% 50%;
-    --muted: 240 4% 12%;
-    --muted-foreground: 32 80% 25%;
-    --accent: 32 94% 44%;
-    --accent-foreground: 0 0% 0%;
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 32 80% 20%;
-    --input: 32 80% 20%;
-    --ring: 43 96% 56%;
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.5);
   }
 }
 
