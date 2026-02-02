@@ -1,329 +1,197 @@
 
+# Plano: Melhorias na Agenda, Bloqueios e Acesso ao Cliente
 
-# Plano Completo: BRONZE PRO - Sistema de Gestão Completo
+## Problemas Identificados
 
-## Resumo Executivo
-
-Este plano aborda todas as funcionalidades solicitadas para transformar o sistema BRONZE PRO em uma plataforma completa de gestão para estúdios de bronzeamento.
-
----
-
-## 1. Remoção do Seletor de Administrador (Desktop)
-
-### Problema Atual
-O componente `RoleSwitcher` ainda está visível no canto superior direito da tela desktop, mostrando "Acesso: Chefe/Pleno/Junior".
-
-### Solução
-Remover completamente o componente `RoleSwitcher` de `Index.tsx` - o controle de roles será feito exclusivamente nas Configurações pelo Admin Chefe.
-
-### Arquivos Afetados
-- `src/pages/Index.tsx` - Remover importação e uso do RoleSwitcher
-- `src/components/layout/RoleSwitcher.tsx` - Pode ser deletado ou mantido para uso futuro
+1. **Agenda** - Os botões de "Semana" e "Mês" estão funcionando visualmente, mas a view continua mostrando apenas o modo "Dia" (não há implementação real para week/month)
+2. **Bloqueios** - Atualmente só permite bloquear um único dia ou horário, sem opção de intervalo de datas (ex: dia 02 a dia 10)
+3. **Clique no Nome do Cliente na Agenda** - Não existe interação ao clicar no nome do cliente no TimeSlot - precisa abrir o histórico completo
 
 ---
 
-## 2. Configurações Completas (Admin Chefe)
+## 1. Implementar Visualizações de Semana e Mês na Agenda
 
-### Estrutura Reorganizada em Seções
+### AgendaView.tsx
+Criar renderização condicional baseada no `viewMode`:
+
+**Modo Dia (atual):** Lista de horários 08:00-22:00 para um único dia
+
+**Modo Semana:** 
+- Grid de 7 colunas (Dom-Sáb)
+- Header com os 7 dias da semana selecionada
+- Células mostrando resumo de agendamentos por dia
+- Navegação anterior/próxima semana
+
+**Modo Mês:**
+- Calendário visual com todos os dias do mês
+- Indicadores visuais de dias com agendamentos
+- Navegação anterior/próximo mês
+
+### AgendaHeader.tsx
+- Ajustar navegação para respeitar o modo de visualização:
+  - Dia: -1/+1 dia
+  - Semana: -7/+7 dias
+  - Mês: -1/+1 mês
+
+### Novos Componentes
+- `AgendaWeekView.tsx` - Grid semanal com resumo
+- `AgendaMonthView.tsx` - Calendário mensal
+
+---
+
+## 2. Bloqueios com Intervalo de Datas
+
+### BlockModal.tsx
+Adicionar terceira opção de tipo de bloqueio:
 
 ```text
-CONFIGURAÇÕES
-├── Estúdio
-│   ├── Nome do Estúdio
-│   ├── Logo (upload)
-│   └── Foto de Fundo
-│
-├── Pagamentos
-│   ├── Chave PIX
-│   └── Link Mercado Pago/PagSeguro
-│
-├── Administradores
-│   ├── Admin Pleno (lista)
-│   └── Admin Junior (lista com checkboxes de permissões)
-│
-├── Tags de Clientes
-│   ├── VIP
-│   ├── Inadimplente
-│   ├── Influencer
-│   ├── Fidelidade
-│   └── Primeira Vez
-│
-├── Alertas
-│   └── Limite de estoque baixo (padrão: 5)
-│
-└── Backup
-    └── Botão "Exportar JSON"
+┌─────────────┬─────────────┬─────────────┐
+│ Dia Inteiro │    Hora     │  Período    │
+└─────────────┴─────────────┴─────────────┘
 ```
 
-### Sistema de Permissões Multinível
+**Tipo "Período":**
+- Campo "Data Inicial" (date picker)
+- Campo "Data Final" (date picker)
+- Campo "Motivo"
 
-**Admin Chefe:** Acesso total + gerencia todos os administradores
+### Lógica de Criação
+Quando tipo = 'dateRange':
+- Gerar múltiplos blocos (um para cada dia do intervalo)
+- Ou criar um único bloco com `startDate` e `endDate`
 
-**Admin Pleno:** Mesmos acessos (agenda, clientes, financeiro, estoque, fornecedores, parcerias, configurações básicas)
-
-**Admin Junior:** Permissões customizáveis via checkboxes:
-- [ ] Agenda
-- [ ] Clientes  
-- [ ] Estoque
-- [ ] Lista de Espera
-- [ ] Financeiro (visualização)
-- [ ] Fornecedores
-- [ ] Parcerias
-
-### Tipos Atualizados
-
+### Block Type (types/index.ts)
 ```typescript
-interface AdminJuniorPermissions {
-  agenda: boolean;
-  clientes: boolean;
-  estoque: boolean;
-  listaEspera: boolean;
-  financeiro: boolean;
-  fornecedores: boolean;
-  parcerias: boolean;
-}
-
-interface AdminUser {
-  id: string;
-  name: string;
-  role: 'Admin Pleno' | 'Admin Junior';
-  permissions?: AdminJuniorPermissions; // Apenas para Junior
-}
-
-interface ClientTag {
-  id: string;
-  name: string;
-  color: string;
-  isActive: boolean;
-}
-
-interface SystemConfig {
-  name: string;
-  logo?: string;
-  backgroundPhoto?: string;
-  pixKey: string;
-  payLink: string;
-  lowStockThreshold: number;
-  admins: AdminUser[];
-  clientTags: ClientTag[];
-}
-```
-
-### Arquivos a Criar/Modificar
-- `src/components/config/ConfigView.tsx` - Reescrever completamente
-- `src/components/config/AdminSection.tsx` - Novo componente
-- `src/components/config/TagsSection.tsx` - Novo componente
-- `src/types/index.ts` - Atualizar tipos
-
----
-
-## 3. Financeiro Completo
-
-### Cards de Resumo
-```text
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│   RECEITA    │ │    CARTÃO    │ │     PIX      │ │   DINHEIRO   │ │  PARCERIAS   │
-│  R$ 5.500    │ │  R$ 1.200    │ │  R$ 3.800    │ │   R$ 500     │ │   R$ 450     │
-└──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
-```
-
-### Relatório PDF Mensal
-
-**Interface de Geração:**
-- Seletor de mês/ano
-- Checkboxes para incluir/excluir:
-  - [x] Sessões de Bronzeamento
-  - [x] Venda de Produtos
-  - [ ] Parcerias (desmarcado por padrão)
-  - [x] Despesas
-- Botão "Gerar PDF"
-
-**Lógica de Relatório:**
-```typescript
-interface ReportConfig {
-  month: number;
-  year: number;
-  includeSessions: boolean;
-  includeProducts: boolean;
-  includePartnerships: boolean;
-  includeExpenses: boolean;
-}
-```
-
-### Gráficos (já implementados, apenas verificar)
-- Linha: Evolução 6 meses
-- Pizza: Pix vs Cartão vs Dinheiro  
-- Barras: Sessões vs Produtos
-
-### Arquivos a Modificar
-- `src/components/finance/FinanceView.tsx` - Adicionar cards e relatório
-- `src/components/finance/ReportModal.tsx` - Novo modal para relatório
-- `src/types/index.ts` - Adicionar Finance com campo 'isPartnership'
-
----
-
-## 4. Clientes Completo
-
-### Campos Expandidos
-```typescript
-interface Client {
-  id: string;
-  name: string;
-  phone: string;
-  email?: string;
-  address?: string;           // NOVO
-  birthday?: string;
-  cpf?: string;               // NOVO
-  anamnesis?: AnamnesisForm;  // NOVO
-  notes?: string;
-  tags: string[];             // NOVO - Array de tag IDs
-  isVIP: boolean;
-  history: ClientHistoryItem[]; // NOVO
-  createdAt: Date;
-}
-
-interface AnamnesisForm {
-  skinType: string;
-  allergies: string;
-  medications: string;
-  healthConditions: string;
-  lastTanning?: string;
-  observations: string;
-}
-
-interface ClientHistoryItem {
+interface Block {
   id: string;
   date: string;
-  type: 'session' | 'purchase';
-  description: string;
-  value: number;
+  endDate?: string;        // NOVO - para intervalos
+  time: string | null;
+  type: 'allDay' | 'timeRange' | 'dateRange';  // NOVO tipo
+  reason: string;
+  createdAt: Date;
 }
 ```
 
-### Modal de Histórico
-Ao clicar no nome do cliente, abre modal com:
-- Dados cadastrais
-- Ficha de anamnese
-- Histórico de sessões e compras
-
-### Arquivos a Criar/Modificar
-- `src/components/clients/ClientModal.tsx` - Expandir campos
-- `src/components/clients/ClientHistoryModal.tsx` - Novo componente
-- `src/components/clients/AnamnesisForm.tsx` - Novo componente
-- `src/types/index.ts` - Atualizar tipos
+### Verificação na Agenda
+Atualizar lógica de verificação de bloqueio para considerar intervalos de data.
 
 ---
 
-## 5. Agenda com Cores e Cálculo Dinâmico
+## 3. Clique no Nome do Cliente na Agenda
 
-### Classificação por Cor
+### TimeSlot.tsx
+Adicionar interação ao clicar no nome do cliente:
+
 ```typescript
-const statusColors = {
-  'Agendado': 'border-l-emerald-500',      // Verde
-  'Aguardando Sinal': 'border-l-amber-400', // Amarelo
-  'VIP': 'border-l-primary',                // Dourado (já existe)
-  'Confirmado': 'bg-emerald-50',            // Fundo verde claro
-};
-```
-
-### Cálculo na Hora (já implementado)
-O `AddAppointmentModal` já calcula sessão + produtos em tempo real.
-Apenas garantir que o total atualiza visualmente.
-
-### Arquivos a Verificar/Ajustar
-- `src/components/agenda/TimeSlot.tsx` - Ajustar cores
-- `src/components/modals/AddAppointmentModal.tsx` - Verificar cálculo
-
----
-
-## 6. Mensagens WhatsApp Integradas
-
-### Templates de Mensagem
-```typescript
-interface WhatsAppTemplate {
-  id: string;
-  name: string;
-  content: string;
-  includePixKey: boolean;
+interface TimeSlotProps {
+  // ... props existentes
+  onClientClick?: (clientName: string, phone: string) => void;  // NOVO
 }
-
-const defaultTemplates: WhatsAppTemplate[] = [
-  {
-    id: 'confirmacao',
-    name: 'Confirmação 24h',
-    content: 'Olá {nome}! Confirmando seu bronzeamento amanhã às {hora}. Responda SIM para confirmar! 🌞',
-    includePixKey: false,
-  },
-  {
-    id: 'sinal',
-    name: 'Aguardando Sinal',
-    content: 'Olá {nome}! Para confirmar seu horário, envie o sinal de R$ {valor}.\n\n💰 Chave PIX: {pix}',
-    includePixKey: true,
-  },
-  {
-    id: 'lembrete',
-    name: 'Lembrete',
-    content: 'Olá {nome}! Lembrete do seu bronze hoje às {hora}. Te esperamos! ✨',
-    includePixKey: false,
-  },
-];
 ```
 
-### Arquivos a Criar
-- `src/components/config/MessagesSection.tsx` - Edição de templates
-- `src/utils/whatsapp.ts` - Funções de formatação
+No componente, tornar o nome clicável:
+```tsx
+<button 
+  onClick={() => onClientClick?.(appointment.clientName, appointment.phone)}
+  className="font-black text-gray-900 text-sm hover:underline cursor-pointer"
+>
+  {appointment.clientName}
+</button>
+```
+
+### AgendaView.tsx
+- Receber lista de `clients` como prop
+- Buscar cliente pelo nome/telefone
+- Abrir `ClientHistoryModal` com os dados completos
+
+### Index.tsx
+- Passar `clients` para AgendaView
+- Criar estado para controlar modal de histórico do cliente
+- Adicionar `ClientHistoryModal` na renderização
+
+### ClientHistoryModal.tsx
+Já existe e mostra:
+- Dados cadastrais (nome, telefone, email, endereço, CPF, aniversário)
+- Ficha de anamnese completa
+- Tags do cliente
+- Histórico de sessões e compras com datas e valores
+- Observações
 
 ---
 
-## 7. Arquivos a Criar
+## Arquivos a Criar
 
 | Arquivo | Descrição |
 |---------|-----------|
-| `src/components/config/ConfigView.tsx` | Reescrever completo |
-| `src/components/config/AdminSection.tsx` | Gestão de admins |
-| `src/components/config/TagsSection.tsx` | Gestão de tags |
-| `src/components/config/MessagesSection.tsx` | Templates WhatsApp |
-| `src/components/config/BackupSection.tsx` | Exportar JSON |
-| `src/components/finance/ReportModal.tsx` | Geração de relatório |
-| `src/components/finance/FinanceSummaryCards.tsx` | Cards de resumo |
-| `src/components/clients/ClientHistoryModal.tsx` | Histórico do cliente |
-| `src/components/clients/AnamnesisForm.tsx` | Ficha de anamnese |
-| `src/utils/whatsapp.ts` | Utilitários WhatsApp |
-| `src/utils/pdf.ts` | Geração de PDF |
+| `src/components/agenda/AgendaWeekView.tsx` | Visualização semanal com grid de 7 dias |
+| `src/components/agenda/AgendaMonthView.tsx` | Visualização mensal com calendário |
 
 ---
 
-## 8. Arquivos a Modificar
+## Arquivos a Modificar
 
 | Arquivo | Alterações |
 |---------|------------|
-| `src/pages/Index.tsx` | Remover RoleSwitcher, adicionar lógica de permissões dinâmicas |
-| `src/types/index.ts` | Expandir todos os tipos conforme documentado |
-| `src/data/mockData.ts` | Atualizar dados mock com novos campos |
-| `src/components/layout/Sidebar.tsx` | Ocultar tabs baseado em permissões dinâmicas |
-| `src/components/finance/FinanceView.tsx` | Adicionar cards e modal de relatório |
-| `src/components/clients/ClientModal.tsx` | Adicionar campos CPF, endereço, anamnese |
-| `src/components/clients/ClientsView.tsx` | Adicionar clique para histórico |
-| `src/components/agenda/TimeSlot.tsx` | Melhorar classificação por cor |
+| `src/types/index.ts` | Adicionar `endDate` e tipo `dateRange` ao Block |
+| `src/components/agenda/AgendaView.tsx` | Renderização condicional por viewMode, receber clients, callback para cliente |
+| `src/components/agenda/AgendaHeader.tsx` | Ajustar navegação por semana/mês |
+| `src/components/agenda/TimeSlot.tsx` | Tornar nome do cliente clicável |
+| `src/components/modals/BlockModal.tsx` | Adicionar opção de período (dateRange) |
+| `src/pages/Index.tsx` | Passar clients para AgendaView, gerenciar modal de histórico |
 
 ---
 
-## Ordem de Implementação
+## Detalhes Técnicos
 
-1. **Remover RoleSwitcher** (1 arquivo)
-2. **Atualizar Types** (base para tudo)
-3. **Configurações Completas** (5 componentes)
-4. **Financeiro** (3 componentes)
-5. **Clientes** (3 componentes)
-6. **Ajustes na Agenda** (2 componentes)
-7. **Testes e Verificação**
+### Cálculo de Semana
+```typescript
+const getWeekDays = (date: Date) => {
+  const start = new Date(date);
+  start.setDate(start.getDate() - start.getDay()); // Início da semana (Domingo)
+  
+  return Array.from({ length: 7 }, (_, i) => {
+    const day = new Date(start);
+    day.setDate(start.getDate() + i);
+    return day;
+  });
+};
+```
+
+### Verificação de Bloqueio com Intervalo
+```typescript
+const isBlocked = (date: string, blocks: Block[]) => {
+  return blocks.some(block => {
+    if (block.type === 'dateRange' && block.endDate) {
+      const checkDate = new Date(date.split('/').reverse().join('-'));
+      const start = new Date(block.date.split('/').reverse().join('-'));
+      const end = new Date(block.endDate.split('/').reverse().join('-'));
+      return checkDate >= start && checkDate <= end;
+    }
+    return block.date === date;
+  });
+};
+```
+
+### Busca de Cliente pelo Agendamento
+```typescript
+const findClientByAppointment = (appointment: Appointment, clients: Client[]) => {
+  // Buscar por telefone (mais preciso)
+  return clients.find(c => c.phone === appointment.phone) 
+    // Fallback por nome
+    || clients.find(c => c.name.toLowerCase() === appointment.clientName.toLowerCase());
+};
+```
 
 ---
 
-## Observações Técnicas
+## Fluxo de Implementação
 
-- **PDF:** Usaremos a Web API de impressão (`window.print()`) com CSS específico para gerar PDF, ou podemos integrar uma biblioteca como `jspdf` futuramente
-- **Upload de Logo:** Por enquanto será armazenado como Base64 no estado local
-- **Backup JSON:** Exportará todos os dados do estado para download
-- **Permissões:** Serão verificadas no Sidebar e ao acessar cada view
-
+1. Atualizar tipos (Block com dateRange)
+2. Modificar BlockModal para suportar intervalo de datas
+3. Criar AgendaWeekView
+4. Criar AgendaMonthView
+5. Atualizar AgendaView com renderização condicional
+6. Atualizar AgendaHeader com navegação correta
+7. Tornar nome do cliente clicável no TimeSlot
+8. Conectar tudo no Index.tsx
