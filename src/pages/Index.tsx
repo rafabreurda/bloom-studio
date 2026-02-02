@@ -17,6 +17,7 @@ import { AddAppointmentModal } from '@/components/modals/AddAppointmentModal';
 import { BlockModal } from '@/components/modals/BlockModal';
 import { WaitlistModal } from '@/components/modals/WaitlistModal';
 import { RestrictedModal } from '@/components/modals/RestrictedModal';
+import { ClientHistoryModal } from '@/components/clients/ClientHistoryModal';
 import { 
   TabId, 
   UserRole, 
@@ -70,6 +71,7 @@ const Index = () => {
   const [showSupplierModal, setShowSupplierModal] = useState(false);
   const [showPartnershipModal, setShowPartnershipModal] = useState(false);
   const [newAppoTime, setNewAppoTime] = useState('');
+  const [historyClient, setHistoryClient] = useState<Client | null>(null);
   
   // Editing state
   const [editingStock, setEditingStock] = useState<StockItem | null>(null);
@@ -137,6 +139,17 @@ const Index = () => {
   const handleAddClick = (time: string) => {
     setNewAppoTime(time);
     setShowAddModal(true);
+  };
+
+  // Handle client click from agenda
+  const handleClientClickFromAgenda = (clientName: string, phone: string) => {
+    // Find client by phone or name
+    const client = clients.find(c => c.phone === phone) 
+      || clients.find(c => c.name.toLowerCase() === clientName.toLowerCase());
+    
+    if (client) {
+      setHistoryClient(client);
+    }
   };
 
   // Client handlers
@@ -321,10 +334,12 @@ const Index = () => {
               appointments={appointments}
               blocks={blocks}
               stock={stock}
+              clients={clients}
               onNavigate={handleTabChange}
               onAddClick={handleAddClick}
               onBlockClick={() => setShowBlockModal(true)}
               onDeleteBlock={handleDeleteBlock}
+              onClientClick={handleClientClickFromAgenda}
               pixKey={systemConfig.pixKey}
             />
           )}
@@ -475,6 +490,17 @@ const Index = () => {
               setEditingPartnership(null);
             }}
             onSave={handleAddPartnership}
+          />
+        </div>
+      )}
+
+      {/* Client History Modal from Agenda */}
+      {historyClient && (
+        <div className="fixed inset-0 bg-background/90 z-[150] flex items-end md:items-center justify-center p-0 md:p-4 backdrop-blur-md">
+          <ClientHistoryModal
+            client={historyClient}
+            tags={systemConfig.clientTags}
+            onClose={() => setHistoryClient(null)}
           />
         </div>
       )}
