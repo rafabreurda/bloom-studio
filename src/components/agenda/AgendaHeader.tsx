@@ -19,20 +19,46 @@ export function AgendaHeader({
   onBlockClick,
   onAddClick,
 }: AgendaHeaderProps) {
-  const goToPrevDay = () => {
+  const goToPrev = () => {
     const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() - 1);
+    if (viewMode === 'day') {
+      newDate.setDate(newDate.getDate() - 1);
+    } else if (viewMode === 'week') {
+      newDate.setDate(newDate.getDate() - 7);
+    } else {
+      newDate.setMonth(newDate.getMonth() - 1);
+    }
     onDateChange(newDate);
   };
 
-  const goToNextDay = () => {
+  const goToNext = () => {
     const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() + 1);
+    if (viewMode === 'day') {
+      newDate.setDate(newDate.getDate() + 1);
+    } else if (viewMode === 'week') {
+      newDate.setDate(newDate.getDate() + 7);
+    } else {
+      newDate.setMonth(newDate.getMonth() + 1);
+    }
     onDateChange(newDate);
   };
 
   const goToToday = () => {
     onDateChange(new Date());
+  };
+
+  const getHeaderLabel = () => {
+    if (viewMode === 'day') {
+      return selectedDate.toLocaleDateString('pt-BR', { weekday: 'long' });
+    } else if (viewMode === 'week') {
+      const start = new Date(selectedDate);
+      start.setDate(start.getDate() - start.getDay());
+      const end = new Date(start);
+      end.setDate(end.getDate() + 6);
+      return `${start.getDate()} - ${end.getDate()} ${end.toLocaleDateString('pt-BR', { month: 'short' })}`;
+    } else {
+      return selectedDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    }
   };
 
   return (
@@ -49,11 +75,11 @@ export function AgendaHeader({
         </div>
         <div className="flex-1">
           <h2 className="text-lg font-black text-foreground capitalize leading-tight">
-            {selectedDate.toLocaleDateString('pt-BR', { weekday: 'long' })}
+            {getHeaderLabel()}
           </h2>
           <div className="flex items-center gap-4 mt-1">
             <button 
-              onClick={goToPrevDay}
+              onClick={goToPrev}
               className="p-2 bg-secondary rounded-lg text-foreground"
             >
               <ChevronLeft size={20} />
@@ -65,7 +91,7 @@ export function AgendaHeader({
               Hoje
             </button>
             <button 
-              onClick={goToNextDay}
+              onClick={goToNext}
               className="p-2 bg-secondary rounded-lg text-foreground"
             >
               <ChevronRight size={20} />

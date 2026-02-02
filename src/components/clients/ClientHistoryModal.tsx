@@ -4,11 +4,11 @@ import { Client, ClientTag } from '@/types';
 
 interface ClientHistoryModalProps {
   client: Client;
-  tags: ClientTag[];
+  tags?: ClientTag[];
   onClose: () => void;
 }
 
-export function ClientHistoryModal({ client, tags, onClose }: ClientHistoryModalProps) {
+export function ClientHistoryModal({ client, tags = [], onClose }: ClientHistoryModalProps) {
   const getTagById = (tagId: string) => tags.find(t => t.id === tagId);
 
   const totalSpent = client.history?.reduce((sum, h) => sum + h.value, 0) || 0;

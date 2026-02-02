@@ -57,8 +57,9 @@ export interface ClientHistoryItem {
 export interface Block {
   id: string;
   date: string;
+  endDate?: string;
   time: string | null;
-  type: 'allDay' | 'timeRange';
+  type: 'allDay' | 'timeRange' | 'dateRange';
   reason: string;
   createdAt: Date;
 }
