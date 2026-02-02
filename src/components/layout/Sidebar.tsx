@@ -1,15 +1,18 @@
+import { useState } from 'react';
 import { 
   Calendar, Users, DollarSign, ShoppingBag, Truck, Handshake, 
   ClipboardList, Settings, Lock, UserCheck, X 
 } from 'lucide-react';
 import { TabId, UserRole } from '@/types';
+import { AdminSwitchModal } from './AdminSwitchModal';
+import { useAuth } from '@/contexts/AuthContext';
+import { getDisplayRole } from '@/types/admin';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
-  currentRole: UserRole;
   systemName: string;
 }
 
@@ -26,9 +29,20 @@ const menuItems = [
 
 const juniorPermissions: TabId[] = ['agenda', 'clientes', 'estoque', 'lista-espera'];
 
-export function Sidebar({ isOpen, onClose, activeTab, onTabChange, currentRole, systemName }: SidebarProps) {
-  const isRestricted = (tabId: TabId) => 
-    currentRole === 'Admin Junior' && !juniorPermissions.includes(tabId);
+export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName }: SidebarProps) {
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const { currentAdmin, hasPermission } = useAuth();
+  
+  const currentRole = currentAdmin 
+    ? (currentAdmin.role === 'admin_chefe' ? 'Admin Chefe' 
+       : currentAdmin.role === 'admin_pleno' ? 'Admin Pleno' 
+       : 'Admin Junior') as UserRole
+    : 'Admin Chefe' as UserRole;
+
+  const isRestricted = (tabId: TabId) => {
+    if (!currentAdmin) return false;
+    return !hasPermission(tabId);
+  };
 
   return (
     <>
@@ -90,22 +104,31 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, currentRole, 
           ))}
         </nav>
 
-        {/* Footer */}
-        <div className="mt-auto p-4 bg-secondary border border-border rounded-3xl shrink-0">
+        {/* Footer - Clickable Admin Switcher */}
+        <button 
+          onClick={() => setShowAdminModal(true)}
+          className="mt-auto p-4 bg-secondary border border-border rounded-3xl shrink-0 w-full text-left hover:border-primary/50 hover:bg-secondary/80 transition-all group"
+        >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-muted text-foreground rounded-full flex items-center justify-center font-black text-xs border border-border">
+            <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-black text-xs border border-border group-hover:scale-110 transition-transform">
               <UserCheck size={14} />
             </div>
-            <div className="overflow-hidden">
+            <div className="overflow-hidden flex-1">
               <p className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter">
                 Período Ativo
               </p>
               <p className="text-xs font-bold truncate text-foreground">
-                {currentRole}
+                {currentAdmin ? currentAdmin.name : currentRole}
               </p>
             </div>
           </div>
-        </div>
+        </button>
+
+        {/* Admin Switch Modal */}
+        <AdminSwitchModal 
+          isOpen={showAdminModal} 
+          onClose={() => setShowAdminModal(false)} 
+        />
       </div>
     </>
   );
