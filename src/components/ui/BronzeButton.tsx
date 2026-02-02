@@ -29,7 +29,7 @@ export function BronzeButton({
     danger: 'bg-destructive/20 text-destructive hover:bg-destructive/40 border border-destructive/30',
     success: 'bg-success text-success-foreground hover:brightness-110',
     gold: 'btn-gold',
-    warning: 'bg-amber-700/30 text-amber-400 hover:bg-amber-700/50 border border-amber-700/50',
+    warning: 'bg-red-100 text-red-600 hover:bg-red-200 border border-red-200',
   };
 
   const sizes = {
