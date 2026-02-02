@@ -14,16 +14,139 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      admin_permissions: {
+        Row: {
+          agenda: boolean
+          clientes: boolean
+          config: boolean
+          created_at: string
+          estoque: boolean
+          financeiro: boolean
+          fornecedores: boolean
+          id: string
+          lista_espera: boolean
+          parcerias: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agenda?: boolean
+          clientes?: boolean
+          config?: boolean
+          created_at?: string
+          estoque?: boolean
+          financeiro?: boolean
+          fornecedores?: boolean
+          id?: string
+          lista_espera?: boolean
+          parcerias?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agenda?: boolean
+          clientes?: boolean
+          config?: boolean
+          created_at?: string
+          estoque?: boolean
+          financeiro?: boolean
+          fornecedores?: boolean
+          id?: string
+          lista_espera?: boolean
+          parcerias?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          password_hash: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          password_hash?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          password_hash?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["admin_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["admin_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["admin_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_admin_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["admin_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin_chefe: { Args: { _user_id: string }; Returns: boolean }
+      set_admin_password: {
+        Args: { _password: string; _user_id: string }
+        Returns: undefined
+      }
+      verify_admin_password: {
+        Args: { _password: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      admin_role: "admin_chefe" | "admin_pleno" | "admin_junior"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +273,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      admin_role: ["admin_chefe", "admin_pleno", "admin_junior"],
+    },
   },
 } as const

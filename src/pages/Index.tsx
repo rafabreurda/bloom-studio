@@ -318,7 +318,6 @@ const Index = () => {
         onClose={() => setIsSidebarOpen(false)}
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        currentRole={currentRole}
         systemName={systemConfig.name}
       />
 
