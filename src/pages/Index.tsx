@@ -431,6 +431,8 @@ const Index = () => {
             onClose={() => setShowAddModal(false)}
             onAdd={handleAddAppointment}
             stock={stock}
+            clients={clients}
+            partnerships={partnerships}
           />
         </div>
       )}

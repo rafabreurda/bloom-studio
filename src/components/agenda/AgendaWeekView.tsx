@@ -59,9 +59,22 @@ export function AgendaWeekView({
   const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
   return (
-    <div className="flex-1 bg-white rounded-2xl md:rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col">
+    <div 
+      className="flex-1 rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col agenda-card"
+      style={{ 
+        backgroundColor: 'hsl(var(--agenda-background))', 
+        borderWidth: '1px', 
+        borderColor: 'hsl(var(--agenda-border))' 
+      }}
+    >
       {/* Week Header */}
-      <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
+      <div 
+        className="grid grid-cols-7" 
+        style={{ 
+          borderBottom: '1px solid hsl(var(--agenda-border))', 
+          backgroundColor: 'hsl(var(--agenda-muted))' 
+        }}
+      >
         {weekDays.map((day, idx) => {
           const isToday = day.toDateString() === today.toDateString();
           const isSelected = day.toDateString() === selectedDate.toDateString();
@@ -70,11 +83,17 @@ export function AgendaWeekView({
             <button
               key={idx}
               onClick={() => onDayClick(day)}
-              className={`p-3 text-center transition-all hover:bg-gray-100 ${
+              className={`p-3 text-center transition-all ${
                 isSelected ? 'bg-amber-50' : ''
               }`}
+              style={!isSelected ? { backgroundColor: 'transparent' } : undefined}
+              onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = 'hsl(var(--agenda-muted))'; }}
+              onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'; }}
             >
-              <p className="text-[10px] font-bold text-gray-500 uppercase">
+              <p 
+                className="text-[10px] font-bold uppercase"
+                style={{ color: 'hsl(var(--agenda-muted-foreground))' }}
+              >
                 {dayNames[idx]}
               </p>
               <p className={`text-lg font-black mt-1 ${
@@ -82,8 +101,10 @@ export function AgendaWeekView({
                   ? 'bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center mx-auto' 
                   : isSelected 
                     ? 'text-primary' 
-                    : 'text-gray-900'
-              }`}>
+                    : ''
+              }`}
+                style={!isToday && !isSelected ? { color: 'hsl(var(--agenda-foreground))' } : undefined}
+              >
                 {day.getDate()}
               </p>
             </button>
@@ -92,7 +113,10 @@ export function AgendaWeekView({
       </div>
 
       {/* Week Grid */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
+      <div 
+        className="flex-1 overflow-y-auto custom-scrollbar"
+        style={{ backgroundColor: 'hsl(var(--agenda-background))' }}
+      >
         <div className="grid grid-cols-7 min-h-[400px]">
           {weekDays.map((day, idx) => {
             const dayAppointments = getAppointmentsForDay(day);
@@ -102,13 +126,19 @@ export function AgendaWeekView({
             return (
               <div 
                 key={idx}
-                className={`border-r border-gray-200 last:border-r-0 p-2 min-h-[300px] ${
-                  isBlocked ? 'bg-gray-100' : isToday ? 'bg-amber-50/30' : 'bg-white'
-                }`}
+                className="p-2 min-h-[300px]"
+                style={{ 
+                  borderRight: idx < 6 ? '1px solid hsl(var(--agenda-border))' : 'none',
+                  backgroundColor: isBlocked 
+                    ? 'hsl(var(--agenda-muted))' 
+                    : isToday 
+                      ? 'hsl(48 100% 96% / 0.3)' 
+                      : 'hsl(var(--agenda-background))'
+                }}
               >
                 {isBlocked ? (
                   <div className="flex items-center justify-center h-full">
-                    <div className="text-center text-gray-400">
+                    <div className="text-center" style={{ color: 'hsl(var(--agenda-muted-foreground))' }}>
                       <Lock size={24} className="mx-auto mb-2" />
                       <p className="text-[10px] font-bold uppercase">Bloqueado</p>
                     </div>
@@ -121,7 +151,11 @@ export function AgendaWeekView({
                           onDayClick(day);
                           onAddClick('09:00');
                         }}
-                        className="w-full h-16 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-gray-400 hover:border-primary hover:text-primary transition-colors"
+                        className="w-full h-16 border-2 border-dashed rounded-lg flex items-center justify-center transition-colors hover:border-primary hover:text-primary"
+                        style={{ 
+                          borderColor: 'hsl(var(--agenda-border))', 
+                          color: 'hsl(var(--agenda-muted-foreground))' 
+                        }}
                       >
                         <Plus size={20} />
                       </button>
@@ -141,13 +175,19 @@ export function AgendaWeekView({
                             }`}
                           >
                             <div className="flex items-center gap-1">
-                              <span className="text-[10px] font-bold text-gray-500">
+                              <span 
+                                className="text-[10px] font-bold"
+                                style={{ color: 'hsl(var(--agenda-muted-foreground))' }}
+                              >
                                 {appo.time}
                               </span>
                               {isVIP && <Star size={10} className="text-amber-500" fill="#f59e0b" />}
                               {appo.isConfirmed && <CheckCircle2 size={10} className="text-emerald-500" />}
                             </div>
-                            <p className="text-xs font-bold text-gray-900 truncate mt-0.5">
+                            <p 
+                              className="text-xs font-bold truncate mt-0.5"
+                              style={{ color: 'hsl(var(--agenda-foreground))' }}
+                            >
                               {appo.clientName}
                             </p>
                           </button>
@@ -155,7 +195,10 @@ export function AgendaWeekView({
                       })
                     )}
                     {dayAppointments.length > 5 && (
-                      <p className="text-[10px] font-bold text-gray-500 text-center">
+                      <p 
+                        className="text-[10px] font-bold text-center"
+                        style={{ color: 'hsl(var(--agenda-muted-foreground))' }}
+                      >
                         +{dayAppointments.length - 5} mais
                       </p>
                     )}

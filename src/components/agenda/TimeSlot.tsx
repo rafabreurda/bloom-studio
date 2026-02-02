@@ -25,7 +25,10 @@ export function TimeSlot({
   const isVIP = appointment?.tags?.includes('VIP');
 
   return (
-    <div className={`flex min-h-[85px] transition-colors agenda-slot ${block ? 'bg-gray-100' : ''}`}>
+    <div 
+      className={`flex min-h-[85px] transition-colors agenda-slot`}
+      style={block ? { backgroundColor: 'hsl(var(--agenda-muted))' } : undefined}
+    >
       {/* Time Column */}
       <div className="w-16 md:w-20 shrink-0 border-r agenda-border flex flex-col items-center pt-4 md:pt-5">
         <span className="text-[10px] md:text-xs font-black agenda-text-muted">{time}</span>
@@ -35,24 +38,41 @@ export function TimeSlot({
       <div className="flex-1 p-2 relative">
         {block ? (
           // Blocked Slot
-          <div className="h-full w-full rounded-xl border-2 border-dashed border-gray-300 bg-gray-100 flex items-center justify-between px-4 opacity-60">
-            <span className="text-[9px] font-black uppercase text-gray-500 truncate">
+          <div 
+            className="h-full w-full rounded-xl border-2 border-dashed flex items-center justify-between px-4 opacity-60"
+            style={{ 
+              borderColor: 'hsl(var(--agenda-border))', 
+              backgroundColor: 'hsl(var(--agenda-muted))' 
+            }}
+          >
+            <span 
+              className="text-[9px] font-black uppercase truncate"
+              style={{ color: 'hsl(var(--agenda-muted-foreground))' }}
+            >
               {block.reason}
             </span>
             <button 
               onClick={() => onDeleteBlock(block.id)} 
-              className="text-red-400 p-2 hover:text-red-600"
+              className="text-destructive p-2 hover:opacity-80"
             >
               <X size={18} />
             </button>
           </div>
         ) : appointment ? (
           // Appointment Slot
-          <div className={`h-full w-full rounded-xl p-3 md:p-4 flex justify-between items-center bg-white border border-gray-200 relative shadow-sm ${
-            isVIP 
-              ? 'vip-border vip-glow' 
-              : `border-l-4 ${appointment.status === 'Agendado' ? 'border-l-emerald-500' : 'border-l-amber-400'}`
-          }`}>
+          <div 
+            className={`h-full w-full rounded-xl p-3 md:p-4 flex justify-between items-center shadow-sm ${
+              isVIP 
+                ? 'vip-border vip-glow' 
+                : `border-l-4 ${appointment.status === 'Agendado' ? 'border-l-emerald-500' : 'border-l-amber-400'}`
+            }`}
+            style={{ 
+              backgroundColor: 'hsl(var(--agenda-background))', 
+              borderColor: 'hsl(var(--agenda-border))',
+              borderWidth: '1px',
+              borderStyle: 'solid'
+            }}
+          >
             {/* VIP Badge */}
             {isVIP && (
               <div className="absolute -top-3 -right-2 bg-amber-500 text-black px-2 py-0.5 rounded-full text-[9px] font-black flex items-center gap-1 shadow-lg border border-white">
@@ -67,12 +87,18 @@ export function TimeSlot({
             >
               <div className="flex items-center gap-1">
                 {isVIP && <Star size={12} className="text-amber-500" fill="#f59e0b" />}
-                <span className={`font-black text-gray-900 text-sm md:text-base truncate hover:underline ${isVIP ? 'text-amber-600' : ''}`}>
+                <span 
+                  className={`font-black text-sm md:text-base truncate hover:underline ${isVIP ? 'text-amber-600' : ''}`}
+                  style={!isVIP ? { color: 'hsl(var(--agenda-foreground))' } : undefined}
+                >
                   {appointment.clientName}
                 </span>
                 {appointment.isConfirmed && <CheckCircle2 size={14} className="text-emerald-500" />}
               </div>
-              <p className="text-[10px] md:text-xs text-gray-500 font-bold truncate">
+              <p 
+                className="text-[10px] md:text-xs font-bold truncate"
+                style={{ color: 'hsl(var(--agenda-muted-foreground))' }}
+              >
                 Total R$ {appointment.totalValue || appointment.value} • {appointment.paymentMethod || '—'}
               </p>
             </button>
@@ -82,7 +108,8 @@ export function TimeSlot({
               {appointment.status === 'Aguardando Sinal' && (
                 <button 
                   onClick={onCopyPix}
-                  className="w-10 h-10 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200 transition-all"
+                  className="w-10 h-10 rounded-lg flex items-center justify-center hover:opacity-80 transition-all"
+                  style={{ backgroundColor: 'hsl(var(--agenda-muted))', color: 'hsl(var(--agenda-muted-foreground))' }}
                 >
                   <Copy size={18} />
                 </button>
@@ -99,9 +126,12 @@ export function TimeSlot({
           // Empty Slot
           <button 
             onClick={() => onAddClick(time)} 
-            className="w-full h-full rounded-xl border-2 border-transparent hover:border-gray-200 flex items-center justify-center group"
+            className="w-full h-full rounded-xl border-2 border-transparent flex items-center justify-center group"
+            style={{ borderColor: 'transparent' }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'hsl(var(--agenda-border))')}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'transparent')}
           >
-            <Plus size={24} className="text-gray-300 group-hover:text-gray-400" />
+            <Plus size={24} style={{ color: 'hsl(var(--agenda-border))' }} className="group-hover:opacity-80" />
           </button>
         )}
       </div>

@@ -70,12 +70,28 @@ export function AgendaMonthView({
   const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
   return (
-    <div className="flex-1 bg-white rounded-2xl md:rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col">
+    <div 
+      className="flex-1 rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col agenda-card"
+      style={{ 
+        backgroundColor: 'hsl(var(--agenda-background))', 
+        borderWidth: '1px', 
+        borderColor: 'hsl(var(--agenda-border))' 
+      }}
+    >
       {/* Month Header */}
-      <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
+      <div 
+        className="grid grid-cols-7"
+        style={{ 
+          borderBottom: '1px solid hsl(var(--agenda-border))', 
+          backgroundColor: 'hsl(var(--agenda-muted))' 
+        }}
+      >
         {dayNames.map((name, idx) => (
           <div key={idx} className="p-3 text-center">
-            <p className="text-[10px] font-bold text-gray-500 uppercase">
+            <p 
+              className="text-[10px] font-bold uppercase"
+              style={{ color: 'hsl(var(--agenda-muted-foreground))' }}
+            >
               {name}
             </p>
           </div>
@@ -83,7 +99,10 @@ export function AgendaMonthView({
       </div>
 
       {/* Month Grid */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
+      <div 
+        className="flex-1 overflow-y-auto custom-scrollbar"
+        style={{ backgroundColor: 'hsl(var(--agenda-background))' }}
+      >
         <div className="grid grid-cols-7 h-full">
           {monthDays.map((day, idx) => {
             const isCurrentMonth = day.getMonth() === currentMonth;
@@ -97,9 +116,20 @@ export function AgendaMonthView({
               <button
                 key={idx}
                 onClick={() => onDayClick(day)}
-                className={`min-h-[80px] md:min-h-[100px] p-1 md:p-2 border-b border-r border-gray-200 text-left transition-all hover:bg-gray-50 ${
+                className={`min-h-[80px] md:min-h-[100px] p-1 md:p-2 text-left transition-all relative ${
                   !isCurrentMonth ? 'opacity-40' : ''
-                } ${isBlocked ? 'bg-gray-100' : ''} ${isToday ? 'bg-amber-50/30' : 'bg-white'}`}
+                }`}
+                style={{ 
+                  borderBottom: '1px solid hsl(var(--agenda-border))',
+                  borderRight: '1px solid hsl(var(--agenda-border))',
+                  backgroundColor: isBlocked 
+                    ? 'hsl(var(--agenda-muted))' 
+                    : isToday 
+                      ? 'hsl(48 100% 96% / 0.3)' 
+                      : 'hsl(var(--agenda-background))'
+                }}
+                onMouseEnter={(e) => { if (!isBlocked && !isToday) e.currentTarget.style.backgroundColor = 'hsl(var(--agenda-muted))'; }}
+                onMouseLeave={(e) => { if (!isBlocked && !isToday) e.currentTarget.style.backgroundColor = 'hsl(var(--agenda-background))'; }}
               >
                 {/* Day Number */}
                 <div className="flex items-center justify-between mb-1">
@@ -108,11 +138,13 @@ export function AgendaMonthView({
                       ? 'bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center' 
                       : isSelected 
                         ? 'text-primary' 
-                        : 'text-gray-900'
-                  }`}>
+                        : ''
+                  }`}
+                    style={!isToday && !isSelected ? { color: 'hsl(var(--agenda-foreground))' } : undefined}
+                  >
                     {day.getDate()}
                   </span>
-                  {isBlocked && <Lock size={12} className="text-gray-400" />}
+                  {isBlocked && <Lock size={12} style={{ color: 'hsl(var(--agenda-muted-foreground))' }} />}
                   {hasVIP && !isBlocked && <Star size={12} className="text-amber-500" fill="#f59e0b" />}
                 </div>
 
@@ -138,7 +170,10 @@ export function AgendaMonthView({
                       </div>
                     ))}
                     {dayAppointments.length > 2 && (
-                      <p className="text-[8px] font-bold text-gray-500 px-1">
+                      <p 
+                        className="text-[8px] font-bold px-1"
+                        style={{ color: 'hsl(var(--agenda-muted-foreground))' }}
+                      >
                         +{dayAppointments.length - 2}
                       </p>
                     )}
@@ -148,7 +183,10 @@ export function AgendaMonthView({
                 {/* Appointments Count Badge */}
                 {!isBlocked && dayAppointments.length > 0 && (
                   <div className="hidden md:block absolute bottom-1 right-1">
-                    <span className="text-[9px] font-bold text-gray-500">
+                    <span 
+                      className="text-[9px] font-bold"
+                      style={{ color: 'hsl(var(--agenda-muted-foreground))' }}
+                    >
                       {dayAppointments.length} agend.
                     </span>
                   </div>

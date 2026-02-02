@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { X, Star, CheckCircle2, ShoppingCart } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
-import { StockItem, Appointment } from '@/types';
+import { ClientSearchCombobox } from './ClientSearchCombobox';
+import { StockItem, Appointment, Client, Partnership } from '@/types';
 
 interface AddAppointmentModalProps {
   selectedDate: Date;
@@ -10,6 +11,8 @@ interface AddAppointmentModalProps {
   onClose: () => void;
   onAdd: (appointment: Omit<Appointment, 'id' | 'createdAt'>) => void;
   stock: StockItem[];
+  clients: Client[];
+  partnerships: Partnership[];
 }
 
 export function AddAppointmentModal({ 
@@ -17,14 +20,30 @@ export function AddAppointmentModal({
   defaultTime, 
   onClose, 
   onAdd,
-  stock 
+  stock,
+  clients,
+  partnerships,
 }: AddAppointmentModalProps) {
+  const [clientName, setClientName] = useState('');
+  const [clientPhone, setClientPhone] = useState('');
   const [sessionValue, setSessionValue] = useState(150);
   const [isVIP, setIsVIP] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<StockItem[]>([]);
-  
+  const [isManualPhone, setIsManualPhone] = useState(true);
   const finalTotal = Number(sessionValue) + selectedProducts.reduce((acc, curr) => acc + Number(curr.price), 0);
+
+  const handleClientSelect = (data: {
+    name: string;
+    phone: string;
+    isVIP: boolean;
+    source: 'client' | 'partnership' | 'manual';
+  }) => {
+    setClientName(data.name);
+    setClientPhone(data.phone);
+    setIsVIP(data.isVIP);
+    setIsManualPhone(data.source === 'manual');
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,8 +51,8 @@ export function AddAppointmentModal({
     const dateStr = new Date(formData.get('date') as string).toLocaleDateString('pt-BR');
     
     onAdd({
-      clientName: formData.get('name') as string,
-      phone: formData.get('phone') as string,
+      clientName: clientName,
+      phone: clientPhone,
       date: dateStr,
       time: formData.get('time') as string,
       status: formData.get('status') as 'Aguardando Sinal' | 'Agendado',
@@ -71,18 +90,19 @@ export function AddAppointmentModal({
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Client Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input 
-            name="name" 
-            type="text" 
-            placeholder="Nome" 
-            className="input-bronze" 
-            required 
+          <ClientSearchCombobox
+            clients={clients}
+            partnerships={partnerships}
+            value={clientName}
+            onSelect={handleClientSelect}
           />
           <input 
             name="phone" 
             type="text" 
             placeholder="WhatsApp" 
             className="input-bronze" 
+            value={clientPhone}
+            onChange={e => setClientPhone(e.target.value)}
             required 
           />
         </div>
