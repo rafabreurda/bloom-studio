@@ -128,10 +128,10 @@ export function AgendaHeader({
         
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-2">
-          <BronzeButton variant="warning" icon={Lock} size="sm" onClick={onBlockClick}>
+          <BronzeButton variant="danger" icon={Lock} size="sm" onClick={onBlockClick}>
             Bloquear
           </BronzeButton>
-          <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
+          <BronzeButton variant="success" icon={Plus} size="sm" onClick={onAddClick}>
             Novo
           </BronzeButton>
         </div>

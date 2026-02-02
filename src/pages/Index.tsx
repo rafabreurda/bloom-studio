@@ -45,12 +45,26 @@ import {
 
 const juniorPermissions: TabId[] = ['agenda', 'clientes', 'estoque', 'lista-espera'];
 
+const LOCAL_STORAGE_CONFIG_KEY = 'bronze_system_config';
+
+const loadSavedConfig = (): SystemConfig => {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_CONFIG_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error('Error loading saved config:', e);
+  }
+  return defaultConfig;
+};
+
 const Index = () => {
   // State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('agenda');
   const [currentRole, setCurrentRole] = useState<UserRole>('Admin Chefe');
-  const [systemConfig, setSystemConfig] = useState<SystemConfig>(defaultConfig);
+  const [systemConfig, setSystemConfig] = useState<SystemConfig>(loadSavedConfig);
   
   // Data state
   const [appointments, setAppointments] = useState(mockAppointments);
@@ -77,6 +91,16 @@ const Index = () => {
   const [editingStock, setEditingStock] = useState<StockItem | null>(null);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [editingPartnership, setEditingPartnership] = useState<Partnership | null>(null);
+
+  // Handle config change and save to localStorage
+  const handleConfigChange = (newConfig: SystemConfig) => {
+    setSystemConfig(newConfig);
+    try {
+      localStorage.setItem(LOCAL_STORAGE_CONFIG_KEY, JSON.stringify(newConfig));
+    } catch (e) {
+      console.error('Error saving config:', e);
+    }
+  };
 
   // Handlers
   const handleTabChange = (tabId: TabId) => {
@@ -411,7 +435,7 @@ const Index = () => {
           {activeTab === 'config' && (
             <ConfigView
               config={systemConfig}
-              onConfigChange={setSystemConfig}
+              onConfigChange={handleConfigChange}
               onExportBackup={handleExportBackup}
             />
           )}

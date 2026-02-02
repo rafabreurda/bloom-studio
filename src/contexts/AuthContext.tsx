@@ -72,9 +72,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasPermission = (tabId: TabId): boolean => {
     if (!currentAdmin) return false;
 
-    // Admin Chefe and Pleno have full access
-    if (currentAdmin.role === 'admin_chefe' || currentAdmin.role === 'admin_pleno') {
+    // Admin Chefe has full access
+    if (currentAdmin.role === 'admin_chefe') {
       return true;
+    }
+
+    // Admin Pleno has access to everything EXCEPT config
+    if (currentAdmin.role === 'admin_pleno') {
+      return tabId !== 'config';
     }
 
     // Admin Junior - check permissions

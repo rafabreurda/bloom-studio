@@ -54,29 +54,30 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName }:
         />
       )}
       
-      {/* Sidebar */}
+      {/* Sidebar - Dark theme */}
       <div 
-        className={`fixed left-0 top-0 h-screen bg-background text-foreground p-5 flex flex-col gap-2 z-[70] border-r border-border shadow-2xl transition-transform duration-300 w-72 ${
+        className={`fixed left-0 top-0 h-screen text-sidebar-foreground p-5 flex flex-col gap-2 z-[70] border-r border-sidebar-border shadow-2xl transition-transform duration-300 w-72 ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
+        style={{ backgroundColor: 'hsl(var(--sidebar-background))' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-10 px-2 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg">
-              <Calendar className="text-primary-foreground" size={24} />
+            <div className="w-10 h-10 bg-sidebar-primary rounded-xl flex items-center justify-center shadow-lg">
+              <Calendar className="text-sidebar-primary-foreground" size={24} />
             </div>
             <div>
-              <h1 className="font-black text-lg text-primary uppercase truncate max-w-[120px]">
+              <h1 className="font-black text-lg text-sidebar-primary uppercase truncate max-w-[120px]">
                 {systemName}
               </h1>
-              <p className="text-muted-foreground text-[9px] font-bold uppercase tracking-widest">
+              <p className="text-sidebar-accent-foreground/50 text-[9px] font-bold uppercase tracking-widest">
                 Master
               </p>
             </div>
           </div>
           <button 
-            className="md:hidden text-muted-foreground" 
+            className="md:hidden text-sidebar-accent-foreground/50" 
             onClick={onClose}
           >
             <X size={24}/>
@@ -91,14 +92,14 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName }:
               onClick={() => onTabChange(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all duration-300 relative group ${
                 activeTab === item.id 
-                  ? 'bg-primary text-primary-foreground shadow-xl translate-x-1' 
-                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                  ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-xl translate-x-1' 
+                  : 'text-sidebar-accent-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
               }`}
             >
               <item.icon size={22} />
               <span className="font-black text-xs uppercase">{item.label}</span>
               {isRestricted(item.id) && (
-                <Lock size={12} className="absolute right-4 text-muted-foreground" />
+                <Lock size={12} className="absolute right-4 text-sidebar-accent-foreground/40" />
               )}
             </button>
           ))}
@@ -107,17 +108,17 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName }:
         {/* Footer - Clickable Admin Switcher */}
         <button 
           onClick={() => setShowAdminModal(true)}
-          className="mt-auto p-4 bg-secondary border border-border rounded-3xl shrink-0 w-full text-left hover:border-primary/50 hover:bg-secondary/80 transition-all group"
+          className="mt-auto p-4 bg-sidebar-accent border border-sidebar-border rounded-3xl shrink-0 w-full text-left hover:border-sidebar-primary/50 hover:bg-sidebar-accent/80 transition-all group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-black text-xs border border-border group-hover:scale-110 transition-transform">
+            <div className="w-8 h-8 bg-sidebar-primary text-sidebar-primary-foreground rounded-full flex items-center justify-center font-black text-xs border border-sidebar-border group-hover:scale-110 transition-transform">
               <UserCheck size={14} />
             </div>
             <div className="overflow-hidden flex-1">
-              <p className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter">
+              <p className="text-[9px] text-sidebar-accent-foreground/50 font-black uppercase tracking-tighter">
                 Período Ativo
               </p>
-              <p className="text-xs font-bold truncate text-foreground">
+              <p className="text-xs font-bold truncate text-sidebar-foreground">
                 {currentAdmin ? currentAdmin.name : currentRole}
               </p>
             </div>

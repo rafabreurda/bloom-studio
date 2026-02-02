@@ -26,10 +26,10 @@ export function BronzeButton({
     primary: 'bg-primary text-primary-foreground hover:brightness-110 shadow-lg shadow-primary/20',
     secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border',
     outline: 'border border-primary/50 text-primary hover:bg-primary/10',
-    danger: 'bg-destructive/20 text-destructive hover:bg-destructive/40 border border-destructive/30',
+    danger: 'bg-destructive text-destructive-foreground hover:brightness-110',
     success: 'bg-success text-success-foreground hover:brightness-110',
     gold: 'btn-gold',
-    warning: 'bg-red-100 text-red-600 hover:bg-red-200 border border-red-200',
+    warning: 'bg-destructive text-destructive-foreground hover:brightness-110',
   };
 
   const sizes = {
