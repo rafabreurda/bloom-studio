@@ -2,13 +2,11 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
-import { RoleSwitcher } from '@/components/layout/RoleSwitcher';
 import { AgendaView } from '@/components/agenda/AgendaView';
 import { FinanceView } from '@/components/finance/FinanceView';
 import { WaitingListView } from '@/components/waitinglist/WaitingListView';
 import { ConfigView } from '@/components/config/ConfigView';
 import { ClientsView } from '@/components/clients/ClientsView';
-import { ClientModal } from '@/components/clients/ClientModal';
 import { StockView } from '@/components/stock/StockView';
 import { StockModal } from '@/components/stock/StockModal';
 import { SuppliersView } from '@/components/suppliers/SuppliersView';
@@ -30,6 +28,7 @@ import {
   StockItem,
   Supplier,
   Partnership,
+  Finance,
 } from '@/types';
 import {
   mockAppointments,
@@ -41,9 +40,6 @@ import {
   mockSuppliers,
   mockPartnerships,
   defaultConfig,
-  chartEvolutionData,
-  chartDistributionData,
-  chartMixData,
 } from '@/data/mockData';
 
 const juniorPermissions: TabId[] = ['agenda', 'clientes', 'estoque', 'lista-espera'];
@@ -59,6 +55,7 @@ const Index = () => {
   const [appointments, setAppointments] = useState(mockAppointments);
   const [blocks, setBlocks] = useState(mockBlocks);
   const [waitingList, setWaitingList] = useState(mockWaitingList);
+  const [finances, setFinances] = useState(mockFinances);
   const [clients, setClients] = useState(mockClients);
   const [stock, setStock] = useState(mockStock);
   const [suppliers, setSuppliers] = useState(mockSuppliers);
@@ -69,14 +66,12 @@ const Index = () => {
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [showRestrictedModal, setShowRestrictedModal] = useState(false);
-  const [showClientModal, setShowClientModal] = useState(false);
   const [showStockModal, setShowStockModal] = useState(false);
   const [showSupplierModal, setShowSupplierModal] = useState(false);
   const [showPartnershipModal, setShowPartnershipModal] = useState(false);
   const [newAppoTime, setNewAppoTime] = useState('');
   
   // Editing state
-  const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [editingStock, setEditingStock] = useState<StockItem | null>(null);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [editingPartnership, setEditingPartnership] = useState<Partnership | null>(null);
@@ -145,34 +140,37 @@ const Index = () => {
   };
 
   // Client handlers
-  const handleAddClient = (client: Omit<Client, 'id' | 'createdAt'>) => {
-    if (editingClient) {
-      setClients(clients.map(c => 
-        c.id === editingClient.id 
-          ? { ...c, ...client }
-          : c
-      ));
-      toast.success('Cliente atualizado!');
-    } else {
-      const newClient: Client = {
-        ...client,
-        id: Date.now().toString(),
-        createdAt: new Date(),
-      };
-      setClients([...clients, newClient]);
-      toast.success('Cliente cadastrado!');
-    }
-    setEditingClient(null);
+  const handleAddClient = (client: Omit<Client, 'id' | 'createdAt' | 'history'>) => {
+    const newClient: Client = {
+      ...client,
+      id: Date.now().toString(),
+      history: [],
+      createdAt: new Date(),
+    };
+    setClients([...clients, newClient]);
+    toast.success('Cliente cadastrado!');
   };
 
   const handleEditClient = (client: Client) => {
-    setEditingClient(client);
-    setShowClientModal(true);
+    setClients(clients.map(c => 
+      c.id === client.id ? client : c
+    ));
+    toast.success('Cliente atualizado!');
   };
 
   const handleDeleteClient = (id: string) => {
     setClients(clients.filter(c => c.id !== id));
     toast.success('Cliente removido!');
+  };
+
+  // Finance handlers
+  const handleAddFinance = (finance: Omit<Finance, 'id'>) => {
+    const newFinance: Finance = {
+      ...finance,
+      id: Date.now().toString(),
+    };
+    setFinances([newFinance, ...finances]);
+    toast.success('Transação adicionada!');
   };
 
   // Stock handlers
@@ -273,6 +271,33 @@ const Index = () => {
     toast.success('Parceria removida!');
   };
 
+  // Export backup
+  const handleExportBackup = () => {
+    const data = {
+      appointments,
+      clients,
+      finances,
+      stock,
+      suppliers,
+      partnerships,
+      waitingList,
+      config: systemConfig,
+      exportedAt: new Date().toISOString(),
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bronze-pro-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast.success('Backup exportado com sucesso!');
+  };
+
   return (
     <div className="min-h-screen bg-background flex font-sans antialiased text-foreground overflow-hidden">
       <Sidebar
@@ -285,11 +310,6 @@ const Index = () => {
       />
 
       <main className="flex-1 flex flex-col md:ml-72 h-screen overflow-hidden relative">
-        <RoleSwitcher 
-          currentRole={currentRole} 
-          onRoleChange={setCurrentRole} 
-        />
-        
         <TopBar 
           onMenuClick={() => setIsSidebarOpen(true)} 
           activeTab={activeTab} 
@@ -312,22 +332,17 @@ const Index = () => {
           {activeTab === 'clientes' && (
             <ClientsView
               clients={clients}
-              onAddClick={() => {
-                setEditingClient(null);
-                setShowClientModal(true);
-              }}
-              onEditClick={handleEditClient}
-              onDeleteClick={handleDeleteClient}
-              onSendMessage={handleSendWhatsApp}
+              tags={systemConfig.clientTags}
+              onAddClient={handleAddClient}
+              onEditClient={handleEditClient}
+              onDeleteClient={handleDeleteClient}
             />
           )}
 
           {activeTab === 'financeiro' && (
             <FinanceView
-              finances={mockFinances}
-              evolutionData={chartEvolutionData}
-              distributionData={chartDistributionData}
-              mixData={chartMixData}
+              finances={finances}
+              onAddFinance={handleAddFinance}
             />
           )}
 
@@ -383,6 +398,7 @@ const Index = () => {
             <ConfigView
               config={systemConfig}
               onConfigChange={setSystemConfig}
+              onExportBackup={handleExportBackup}
             />
           )}
         </div>
@@ -420,19 +436,6 @@ const Index = () => {
           <WaitlistModal
             onClose={() => setShowWaitlistModal(false)}
             onAdd={handleAddWaiting}
-          />
-        </div>
-      )}
-
-      {showClientModal && (
-        <div className="fixed inset-0 bg-background/90 z-[150] flex items-end md:items-center justify-center p-0 md:p-4 backdrop-blur-md">
-          <ClientModal
-            client={editingClient}
-            onClose={() => {
-              setShowClientModal(false);
-              setEditingClient(null);
-            }}
-            onSave={handleAddClient}
           />
         </div>
       )}

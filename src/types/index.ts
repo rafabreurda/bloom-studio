@@ -11,6 +11,14 @@ export interface Appointment {
   tags: string[];
   isConfirmed: boolean;
   createdAt: Date;
+  products?: AppointmentProduct[];
+}
+
+export interface AppointmentProduct {
+  productId: string;
+  name: string;
+  quantity: number;
+  price: number;
 }
 
 export interface Client {
@@ -18,10 +26,32 @@ export interface Client {
   name: string;
   phone: string;
   email?: string;
+  address?: string;
   birthday?: string;
+  cpf?: string;
+  anamnesis?: AnamnesisForm;
   notes?: string;
+  tags: string[];
   isVIP: boolean;
+  history: ClientHistoryItem[];
   createdAt: Date;
+}
+
+export interface AnamnesisForm {
+  skinType: string;
+  allergies: string;
+  medications: string;
+  healthConditions: string;
+  lastTanning?: string;
+  observations: string;
+}
+
+export interface ClientHistoryItem {
+  id: string;
+  date: string;
+  type: 'session' | 'purchase';
+  description: string;
+  value: number;
 }
 
 export interface Block {
@@ -49,7 +79,8 @@ export interface Finance {
   type: 'in' | 'out';
   value: number;
   paymentMethod: 'Pix' | 'Cartão' | 'Dinheiro';
-  category: string;
+  category: 'session' | 'product' | 'partnership' | 'expense';
+  isPartnership?: boolean;
 }
 
 export interface StockItem {
@@ -74,10 +105,57 @@ export interface Partnership {
   contact: string;
 }
 
+export interface AdminJuniorPermissions {
+  agenda: boolean;
+  clientes: boolean;
+  estoque: boolean;
+  listaEspera: boolean;
+  financeiro: boolean;
+  fornecedores: boolean;
+  parcerias: boolean;
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: 'Admin Pleno' | 'Admin Junior';
+  permissions?: AdminJuniorPermissions;
+}
+
+export interface ClientTag {
+  id: string;
+  name: string;
+  color: string;
+  isActive: boolean;
+}
+
+export interface WhatsAppTemplate {
+  id: string;
+  name: string;
+  content: string;
+  includePixKey: boolean;
+}
+
 export interface SystemConfig {
   name: string;
+  logo?: string;
+  backgroundPhoto?: string;
   pixKey: string;
   payLink: string;
+  lowStockThreshold: number;
+  admins: AdminUser[];
+  clientTags: ClientTag[];
+  whatsappTemplates: WhatsAppTemplate[];
+}
+
+export interface ReportConfig {
+  month: number;
+  year: number;
+  includeSessions: boolean;
+  includeProducts: boolean;
+  includePartnerships: boolean;
+  includeExpenses: boolean;
 }
 
 export type UserRole = 'Admin Chefe' | 'Admin Pleno' | 'Admin Junior';
