@@ -1,4 +1,4 @@
-import { Menu, UserCheck } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { TabId } from '@/types';
 
 interface TopBarProps {
@@ -34,9 +34,7 @@ export function TopBar({ onMenuClick, activeTab }: TopBarProps) {
         {getTabLabel(activeTab)}
       </h2>
       
-      <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
-        <UserCheck size={20} className="text-foreground" />
-      </div>
+      <div className="w-10" />
     </div>
   );
 }
