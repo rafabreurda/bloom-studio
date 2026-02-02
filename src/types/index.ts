@@ -132,7 +132,7 @@ export interface AdminJuniorPermissions {
 export interface AdminUser {
   id: string;
   name: string;
-  email: string;
+  phone: string;
   role: 'Admin Pleno' | 'Admin Junior';
   permissions?: AdminJuniorPermissions;
 }
