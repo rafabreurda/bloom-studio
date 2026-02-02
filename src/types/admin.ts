@@ -6,6 +6,7 @@ export interface AdminProfile {
   id: string;
   name: string;
   email: string | null;
+  phone: string | null;
   password_hash: string | null;
   created_at: string;
   updated_at: string;
