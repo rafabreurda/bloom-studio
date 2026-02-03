@@ -33,9 +33,14 @@ export function AddAppointmentModal({
   const [selectedPartnershipId, setSelectedPartnershipId] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<StockItem[]>([]);
   const [isManualPhone, setIsManualPhone] = useState(true);
-  const finalTotal = Number(sessionValue) + selectedProducts.reduce((acc, curr) => acc + Number(curr.price), 0);
 
   const selectedPartnership = partnerships.find(p => p.id === selectedPartnershipId);
+  const productsTotal = selectedProducts.reduce((acc, curr) => acc + Number(curr.price), 0);
+  
+  // Para parcerias 100%, cobra apenas produtos
+  const isFullPartnership = isPartnership && selectedPartnership?.discount === 100;
+  const chargedValue = isFullPartnership ? productsTotal : Number(sessionValue) + productsTotal;
+  const finalTotal = Number(sessionValue) + productsTotal;
 
   const handleClientSelect = (data: {
     name: string;
@@ -62,12 +67,21 @@ export function AddAppointmentModal({
       status: formData.get('status') as 'Aguardando Sinal' | 'Agendado',
       value: Number(sessionValue),
       totalValue: finalTotal,
+      productsValue: productsTotal,
+      chargedValue: chargedValue,
       tags: isVIP ? ['VIP'] : [],
       paymentMethod: formData.get('paymentMethod') as 'Pix' | 'Cartão' | 'Dinheiro',
       isConfirmed,
       isPartnership,
       partnershipId: isPartnership ? selectedPartnershipId : undefined,
       partnershipName: isPartnership ? selectedPartnership?.name : undefined,
+      partnershipDiscount: isPartnership ? selectedPartnership?.discount : undefined,
+      products: selectedProducts.map(p => ({
+        productId: p.id,
+        name: p.name,
+        quantity: 1,
+        price: p.price,
+      })),
     });
     
     onClose();
@@ -268,18 +282,23 @@ export function AddAppointmentModal({
           </div>
         </div>
 
-        {/* Total */}
-        <div className={`p-6 rounded-[28px] text-primary-foreground flex justify-between items-center shadow-xl transition-all duration-500 ${
-          isVIP ? 'bg-gradient-gold' : isPartnership ? 'bg-violet-500 text-white' : 'bg-gray-100 text-gray-900'
-        }`}>
+        {/* Total - Célula preta com número vermelho */}
+        <div className="p-6 rounded-[28px] bg-black flex justify-between items-center shadow-xl">
           <div>
-            <p className="text-[10px] font-black uppercase opacity-60">Total</p>
-            <p className="text-4xl font-black">R$ {finalTotal.toFixed(2)}</p>
+            <p className="text-[10px] font-black uppercase text-gray-400">
+              {isFullPartnership ? 'Cobrar (apenas produtos)' : 'Total a Cobrar'}
+            </p>
+            <p className="text-4xl font-black text-red-500">R$ {chargedValue.toFixed(2)}</p>
+            {isFullPartnership && (
+              <p className="text-[9px] text-gray-500 mt-1">
+                Sessão R$ {sessionValue} → Parcerias | Produtos R$ {productsTotal} → Receita
+              </p>
+            )}
           </div>
           <div className="text-right">
             <select 
               name="status" 
-              className="bg-background text-foreground font-black uppercase text-[10px] rounded-xl p-3 border-none focus:ring-0"
+              className="bg-gray-800 text-white font-black uppercase text-[10px] rounded-xl p-3 border-none focus:ring-0"
             >
               <option>Aguardando Sinal</option>
               <option>Agendado</option>

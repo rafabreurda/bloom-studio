@@ -7,12 +7,15 @@ export interface Appointment {
   status: 'Aguardando Sinal' | 'Agendado';
   value: number;
   totalValue: number;
+  productsValue: number;
+  chargedValue: number; // Valor efetivamente cobrado do cliente
   paymentMethod: 'Pix' | 'Cartão' | 'Dinheiro';
   tags: string[];
   isConfirmed: boolean;
   isPartnership: boolean;
   partnershipId?: string;
   partnershipName?: string;
+  partnershipDiscount?: number;
   createdAt: Date;
   products?: AppointmentProduct[];
 }
