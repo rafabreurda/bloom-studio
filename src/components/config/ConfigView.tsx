@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Save, Building2, CreditCard, Users, Tag, Bell, MessageSquare, Image } from 'lucide-react';
+import { Save, Building2, CreditCard, Users, Tag, MessageSquare, Image } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { SystemConfig, ClientTag, WhatsAppTemplate } from '@/types';
@@ -14,7 +14,7 @@ interface ConfigViewProps {
   onExportBackup: () => void;
 }
 
-type ConfigSection = 'estudio' | 'pagamentos' | 'admins' | 'tags' | 'mensagens' | 'alertas';
+type ConfigSection = 'estudio' | 'pagamentos' | 'admins' | 'tags' | 'mensagens';
 
 export function ConfigView({ config, onConfigChange, onExportBackup }: ConfigViewProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('estudio');
@@ -63,7 +63,6 @@ export function ConfigView({ config, onConfigChange, onExportBackup }: ConfigVie
     { id: 'admins' as ConfigSection, icon: Users, label: 'Administradores' },
     { id: 'tags' as ConfigSection, icon: Tag, label: 'Tags de Clientes' },
     { id: 'mensagens' as ConfigSection, icon: MessageSquare, label: 'Mensagens' },
-    { id: 'alertas' as ConfigSection, icon: Bell, label: 'Alertas' },
   ];
 
   return (
@@ -214,29 +213,6 @@ export function ConfigView({ config, onConfigChange, onExportBackup }: ConfigVie
             templates={config.whatsappTemplates}
             onUpdate={handleTemplateUpdate}
           />
-        )}
-
-        {activeSection === 'alertas' && (
-          <BronzeCard className="bg-secondary/50 space-y-6">
-            <h3 className="text-lg font-black uppercase text-primary">Configurações de Alertas</h3>
-            
-            {/* Low Stock Threshold */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                Limite de Estoque Baixo (quantidade)
-              </label>
-              <input
-                type="number"
-                value={config.lowStockThreshold}
-                onChange={(e) => onConfigChange({ ...config, lowStockThreshold: parseInt(e.target.value) || 5 })}
-                className="input-bronze w-32"
-                min={1}
-              />
-              <p className="text-xs text-muted-foreground">
-                Produtos com quantidade abaixo deste valor serão destacados como estoque baixo.
-              </p>
-            </div>
-          </BronzeCard>
         )}
 
       </div>
