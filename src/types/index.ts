@@ -40,6 +40,7 @@ export interface Client {
   notes?: string;
   tags: string[];
   isVIP: boolean;
+  partnershipId?: string; // Vínculo direto com uma parceria
   history: ClientHistoryItem[];
   createdAt: Date;
 }
