@@ -380,6 +380,7 @@ const Index = () => {
             <ClientsView
               clients={clients}
               tags={systemConfig.clientTags}
+              partnerships={partnerships}
               onAddClient={handleAddClient}
               onEditClient={handleEditClient}
               onDeleteClient={handleDeleteClient}

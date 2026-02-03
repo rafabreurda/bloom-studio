@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react';
-import { X, Star, CheckCircle2, FileText, Plus, Calendar, ChevronRight, Check, XIcon, Camera, AlertTriangle } from 'lucide-react';
+import { X, Star, CheckCircle2, FileText, Plus, Calendar, ChevronRight, Check, XIcon, Camera, AlertTriangle, Handshake } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
-import { Client, AnamnesisRecord, ClientTag } from '@/types';
+import { Client, AnamnesisRecord, ClientTag, Partnership } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AnamnesisFormModal } from './AnamnesisFormModal';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ClientModalProps {
   client: Client | null;
   tags: ClientTag[];
+  partnerships?: Partnership[];
   onClose: () => void;
   onSave: (client: Omit<Client, 'id' | 'createdAt' | 'history'>) => void;
 }
 
-export function ClientModal({ client, tags, onClose, onSave }: ClientModalProps) {
+export function ClientModal({ client, tags, partnerships = [], onClose, onSave }: ClientModalProps) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -24,6 +26,7 @@ export function ClientModal({ client, tags, onClose, onSave }: ClientModalProps)
   const [notes, setNotes] = useState('');
   const [isVIP, setIsVIP] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [partnershipId, setPartnershipId] = useState<string>('');
   const [anamnesisHistory, setAnamnesisHistory] = useState<AnamnesisRecord[]>([]);
   const [showAnamnesisForm, setShowAnamnesisForm] = useState(false);
   const [expandedRecordId, setExpandedRecordId] = useState<string | null>(null);
@@ -39,6 +42,7 @@ export function ClientModal({ client, tags, onClose, onSave }: ClientModalProps)
       setNotes(client.notes || '');
       setIsVIP(client.isVIP);
       setSelectedTags(client.tags || []);
+      setPartnershipId(client.partnershipId || '');
       setAnamnesisHistory(client.anamnesisHistory || []);
       // Auto-expand the most recent record
       if (client.anamnesisHistory && client.anamnesisHistory.length > 0) {
@@ -59,6 +63,7 @@ export function ClientModal({ client, tags, onClose, onSave }: ClientModalProps)
       notes: notes || undefined,
       isVIP,
       tags: selectedTags,
+      partnershipId: partnershipId || undefined,
       anamnesisHistory: anamnesisHistory.length > 0 ? anamnesisHistory : undefined,
     });
     onClose();
@@ -291,6 +296,37 @@ export function ClientModal({ client, tags, onClose, onSave }: ClientModalProps)
                   ))}
                 </div>
               </div>
+
+              {/* Partnership Link */}
+              {partnerships.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
+                    <Handshake size={12} className="text-violet-500" />
+                    Vincular a Parceria
+                  </label>
+                  <Select value={partnershipId} onValueChange={setPartnershipId}>
+                    <SelectTrigger className="input-bronze">
+                      <SelectValue placeholder="Selecione uma parceria (opcional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Nenhuma</SelectItem>
+                      {partnerships.map(p => (
+                        <SelectItem key={p.id} value={p.id}>
+                          <span className="flex items-center gap-2">
+                            <Handshake size={12} className="text-violet-500" />
+                            {p.name} ({p.discount}% desc.)
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {partnershipId && (
+                    <p className="text-[10px] text-violet-500 font-bold">
+                      ✓ Este cliente será automaticamente vinculado à parceria nos agendamentos
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
