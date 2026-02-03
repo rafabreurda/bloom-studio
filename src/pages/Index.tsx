@@ -173,7 +173,16 @@ const Index = () => {
     
     if (client) {
       setHistoryClient(client);
+    } else {
+      toast.info(`Cliente "${clientName}" não cadastrado. Cadastre na aba Clientes para visualizar o histórico.`);
     }
+  };
+
+  // Handle client update from history modal
+  const handleUpdateClientFromHistory = (updatedClient: Client) => {
+    setClients(clients.map(c => c.id === updatedClient.id ? updatedClient : c));
+    setHistoryClient(updatedClient);
+    toast.success('Ficha de anamnese salva!');
   };
 
   // Client handlers
@@ -526,6 +535,7 @@ const Index = () => {
             client={historyClient}
             tags={systemConfig.clientTags}
             onClose={() => setHistoryClient(null)}
+            onUpdateClient={handleUpdateClientFromHistory}
           />
         </div>
       )}
