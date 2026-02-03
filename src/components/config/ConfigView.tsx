@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Save, Building2, CreditCard, Users, Tag, Bell, Download, MessageSquare, Image } from 'lucide-react';
+import { Save, Building2, CreditCard, Users, Tag, Bell, MessageSquare, Image } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { SystemConfig, ClientTag, WhatsAppTemplate } from '@/types';
@@ -14,7 +14,7 @@ interface ConfigViewProps {
   onExportBackup: () => void;
 }
 
-type ConfigSection = 'estudio' | 'pagamentos' | 'admins' | 'tags' | 'mensagens' | 'alertas' | 'backup';
+type ConfigSection = 'estudio' | 'pagamentos' | 'admins' | 'tags' | 'mensagens' | 'alertas';
 
 export function ConfigView({ config, onConfigChange, onExportBackup }: ConfigViewProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('estudio');
@@ -64,7 +64,6 @@ export function ConfigView({ config, onConfigChange, onExportBackup }: ConfigVie
     { id: 'tags' as ConfigSection, icon: Tag, label: 'Tags de Clientes' },
     { id: 'mensagens' as ConfigSection, icon: MessageSquare, label: 'Mensagens' },
     { id: 'alertas' as ConfigSection, icon: Bell, label: 'Alertas' },
-    { id: 'backup' as ConfigSection, icon: Download, label: 'Backup' },
   ];
 
   return (
@@ -240,31 +239,6 @@ export function ConfigView({ config, onConfigChange, onExportBackup }: ConfigVie
           </BronzeCard>
         )}
 
-        {activeSection === 'backup' && (
-          <BronzeCard className="bg-secondary/50 space-y-6">
-            <h3 className="text-lg font-black uppercase text-primary">Backup dos Dados</h3>
-            
-            <p className="text-sm text-muted-foreground">
-              Exporte todos os dados do sistema em formato JSON para backup ou migração.
-            </p>
-
-            <BronzeButton 
-              variant="gold" 
-              icon={Download} 
-              onClick={onExportBackup}
-              className="w-full md:w-auto"
-            >
-              Exportar Backup JSON
-            </BronzeButton>
-
-            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-              <p className="text-xs text-amber-600 font-bold">
-                ⚠️ O arquivo exportado contém todos os dados: clientes, agendamentos, financeiro, estoque, etc.
-                Guarde em local seguro.
-              </p>
-            </div>
-          </BronzeCard>
-        )}
       </div>
     </div>
   );
