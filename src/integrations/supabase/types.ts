@@ -67,6 +67,238 @@ export type Database = {
           },
         ]
       }
+      appointments: {
+        Row: {
+          charged_value: number
+          client_name: string
+          created_at: string
+          date: string
+          id: string
+          is_confirmed: boolean
+          is_partnership: boolean
+          partnership_discount: number | null
+          partnership_id: string | null
+          partnership_name: string | null
+          payment_method: string | null
+          phone: string
+          products: Json | null
+          products_value: number
+          status: string
+          tags: string[] | null
+          time: string
+          total_value: number
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          charged_value?: number
+          client_name: string
+          created_at?: string
+          date: string
+          id?: string
+          is_confirmed?: boolean
+          is_partnership?: boolean
+          partnership_discount?: number | null
+          partnership_id?: string | null
+          partnership_name?: string | null
+          payment_method?: string | null
+          phone: string
+          products?: Json | null
+          products_value?: number
+          status?: string
+          tags?: string[] | null
+          time: string
+          total_value?: number
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          charged_value?: number
+          client_name?: string
+          created_at?: string
+          date?: string
+          id?: string
+          is_confirmed?: boolean
+          is_partnership?: boolean
+          partnership_discount?: number | null
+          partnership_id?: string | null
+          partnership_name?: string | null
+          payment_method?: string | null
+          phone?: string
+          products?: Json | null
+          products_value?: number
+          status?: string
+          tags?: string[] | null
+          time?: string
+          total_value?: number
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blocks: {
+        Row: {
+          created_at: string
+          date: string
+          end_date: string | null
+          id: string
+          reason: string | null
+          time: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          end_date?: string | null
+          id?: string
+          reason?: string | null
+          time?: string | null
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          end_date?: string | null
+          id?: string
+          reason?: string | null
+          time?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
+      clients: {
+        Row: {
+          address: string | null
+          anamnesis_history: Json | null
+          birthday: string | null
+          cpf: string | null
+          created_at: string
+          email: string | null
+          history: Json | null
+          id: string
+          is_vip: boolean
+          name: string
+          notes: string | null
+          partnership_id: string | null
+          phone: string
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          anamnesis_history?: Json | null
+          birthday?: string | null
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          history?: Json | null
+          id?: string
+          is_vip?: boolean
+          name: string
+          notes?: string | null
+          partnership_id?: string | null
+          phone: string
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          anamnesis_history?: Json | null
+          birthday?: string | null
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          history?: Json | null
+          id?: string
+          is_vip?: boolean
+          name?: string
+          notes?: string | null
+          partnership_id?: string | null
+          phone?: string
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      finances: {
+        Row: {
+          category: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          is_partnership: boolean | null
+          payment_method: string | null
+          type: string
+          value: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          date: string
+          description: string
+          id?: string
+          is_partnership?: boolean | null
+          payment_method?: string | null
+          type: string
+          value: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          is_partnership?: boolean | null
+          payment_method?: string | null
+          type?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      partnerships: {
+        Row: {
+          contact: string | null
+          created_at: string
+          discount: number
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          contact?: string | null
+          created_at?: string
+          discount?: number
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          contact?: string | null
+          created_at?: string
+          discount?: number
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -94,6 +326,84 @@ export type Database = {
           password_hash?: string | null
           phone?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      stock: {
+        Row: {
+          created_at: string
+          id: string
+          min_stock: number
+          name: string
+          price: number
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          min_stock?: number
+          name: string
+          price?: number
+          quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          min_stock?: number
+          name?: string
+          price?: number
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          contact: string | null
+          created_at: string
+          id: string
+          name: string
+          products: string | null
+          updated_at: string
+        }
+        Insert: {
+          contact?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          products?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contact?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          products?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      system_config: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
         }
         Relationships: []
       }
@@ -125,6 +435,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      waiting_list: {
+        Row: {
+          created_at: string
+          desired_date: string
+          id: string
+          name: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          desired_date: string
+          id?: string
+          name: string
+          phone: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          desired_date?: string
+          id?: string
+          name?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: []
       }
     }
     Views: {

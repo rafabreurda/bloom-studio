@@ -22,26 +22,22 @@ import {
   TabId, 
   UserRole, 
   SystemConfig,
-  Appointment,
-  Block,
-  WaitingItem,
   Client,
   StockItem,
   Supplier,
   Partnership,
-  Finance,
 } from '@/types';
-import {
-  mockAppointments,
-  mockBlocks,
-  mockWaitingList,
-  mockFinances,
-  mockStock,
-  mockClients,
-  mockSuppliers,
-  mockPartnerships,
-  defaultConfig,
-} from '@/data/mockData';
+import { defaultConfig } from '@/data/mockData';
+
+// Import persistence hooks
+import { usePartnerships } from '@/hooks/usePartnerships';
+import { useClients } from '@/hooks/useClients';
+import { useStock } from '@/hooks/useStock';
+import { useSuppliers } from '@/hooks/useSuppliers';
+import { useAppointments } from '@/hooks/useAppointments';
+import { useBlocks } from '@/hooks/useBlocks';
+import { useWaitingList } from '@/hooks/useWaitingList';
+import { useFinances } from '@/hooks/useFinances';
 
 const juniorPermissions: TabId[] = ['agenda', 'clientes', 'estoque', 'lista-espera'];
 
@@ -66,15 +62,15 @@ const Index = () => {
   const [currentRole, setCurrentRole] = useState<UserRole>('Admin Chefe');
   const [systemConfig, setSystemConfig] = useState<SystemConfig>(loadSavedConfig);
   
-  // Data state
-  const [appointments, setAppointments] = useState(mockAppointments);
-  const [blocks, setBlocks] = useState(mockBlocks);
-  const [waitingList, setWaitingList] = useState(mockWaitingList);
-  const [finances, setFinances] = useState(mockFinances);
-  const [clients, setClients] = useState(mockClients);
-  const [stock, setStock] = useState(mockStock);
-  const [suppliers, setSuppliers] = useState(mockSuppliers);
-  const [partnerships, setPartnerships] = useState(mockPartnerships);
+  // Use persistence hooks
+  const { partnerships, addPartnership, updatePartnership, deletePartnership } = usePartnerships();
+  const { clients, addClient, updateClient, deleteClient } = useClients();
+  const { stock, addStock, updateStock, deleteStock, adjustQuantity } = useStock();
+  const { suppliers, addSupplier, updateSupplier, deleteSupplier } = useSuppliers();
+  const { appointments, addAppointment } = useAppointments();
+  const { blocks, addBlock, deleteBlock } = useBlocks();
+  const { waitingList, addWaiting, completeWaiting } = useWaitingList();
+  const { finances, addFinance } = useFinances();
   
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -112,54 +108,6 @@ const Index = () => {
     setIsSidebarOpen(false);
   };
 
-  const handleAddAppointment = (appointment: Omit<Appointment, 'id' | 'createdAt'>) => {
-    const newAppointment: Appointment = {
-      ...appointment,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    };
-    setAppointments([...appointments, newAppointment]);
-    toast.success('Bronze agendado com sucesso!');
-  };
-
-  const handleAddBlock = (block: Omit<Block, 'id' | 'createdAt'>) => {
-    const newBlock: Block = {
-      ...block,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    };
-    setBlocks([...blocks, newBlock]);
-    toast.success('Horário bloqueado!');
-  };
-
-  const handleDeleteBlock = (blockId: string) => {
-    setBlocks(blocks.filter(b => b.id !== blockId));
-    toast.success('Bloqueio removido!');
-  };
-
-  const handleAddWaiting = (item: Omit<WaitingItem, 'id' | 'createdAt'>) => {
-    const newItem: WaitingItem = {
-      ...item,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    };
-    setWaitingList([...waitingList, newItem]);
-    toast.success('Adicionado à lista de espera!');
-  };
-
-  const handleCompleteWaiting = (id: string) => {
-    setWaitingList(waitingList.filter(w => w.id !== id));
-    toast.success('Cliente atendido!');
-  };
-
-  const handleSendWhatsApp = (phone: string, name: string) => {
-    const msg = `Olá ${name}! Temos uma vaga disponível para bronzeamento. Entre em contato para agendar! 🌞`;
-    const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone) {
-      window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-  };
-
   const handleAddClick = (time: string) => {
     setNewAppoTime(time);
     setShowAddModal(true);
@@ -167,7 +115,6 @@ const Index = () => {
 
   // Handle client click from agenda
   const handleClientClickFromAgenda = (clientName: string, phone: string) => {
-    // Find client by phone or name
     const client = clients.find(c => c.phone === phone) 
       || clients.find(c => c.name.toLowerCase() === clientName.toLowerCase());
     
@@ -180,63 +127,27 @@ const Index = () => {
 
   // Handle client update from history modal
   const handleUpdateClientFromHistory = (updatedClient: Client) => {
-    setClients(clients.map(c => c.id === updatedClient.id ? updatedClient : c));
+    updateClient(updatedClient);
     setHistoryClient(updatedClient);
-    toast.success('Ficha de anamnese salva!');
   };
 
-  // Client handlers
-  const handleAddClient = (client: Omit<Client, 'id' | 'createdAt' | 'history'>) => {
-    const newClient: Client = {
-      ...client,
-      id: Date.now().toString(),
-      history: [],
-      createdAt: new Date(),
-    };
-    setClients([...clients, newClient]);
-    toast.success('Cliente cadastrado!');
-  };
-
-  const handleEditClient = (client: Client) => {
-    setClients(clients.map(c => 
-      c.id === client.id ? client : c
-    ));
-    toast.success('Cliente atualizado!');
-  };
-
-  const handleDeleteClient = (id: string) => {
-    setClients(clients.filter(c => c.id !== id));
-    toast.success('Cliente removido!');
-  };
-
-  // Finance handlers
-  const handleAddFinance = (finance: Omit<Finance, 'id'>) => {
-    const newFinance: Finance = {
-      ...finance,
-      id: Date.now().toString(),
-    };
-    setFinances([newFinance, ...finances]);
-    toast.success('Transação adicionada!');
+  const handleSendWhatsApp = (phone: string, name: string) => {
+    const msg = `Olá ${name}! Temos uma vaga disponível para bronzeamento. Entre em contato para agendar! 🌞`;
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone) {
+      window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
   };
 
   // Stock handlers
-  const handleAddStock = (item: Omit<StockItem, 'id'>) => {
+  const handleAddStock = async (item: Omit<StockItem, 'id'>) => {
     if (editingStock) {
-      setStock(stock.map(s => 
-        s.id === editingStock.id 
-          ? { ...s, ...item }
-          : s
-      ));
-      toast.success('Produto atualizado!');
+      await updateStock({ ...editingStock, ...item });
     } else {
-      const newItem: StockItem = {
-        ...item,
-        id: Date.now().toString(),
-      };
-      setStock([...stock, newItem]);
-      toast.success('Produto cadastrado!');
+      await addStock(item);
     }
     setEditingStock(null);
+    setShowStockModal(false);
   };
 
   const handleEditStock = (item: StockItem) => {
@@ -244,37 +155,15 @@ const Index = () => {
     setShowStockModal(true);
   };
 
-  const handleDeleteStock = (id: string) => {
-    setStock(stock.filter(s => s.id !== id));
-    toast.success('Produto removido!');
-  };
-
-  const handleAdjustQuantity = (id: string, delta: number) => {
-    setStock(stock.map(s => 
-      s.id === id 
-        ? { ...s, quantity: Math.max(0, s.quantity + delta) }
-        : s
-    ));
-  };
-
   // Supplier handlers
-  const handleAddSupplier = (supplier: Omit<Supplier, 'id'>) => {
+  const handleAddSupplier = async (supplier: Omit<Supplier, 'id'>) => {
     if (editingSupplier) {
-      setSuppliers(suppliers.map(s => 
-        s.id === editingSupplier.id 
-          ? { ...s, ...supplier }
-          : s
-      ));
-      toast.success('Fornecedor atualizado!');
+      await updateSupplier({ ...editingSupplier, ...supplier });
     } else {
-      const newSupplier: Supplier = {
-        ...supplier,
-        id: Date.now().toString(),
-      };
-      setSuppliers([...suppliers, newSupplier]);
-      toast.success('Fornecedor cadastrado!');
+      await addSupplier(supplier);
     }
     setEditingSupplier(null);
+    setShowSupplierModal(false);
   };
 
   const handleEditSupplier = (supplier: Supplier) => {
@@ -282,39 +171,20 @@ const Index = () => {
     setShowSupplierModal(true);
   };
 
-  const handleDeleteSupplier = (id: string) => {
-    setSuppliers(suppliers.filter(s => s.id !== id));
-    toast.success('Fornecedor removido!');
-  };
-
   // Partnership handlers
-  const handleAddPartnership = (partnership: Omit<Partnership, 'id'>) => {
+  const handleAddPartnership = async (partnership: Omit<Partnership, 'id'>) => {
     if (editingPartnership) {
-      setPartnerships(partnerships.map(p => 
-        p.id === editingPartnership.id 
-          ? { ...p, ...partnership }
-          : p
-      ));
-      toast.success('Parceria atualizada!');
+      await updatePartnership({ ...editingPartnership, ...partnership });
     } else {
-      const newPartnership: Partnership = {
-        ...partnership,
-        id: Date.now().toString(),
-      };
-      setPartnerships([...partnerships, newPartnership]);
-      toast.success('Parceria cadastrada!');
+      await addPartnership(partnership);
     }
     setEditingPartnership(null);
+    setShowPartnershipModal(false);
   };
 
   const handleEditPartnership = (partnership: Partnership) => {
     setEditingPartnership(partnership);
     setShowPartnershipModal(true);
-  };
-
-  const handleDeletePartnership = (id: string) => {
-    setPartnerships(partnerships.filter(p => p.id !== id));
-    toast.success('Parceria removida!');
   };
 
   // Export backup
@@ -370,7 +240,7 @@ const Index = () => {
               onNavigate={handleTabChange}
               onAddClick={handleAddClick}
               onBlockClick={() => setShowBlockModal(true)}
-              onDeleteBlock={handleDeleteBlock}
+              onDeleteBlock={deleteBlock}
               onClientClick={handleClientClickFromAgenda}
               pixKey={systemConfig.pixKey}
             />
@@ -381,16 +251,16 @@ const Index = () => {
               clients={clients}
               tags={systemConfig.clientTags}
               partnerships={partnerships}
-              onAddClient={handleAddClient}
-              onEditClient={handleEditClient}
-              onDeleteClient={handleDeleteClient}
+              onAddClient={addClient}
+              onEditClient={updateClient}
+              onDeleteClient={deleteClient}
             />
           )}
 
           {activeTab === 'financeiro' && (
             <FinanceView
               finances={finances}
-              onAddFinance={handleAddFinance}
+              onAddFinance={addFinance}
             />
           )}
 
@@ -402,8 +272,8 @@ const Index = () => {
                 setShowStockModal(true);
               }}
               onEditClick={handleEditStock}
-              onDeleteClick={handleDeleteStock}
-              onAdjustQuantity={handleAdjustQuantity}
+              onDeleteClick={deleteStock}
+              onAdjustQuantity={adjustQuantity}
             />
           )}
 
@@ -415,7 +285,7 @@ const Index = () => {
                 setShowSupplierModal(true);
               }}
               onEditClick={handleEditSupplier}
-              onDeleteClick={handleDeleteSupplier}
+              onDeleteClick={deleteSupplier}
               onSendMessage={handleSendWhatsApp}
             />
           )}
@@ -428,7 +298,7 @@ const Index = () => {
                 setShowPartnershipModal(true);
               }}
               onEditClick={handleEditPartnership}
-              onDeleteClick={handleDeletePartnership}
+              onDeleteClick={deletePartnership}
               onSendMessage={handleSendWhatsApp}
             />
           )}
@@ -438,7 +308,7 @@ const Index = () => {
               waitingList={waitingList}
               onAddClick={() => setShowWaitlistModal(true)}
               onSendMessage={handleSendWhatsApp}
-              onComplete={handleCompleteWaiting}
+              onComplete={completeWaiting}
             />
           )}
 
@@ -463,7 +333,7 @@ const Index = () => {
             selectedDate={new Date()}
             defaultTime={newAppoTime}
             onClose={() => setShowAddModal(false)}
-            onAdd={handleAddAppointment}
+            onAdd={addAppointment}
             stock={stock}
             clients={clients}
             partnerships={partnerships}
@@ -476,7 +346,7 @@ const Index = () => {
           <BlockModal
             selectedDate={new Date()}
             onClose={() => setShowBlockModal(false)}
-            onBlock={handleAddBlock}
+            onBlock={addBlock}
           />
         </div>
       )}
@@ -485,7 +355,7 @@ const Index = () => {
         <div className="fixed inset-0 bg-background/90 z-[150] flex items-center justify-center p-4">
           <WaitlistModal
             onClose={() => setShowWaitlistModal(false)}
-            onAdd={handleAddWaiting}
+            onAdd={addWaiting}
           />
         </div>
       )}
