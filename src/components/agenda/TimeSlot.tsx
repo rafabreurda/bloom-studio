@@ -109,13 +109,16 @@ export function TimeSlot({
                 {appointment.isConfirmed && <CheckCircle2 size={14} className="text-emerald-500" />}
               </div>
               <p 
-                className="text-[10px] md:text-xs font-bold truncate"
+                className="text-[10px] md:text-xs font-bold truncate flex items-center gap-1"
                 style={{ color: 'hsl(var(--agenda-muted-foreground))' }}
               >
                 {isPartnership && appointment.partnershipName ? (
                   <span className="text-violet-500">{appointment.partnershipName} • </span>
                 ) : null}
-                Total R$ {appointment.totalValue || appointment.value} • {appointment.paymentMethod || '—'}
+                <span className="bg-black text-red-500 px-2 py-0.5 rounded font-black">
+                  R$ {appointment.chargedValue ?? appointment.totalValue ?? appointment.value}
+                </span>
+                <span> • {appointment.paymentMethod || '—'}</span>
               </p>
             </button>
 
