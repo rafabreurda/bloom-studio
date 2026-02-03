@@ -229,16 +229,7 @@ export const mockWaitingList: WaitingItem[] = [
   },
 ];
 
-export const mockFinances: Finance[] = [
-  { id: '1', date: '2024-01-15', description: 'Sessão Bronze - Maria Silva', type: 'in', value: 150, paymentMethod: 'Pix', category: 'session' },
-  { id: '2', date: '2024-01-15', description: 'Óleo Bronzeador', type: 'in', value: 89, paymentMethod: 'Cartão', category: 'product' },
-  { id: '3', date: '2024-01-14', description: 'Sessão Bronze - Ana Costa', type: 'in', value: 120, paymentMethod: 'Dinheiro', category: 'session' },
-  { id: '4', date: '2024-01-14', description: 'Parceria Salão Bella', type: 'in', value: 45, paymentMethod: 'Pix', category: 'partnership', isPartnership: true },
-  { id: '5', date: '2024-01-13', description: 'Conta de Luz', type: 'out', value: 280, paymentMethod: 'Pix', category: 'expense' },
-  { id: '6', date: '2024-01-12', description: 'Sessão Bronze VIP - Julia Santos', type: 'in', value: 180, paymentMethod: 'Cartão', category: 'session' },
-  { id: '7', date: '2024-01-11', description: 'Hidratante Pós-Bronze', type: 'in', value: 65, paymentMethod: 'Pix', category: 'product' },
-  { id: '8', date: '2024-01-10', description: 'Parceria Gym Fitness', type: 'in', value: 60, paymentMethod: 'Pix', category: 'partnership', isPartnership: true },
-];
+export const mockFinances: Finance[] = [];
 
 export const mockStock: StockItem[] = [
   { id: '1', name: 'Óleo Bronzeador Premium', quantity: 12, price: 89.90, minStock: 5 },
@@ -308,21 +299,21 @@ export const defaultConfig: SystemConfig = {
 };
 
 export const chartEvolutionData = [
-  { name: 'Set', faturamento: 3200 },
-  { name: 'Out', faturamento: 4100 },
-  { name: 'Nov', faturamento: 3800 },
-  { name: 'Dez', faturamento: 5200 },
-  { name: 'Jan', faturamento: 4800 },
-  { name: 'Fev', faturamento: 5500 },
+  { name: 'Set', faturamento: 0 },
+  { name: 'Out', faturamento: 0 },
+  { name: 'Nov', faturamento: 0 },
+  { name: 'Dez', faturamento: 0 },
+  { name: 'Jan', faturamento: 0 },
+  { name: 'Fev', faturamento: 0 },
 ];
 
 export const chartDistributionData = [
-  { name: 'Pix', value: 65 },
-  { name: 'Cartão', value: 25 },
-  { name: 'Dinheiro', value: 10 },
+  { name: 'Pix', value: 0 },
+  { name: 'Cartão', value: 0 },
+  { name: 'Dinheiro', value: 0 },
 ];
 
 export const chartMixData = [
-  { name: 'Sessões', valor: 4200 },
-  { name: 'Produtos', valor: 1300 },
+  { name: 'Sessões', valor: 0 },
+  { name: 'Produtos', valor: 0 },
 ];
