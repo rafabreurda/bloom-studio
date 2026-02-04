@@ -1,4 +1,4 @@
-import { Plus, X, Star, CheckCircle2, Copy, MessageSquare, Handshake } from 'lucide-react';
+import { Plus, X, Star, CheckCircle2, Copy, MessageSquare, Handshake, Pencil } from 'lucide-react';
 import { Appointment, Block } from '@/types';
 
 interface TimeSlotProps {
@@ -10,6 +10,7 @@ interface TimeSlotProps {
   onCopyPix: () => void;
   onSendWhatsApp: (phone: string, clientName: string) => void;
   onClientClick?: (clientName: string, phone: string) => void;
+  onAppointmentClick?: (appointment: Appointment) => void;
 }
 
 export function TimeSlot({
@@ -21,6 +22,7 @@ export function TimeSlot({
   onCopyPix,
   onSendWhatsApp,
   onClientClick,
+  onAppointmentClick,
 }: TimeSlotProps) {
   const isVIP = appointment?.tags?.includes('VIP');
   const isPartnership = appointment?.isPartnership;
@@ -124,6 +126,12 @@ export function TimeSlot({
 
             {/* Actions */}
             <div className="flex gap-1">
+              <button 
+                onClick={() => onAppointmentClick?.(appointment)}
+                className="w-10 h-10 rounded-lg flex items-center justify-center hover:opacity-80 transition-all bg-primary/10 text-primary"
+              >
+                <Pencil size={18} />
+              </button>
               {appointment.status === 'Aguardando Sinal' && (
                 <button 
                   onClick={onCopyPix}

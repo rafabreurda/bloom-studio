@@ -4,6 +4,7 @@ import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { Finance } from '@/types';
 import { ReportModal } from './ReportModal';
+import { FinanceModal } from './FinanceModal';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 
 interface FinanceViewProps {
@@ -13,6 +14,7 @@ interface FinanceViewProps {
 
 export function FinanceView({ finances, onAddFinance }: FinanceViewProps) {
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showFinanceModal, setShowFinanceModal] = useState(false);
   const totalReceita = finances.filter(f => f.type === 'in').reduce((sum, f) => sum + f.value, 0);
   const totalCartao = finances.filter(f => f.type === 'in' && f.paymentMethod === 'Cartão').reduce((sum, f) => sum + f.value, 0);
   const totalPix = finances.filter(f => f.type === 'in' && f.paymentMethod === 'Pix').reduce((sum, f) => sum + f.value, 0);
@@ -31,7 +33,7 @@ export function FinanceView({ finances, onAddFinance }: FinanceViewProps) {
         <h2 className="text-2xl font-black uppercase tracking-tight">Financeiro</h2>
         <div className="flex gap-2">
           <BronzeButton variant="secondary" icon={FileText} size="sm" onClick={() => setShowReportModal(true)}>Relatório</BronzeButton>
-          <BronzeButton variant="gold" icon={Plus} size="sm">Nova Entrada</BronzeButton>
+          <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => setShowFinanceModal(true)}>Nova Entrada</BronzeButton>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto custom-scrollbar pb-20 space-y-6 pr-2">
@@ -44,6 +46,7 @@ export function FinanceView({ finances, onAddFinance }: FinanceViewProps) {
         <BronzeCard className="bg-secondary/50"><h3 className="text-sm font-black uppercase text-muted-foreground mb-4">Últimas Transações</h3><div className="space-y-2">{finances.slice(0, 10).map(f => (<div key={f.id} className={`flex items-center justify-between p-3 rounded-xl border ${f.type === 'in' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'}`}><div className="flex items-center gap-3"><div className={`w-2 h-2 rounded-full ${f.type === 'in' ? 'bg-emerald-500' : 'bg-red-500'}`} /><div><p className="text-sm font-bold">{f.description}</p><p className="text-xs text-muted-foreground">{f.date} • {f.paymentMethod}</p></div></div><span className={`font-black ${f.type === 'in' ? 'text-emerald-500' : 'text-red-500'}`}>{f.type === 'in' ? '+' : '-'}R$ {f.value}</span></div>))}</div></BronzeCard>
       </div>
       {showReportModal && <ReportModal finances={finances} onClose={() => setShowReportModal(false)} />}
+      {showFinanceModal && <FinanceModal onClose={() => setShowFinanceModal(false)} onSave={onAddFinance} />}
     </div>
   );
 }
