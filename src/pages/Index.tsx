@@ -14,6 +14,7 @@ import { SupplierModal } from '@/components/suppliers/SupplierModal';
 import { PartnershipsView } from '@/components/partnerships/PartnershipsView';
 import { PartnershipModal } from '@/components/partnerships/PartnershipModal';
 import { AddAppointmentModal } from '@/components/modals/AddAppointmentModal';
+import { EditAppointmentModal } from '@/components/modals/EditAppointmentModal';
 import { BlockModal } from '@/components/modals/BlockModal';
 import { WaitlistModal } from '@/components/modals/WaitlistModal';
 import { RestrictedModal } from '@/components/modals/RestrictedModal';
@@ -26,6 +27,7 @@ import {
   StockItem,
   Supplier,
   Partnership,
+  Appointment,
 } from '@/types';
 import { defaultConfig } from '@/data/mockData';
 
@@ -67,7 +69,7 @@ const Index = () => {
   const { clients, addClient, updateClient, deleteClient } = useClients();
   const { stock, addStock, updateStock, deleteStock, adjustQuantity } = useStock();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier } = useSuppliers();
-  const { appointments, addAppointment } = useAppointments();
+  const { appointments, addAppointment, updateAppointment, deleteAppointment } = useAppointments();
   const { blocks, addBlock, deleteBlock } = useBlocks();
   const { waitingList, addWaiting, completeWaiting } = useWaitingList();
   const { finances, addFinance } = useFinances();
@@ -82,6 +84,7 @@ const Index = () => {
   const [showPartnershipModal, setShowPartnershipModal] = useState(false);
   const [newAppoTime, setNewAppoTime] = useState('');
   const [historyClient, setHistoryClient] = useState<Client | null>(null);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   
   // Editing state
   const [editingStock, setEditingStock] = useState<StockItem | null>(null);
@@ -242,6 +245,7 @@ const Index = () => {
               onBlockClick={() => setShowBlockModal(true)}
               onDeleteBlock={deleteBlock}
               onClientClick={handleClientClickFromAgenda}
+              onAppointmentClick={(appointment) => setEditingAppointment(appointment)}
               pixKey={systemConfig.pixKey}
             />
           )}
@@ -407,6 +411,20 @@ const Index = () => {
             tags={systemConfig.clientTags}
             onClose={() => setHistoryClient(null)}
             onUpdateClient={handleUpdateClientFromHistory}
+          />
+        </div>
+      )}
+
+      {/* Edit Appointment Modal */}
+      {editingAppointment && (
+        <div className="fixed inset-0 bg-background/90 z-[150] flex items-end md:items-center justify-center p-0 md:p-4 backdrop-blur-md animate-slide-up">
+          <EditAppointmentModal
+            appointment={editingAppointment}
+            onClose={() => setEditingAppointment(null)}
+            onSave={updateAppointment}
+            onDelete={deleteAppointment}
+            stock={stock}
+            partnerships={partnerships}
           />
         </div>
       )}

@@ -16,6 +16,7 @@ interface AgendaViewProps {
   onBlockClick: () => void;
   onDeleteBlock: (blockId: string) => void;
   onClientClick: (clientName: string, phone: string) => void;
+  onAppointmentClick: (appointment: Appointment) => void;
   pixKey: string;
 }
 
@@ -29,6 +30,7 @@ export function AgendaView({
   onBlockClick,
   onDeleteBlock,
   onClientClick,
+  onAppointmentClick,
   pixKey,
 }: AgendaViewProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -106,6 +108,7 @@ export function AgendaView({
                     onCopyPix={handleCopyPix}
                     onSendWhatsApp={handleSendWhatsApp}
                     onClientClick={onClientClick}
+                    onAppointmentClick={onAppointmentClick}
                   />
                 );
               })}
