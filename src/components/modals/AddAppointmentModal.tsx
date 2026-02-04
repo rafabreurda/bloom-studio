@@ -57,7 +57,10 @@ export function AddAppointmentModal({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const dateStr = new Date(formData.get('date') as string).toLocaleDateString('pt-BR');
+    // Parse date directly without creating Date object to avoid timezone issues
+    const rawDate = formData.get('date') as string; // Format: YYYY-MM-DD
+    const [year, month, day] = rawDate.split('-');
+    const dateStr = `${day}/${month}/${year}`; // Convert to DD/MM/YYYY
     
     onAdd({
       clientName: clientName,
