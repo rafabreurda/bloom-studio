@@ -17,27 +17,34 @@ export function useAppointments() {
 
       if (error) throw error;
 
-      setAppointments(data?.map(a => ({
-        id: a.id,
-        clientName: a.client_name,
-        phone: a.phone,
-        date: new Date(a.date).toLocaleDateString('pt-BR'),
-        time: a.time,
-        status: a.status as 'Aguardando Sinal' | 'Agendado',
-        value: Number(a.value),
-        totalValue: Number(a.total_value),
-        productsValue: Number(a.products_value),
-        chargedValue: Number(a.charged_value),
-        paymentMethod: a.payment_method as 'Pix' | 'Cartão' | 'Dinheiro',
-        tags: a.tags || [],
-        isConfirmed: a.is_confirmed,
-        isPartnership: a.is_partnership,
-        partnershipId: a.partnership_id || undefined,
-        partnershipName: a.partnership_name || undefined,
-        partnershipDiscount: a.partnership_discount || undefined,
-        products: (a.products as unknown as AppointmentProduct[]) || [],
-        createdAt: new Date(a.created_at),
-      })) || []);
+      setAppointments(data?.map(a => {
+        // Parse date manually to avoid timezone issues
+        // Database stores as YYYY-MM-DD
+        const [year, month, day] = a.date.split('-');
+        const dateStr = `${day}/${month}/${year}`;
+        
+        return {
+          id: a.id,
+          clientName: a.client_name,
+          phone: a.phone,
+          date: dateStr,
+          time: a.time,
+          status: a.status as 'Aguardando Sinal' | 'Agendado',
+          value: Number(a.value),
+          totalValue: Number(a.total_value),
+          productsValue: Number(a.products_value),
+          chargedValue: Number(a.charged_value),
+          paymentMethod: a.payment_method as 'Pix' | 'Cartão' | 'Dinheiro',
+          tags: a.tags || [],
+          isConfirmed: a.is_confirmed,
+          isPartnership: a.is_partnership,
+          partnershipId: a.partnership_id || undefined,
+          partnershipName: a.partnership_name || undefined,
+          partnershipDiscount: a.partnership_discount || undefined,
+          products: (a.products as unknown as AppointmentProduct[]) || [],
+          createdAt: new Date(a.created_at),
+        };
+      }) || []);
     } catch (error) {
       console.error('Erro ao carregar agendamentos:', error);
     } finally {
@@ -81,11 +88,15 @@ export function useAppointments() {
 
       if (error) throw error;
 
+      // Parse date manually to avoid timezone issues
+      const [year, month, day] = data.date.split('-');
+      const dateStr = `${day}/${month}/${year}`;
+
       const newAppointment: Appointment = {
         id: data.id,
         clientName: data.client_name,
         phone: data.phone,
-        date: new Date(data.date).toLocaleDateString('pt-BR'),
+        date: dateStr,
         time: data.time,
         status: data.status as 'Aguardando Sinal' | 'Agendado',
         value: Number(data.value),
