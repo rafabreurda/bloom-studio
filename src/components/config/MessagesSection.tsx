@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, Edit2, X, CheckCircle2, MessageSquare, Info } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, CheckCircle2, MessageSquare, Info, Clock } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { Switch } from '@/components/ui/switch';
@@ -18,18 +18,39 @@ const variablesList = [
   { var: '{pix}', desc: 'Chave PIX configurada' },
 ];
 
+const reminderOptions = [
+  { value: undefined, label: 'Sem lembrete automático' },
+  { value: 30, label: '30 minutos antes' },
+  { value: 60, label: '1 hora antes' },
+  { value: 120, label: '2 horas antes' },
+  { value: 180, label: '3 horas antes' },
+  { value: 360, label: '6 horas antes' },
+  { value: 720, label: '12 horas antes' },
+  { value: 1440, label: '24 horas antes (1 dia)' },
+  { value: 2880, label: '48 horas antes (2 dias)' },
+];
+
+const formatReminderTime = (minutes?: number) => {
+  if (!minutes) return null;
+  if (minutes < 60) return `${minutes}min antes`;
+  if (minutes < 1440) return `${minutes / 60}h antes`;
+  return `${minutes / 1440}d antes`;
+};
+
 export function MessagesSection({ templates, onUpdate }: MessagesSectionProps) {
   const [showModal, setShowModal] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<WhatsAppTemplate | null>(null);
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
   const [includePixKey, setIncludePixKey] = useState(false);
+  const [reminderMinutesBefore, setReminderMinutesBefore] = useState<number | undefined>(undefined);
 
   const openAddModal = () => {
     setEditingTemplate(null);
     setName('');
     setContent('');
     setIncludePixKey(false);
+    setReminderMinutesBefore(undefined);
     setShowModal(true);
   };
 
@@ -38,19 +59,21 @@ export function MessagesSection({ templates, onUpdate }: MessagesSectionProps) {
     setName(template.name);
     setContent(template.content);
     setIncludePixKey(template.includePixKey);
+    setReminderMinutesBefore(template.reminderMinutesBefore);
     setShowModal(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingTemplate) {
-      onUpdate(templates.map(t => t.id === editingTemplate.id ? { ...t, name, content, includePixKey } : t));
+      onUpdate(templates.map(t => t.id === editingTemplate.id ? { ...t, name, content, includePixKey, reminderMinutesBefore } : t));
     } else {
       const newTemplate: WhatsAppTemplate = {
         id: Date.now().toString(),
         name,
         content,
         includePixKey,
+        reminderMinutesBefore,
       };
       onUpdate([...templates, newTemplate]);
     }
@@ -89,6 +112,12 @@ export function MessagesSection({ templates, onUpdate }: MessagesSectionProps) {
                   {template.includePixKey && (
                     <span className="px-2 py-0.5 bg-primary/20 text-primary text-[10px] font-bold rounded-full">
                       PIX
+                    </span>
+                  )}
+                  {template.reminderMinutesBefore && (
+                    <span className="px-2 py-0.5 bg-accent text-accent-foreground text-[10px] font-bold rounded-full flex items-center gap-1">
+                      <Clock size={10} />
+                      {formatReminderTime(template.reminderMinutesBefore)}
                     </span>
                   )}
                 </div>
@@ -181,6 +210,25 @@ export function MessagesSection({ templates, onUpdate }: MessagesSectionProps) {
                   </p>
                 </div>
               </label>
+
+              {/* Reminder Time Selector */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-1">
+                  <Clock size={12} /> Lembrete Automático
+                </label>
+                <select
+                  value={reminderMinutesBefore ?? ''}
+                  onChange={(e) => setReminderMinutesBefore(e.target.value ? Number(e.target.value) : undefined)}
+                  className="input-bronze w-full"
+                >
+                  {reminderOptions.map((opt, i) => (
+                    <option key={i} value={opt.value ?? ''}>{opt.label}</option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-muted-foreground">
+                  Define quanto tempo antes do agendamento a mensagem deve ser enviada
+                </p>
+              </div>
 
               <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
                 <div className="flex items-start gap-2">
