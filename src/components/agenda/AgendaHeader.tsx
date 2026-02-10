@@ -55,6 +55,18 @@ export function AgendaHeader({
     onDateChange(newDate);
   };
 
+  const goToPrevYear = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setFullYear(newDate.getFullYear() - 1);
+    onDateChange(newDate);
+  };
+
+  const goToNextYear = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setFullYear(newDate.getFullYear() + 1);
+    onDateChange(newDate);
+  };
+
   const goToToday = () => {
     const now = new Date();
     const brDateStr = now.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
@@ -100,10 +112,26 @@ export function AgendaHeader({
             <ChevronRight size={18} />
           </button>
         </div>
-        {/* Year */}
-        <span className="text-sm font-black ml-4 px-3 py-1 rounded-lg" style={{ color: 'hsl(var(--agenda-muted-foreground))', backgroundColor: 'hsl(var(--agenda-muted))' }}>
-          {year}
-        </span>
+        {/* Year nav */}
+        <div className="flex items-center gap-1 ml-4">
+          <button 
+            onClick={goToPrevYear}
+            className="p-1.5 rounded-lg hover:opacity-80 transition-opacity"
+            style={{ backgroundColor: 'hsl(var(--agenda-muted))', color: 'hsl(var(--agenda-foreground))' }}
+          >
+            <ChevronLeft size={14} />
+          </button>
+          <span className="text-sm font-black px-2" style={{ color: 'hsl(var(--agenda-muted-foreground))' }}>
+            {year}
+          </span>
+          <button 
+            onClick={goToNextYear}
+            className="p-1.5 rounded-lg hover:opacity-80 transition-opacity"
+            style={{ backgroundColor: 'hsl(var(--agenda-muted))', color: 'hsl(var(--agenda-foreground))' }}
+          >
+            <ChevronRight size={14} />
+          </button>
+        </div>
       </div>
 
       {/* Day navigation row (for day/week views) */}
