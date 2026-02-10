@@ -69,7 +69,7 @@ const Index = () => {
   const { clients, addClient, updateClient, deleteClient } = useClients();
   const { stock, addStock, updateStock, deleteStock, adjustQuantity } = useStock();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier } = useSuppliers();
-  const { appointments, addAppointment, updateAppointment, deleteAppointment } = useAppointments();
+  const { appointments, addAppointment, updateAppointment, deleteAppointment, clearAllAppointments } = useAppointments();
   const { blocks, addBlock, deleteBlock } = useBlocks();
   const { waitingList, addWaiting, completeWaiting } = useWaitingList();
   const { finances, addFinance } = useFinances();
@@ -247,6 +247,7 @@ const Index = () => {
               onClientClick={handleClientClickFromAgenda}
               onAppointmentClick={(appointment) => setEditingAppointment(appointment)}
               pixKey={systemConfig.pixKey}
+              onClearAgenda={clearAllAppointments}
             />
           )}
 
