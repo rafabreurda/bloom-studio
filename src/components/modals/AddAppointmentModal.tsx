@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Star, CheckCircle2, ShoppingCart, Handshake } from 'lucide-react';
+import { X, Star, CheckCircle2, ShoppingCart, Handshake, UserPlus } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { ClientSearchCombobox } from './ClientSearchCombobox';
@@ -34,6 +34,7 @@ export function AddAppointmentModal({
   const [selectedPartnershipId, setSelectedPartnershipId] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<StockItem[]>([]);
   const [isManualPhone, setIsManualPhone] = useState(true);
+  const [isNewClient, setIsNewClient] = useState(false);
   const [selectedTime, setSelectedTime] = useState(defaultTime || '08:00');
 
   const selectedPartnership = partnerships.find(p => p.id === selectedPartnershipId);
@@ -54,6 +55,7 @@ export function AddAppointmentModal({
     setClientPhone(data.phone);
     setIsVIP(data.isVIP);
     setIsManualPhone(data.source === 'manual');
+    setIsNewClient(data.source === 'manual');
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -74,7 +76,7 @@ export function AddAppointmentModal({
       totalValue: finalTotal,
       productsValue: productsTotal,
       chargedValue: chargedValue,
-      tags: isVIP ? ['VIP'] : [],
+      tags: [...(isVIP ? ['VIP'] : []), ...(isNewClient ? ['Cliente Nova'] : [])],
       paymentMethod: formData.get('paymentMethod') as 'Pix' | 'Cartão' | 'Dinheiro',
       isConfirmed,
       isPartnership,
@@ -183,6 +185,14 @@ export function AddAppointmentModal({
             ))}
           </div>
         </div>
+
+        {/* New Client Tag */}
+        {isNewClient && (
+          <div className="flex items-center gap-2 p-3 bg-orange-500/10 border border-orange-500/30 rounded-2xl">
+            <UserPlus size={16} className="text-orange-500" />
+            <span className="text-xs font-black uppercase text-orange-600">Cliente Nova — sem cadastro</span>
+          </div>
+        )}
 
         {/* VIP, Confirmed & Partnership */}
         <div className="grid grid-cols-3 gap-3">
