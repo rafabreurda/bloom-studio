@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { X, Star, CheckCircle2, ShoppingCart, Handshake, UserPlus } from 'lucide-react';
+import { X, Star, CheckCircle2, ShoppingCart, Handshake, UserPlus, Sparkles } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { ClientSearchCombobox } from './ClientSearchCombobox';
 import { TimeRollerPicker } from '@/components/ui/TimeRollerPicker';
-import { StockItem, Appointment, Client, Partnership } from '@/types';
+import { StockItem, Appointment, Client, Partnership, ServiceType } from '@/types';
 
 interface AddAppointmentModalProps {
   selectedDate: Date;
@@ -14,6 +14,7 @@ interface AddAppointmentModalProps {
   stock: StockItem[];
   clients: Client[];
   partnerships: Partnership[];
+  serviceTypes: ServiceType[];
 }
 
 export function AddAppointmentModal({ 
@@ -24,10 +25,13 @@ export function AddAppointmentModal({
   stock,
   clients,
   partnerships,
+  serviceTypes,
 }: AddAppointmentModalProps) {
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
   const [sessionValue, setSessionValue] = useState(150);
+  const [sessionCost, setSessionCost] = useState(0);
+  const [selectedServiceId, setSelectedServiceId] = useState('');
   const [isVIP, setIsVIP] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isPartnership, setIsPartnership] = useState(false);
@@ -36,6 +40,17 @@ export function AddAppointmentModal({
   const [isManualPhone, setIsManualPhone] = useState(true);
   const [isNewClient, setIsNewClient] = useState(false);
   const [selectedTime, setSelectedTime] = useState(defaultTime || '08:00');
+
+  const activeServices = serviceTypes.filter(s => s.isActive);
+
+  const handleServiceSelect = (serviceId: string) => {
+    setSelectedServiceId(serviceId);
+    const service = serviceTypes.find(s => s.id === serviceId);
+    if (service) {
+      setSessionValue(service.price);
+      setSessionCost(service.cost);
+    }
+  };
 
   const selectedPartnership = partnerships.find(p => p.id === selectedPartnershipId);
   const productsTotal = selectedProducts.reduce((acc, curr) => acc + Number(curr.price), 0);
@@ -66,6 +81,8 @@ export function AddAppointmentModal({
     const [year, month, day] = rawDate.split('-');
     const dateStr = `${day}/${month}/${year}`; // Convert to DD/MM/YYYY
     
+    const selectedService = serviceTypes.find(s => s.id === selectedServiceId);
+    
     onAdd({
       clientName: clientName,
       phone: clientPhone,
@@ -76,6 +93,7 @@ export function AddAppointmentModal({
       totalValue: finalTotal,
       productsValue: productsTotal,
       chargedValue: chargedValue,
+      cost: sessionCost,
       tags: [...(isVIP ? ['VIP'] : []), ...(isNewClient ? ['Cliente Nova'] : [])],
       paymentMethod: formData.get('paymentMethod') as 'Pix' | 'Cartão' | 'Dinheiro',
       isConfirmed,
@@ -83,6 +101,8 @@ export function AddAppointmentModal({
       partnershipId: isPartnership ? selectedPartnershipId : undefined,
       partnershipName: isPartnership ? selectedPartnership?.name : undefined,
       partnershipDiscount: isPartnership ? selectedPartnership?.discount : undefined,
+      serviceTypeId: selectedServiceId || undefined,
+      serviceTypeName: selectedService?.name || undefined,
       products: selectedProducts.map(p => ({
         productId: p.id,
         name: p.name,
@@ -151,6 +171,27 @@ export function AddAppointmentModal({
             <TimeRollerPicker value={selectedTime} onChange={setSelectedTime} />
           </div>
         </div>
+
+        {/* Service Type Selector */}
+        {activeServices.length > 0 && (
+          <div className="p-4 bg-secondary rounded-3xl border border-border/10 space-y-2">
+            <p className="text-[10px] font-black uppercase text-foreground flex items-center gap-2">
+              <Sparkles size={14} /> Tipo de Serviço
+            </p>
+            <select
+              value={selectedServiceId}
+              onChange={(e) => handleServiceSelect(e.target.value)}
+              className="w-full p-3 bg-background border border-border rounded-xl text-xs font-bold text-foreground"
+            >
+              <option value="">Selecionar serviço...</option>
+              {activeServices.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.name} — {s.duration}min — R$ {s.price.toFixed(2)}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Products */}
         <div className="p-4 bg-secondary rounded-3xl border border-border/10 space-y-3">

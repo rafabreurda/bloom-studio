@@ -91,6 +91,7 @@ export function AgendaView({
         totalValue: 0,
         productsValue: 0,
         chargedValue: 0,
+        cost: 0,
         paymentMethod: 'Pix',
         tags: [],
         isConfirmed: false,

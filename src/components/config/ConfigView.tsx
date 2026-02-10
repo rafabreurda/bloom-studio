@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Save, Building2, CreditCard, Users, Tag, MessageSquare, Image } from 'lucide-react';
+import { Save, Building2, CreditCard, Users, Tag, MessageSquare, Image, Sparkles } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
-import { SystemConfig, ClientTag, WhatsAppTemplate } from '@/types';
+import { SystemConfig, ClientTag, WhatsAppTemplate, ServiceType } from '@/types';
 import { AdminSection } from './AdminSection';
 import { TagsSection } from './TagsSection';
 import { MessagesSection } from './MessagesSection';
+import { ServicesSection } from './ServicesSection';
 import { toast } from 'sonner';
 
 interface ConfigViewProps {
@@ -14,7 +15,7 @@ interface ConfigViewProps {
   onExportBackup: () => void;
 }
 
-type ConfigSection = 'estudio' | 'pagamentos' | 'admins' | 'tags' | 'mensagens';
+type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'admins' | 'tags' | 'mensagens';
 
 export function ConfigView({ config, onConfigChange, onExportBackup }: ConfigViewProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('estudio');
@@ -57,8 +58,13 @@ export function ConfigView({ config, onConfigChange, onExportBackup }: ConfigVie
     onConfigChange({ ...config, whatsappTemplates: templates });
   };
 
+  const handleServiceUpdate = (services: ServiceType[]) => {
+    onConfigChange({ ...config, serviceTypes: services });
+  };
+
   const sections = [
     { id: 'estudio' as ConfigSection, icon: Building2, label: 'Estúdio' },
+    { id: 'servicos' as ConfigSection, icon: Sparkles, label: 'Serviços' },
     { id: 'pagamentos' as ConfigSection, icon: CreditCard, label: 'Pagamentos' },
     { id: 'admins' as ConfigSection, icon: Users, label: 'Administradores' },
     { id: 'tags' as ConfigSection, icon: Tag, label: 'Tags de Clientes' },
@@ -161,6 +167,13 @@ export function ConfigView({ config, onConfigChange, onExportBackup }: ConfigVie
               </div>
             </div>
           </BronzeCard>
+        )}
+
+        {activeSection === 'servicos' && (
+          <ServicesSection
+            services={config.serviceTypes || []}
+            onUpdate={handleServiceUpdate}
+          />
         )}
 
         {activeSection === 'pagamentos' && (

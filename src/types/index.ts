@@ -9,6 +9,7 @@ export interface Appointment {
   totalValue: number;
   productsValue: number;
   chargedValue: number; // Valor efetivamente cobrado do cliente
+  cost: number; // Custo de insumos da sessão
   paymentMethod: 'Pix' | 'Cartão' | 'Dinheiro';
   tags: string[];
   isConfirmed: boolean;
@@ -16,6 +17,8 @@ export interface Appointment {
   partnershipId?: string;
   partnershipName?: string;
   partnershipDiscount?: number;
+  serviceTypeId?: string;
+  serviceTypeName?: string;
   createdAt: Date;
   products?: AppointmentProduct[];
 }
@@ -185,6 +188,15 @@ export interface WhatsAppTemplate {
   reminderMinutesBefore?: number; // Tempo de antecedência em minutos (ex: 60, 120, 1440)
 }
 
+export interface ServiceType {
+  id: string;
+  name: string;
+  duration: number; // in minutes
+  price: number;
+  cost: number; // cost of supplies per session
+  isActive: boolean;
+}
+
 export interface SystemConfig {
   name: string;
   logo?: string;
@@ -195,6 +207,7 @@ export interface SystemConfig {
   admins: AdminUser[];
   clientTags: ClientTag[];
   whatsappTemplates: WhatsAppTemplate[];
+  serviceTypes: ServiceType[];
 }
 
 export interface ReportConfig {

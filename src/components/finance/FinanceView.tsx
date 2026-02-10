@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Plus, TrendingUp, CreditCard, Banknote, Handshake, DollarSign, FileText } from 'lucide-react';
+import { Plus, TrendingUp, CreditCard, Banknote, Handshake, DollarSign, FileText, TrendingDown, Sparkles } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
-import { Finance } from '@/types';
+import { Finance, Appointment } from '@/types';
 import { ReportModal } from './ReportModal';
 import { FinanceModal } from './FinanceModal';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
@@ -10,9 +10,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 interface FinanceViewProps {
   finances: Finance[];
   onAddFinance: (finance: Omit<Finance, 'id'>) => void;
+  appointments: Appointment[];
 }
 
-export function FinanceView({ finances, onAddFinance }: FinanceViewProps) {
+export function FinanceView({ finances, onAddFinance, appointments }: FinanceViewProps) {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showFinanceModal, setShowFinanceModal] = useState(false);
   const totalReceita = finances.filter(f => f.type === 'in').reduce((sum, f) => sum + f.value, 0);
@@ -20,12 +21,22 @@ export function FinanceView({ finances, onAddFinance }: FinanceViewProps) {
   const totalPix = finances.filter(f => f.type === 'in' && f.paymentMethod === 'Pix').reduce((sum, f) => sum + f.value, 0);
   const totalDinheiro = finances.filter(f => f.type === 'in' && f.paymentMethod === 'Dinheiro').reduce((sum, f) => sum + f.value, 0);
   const totalParcerias = finances.filter(f => f.isPartnership).reduce((sum, f) => sum + f.value, 0);
+  const totalCustos = appointments.reduce((sum, a) => sum + (a.cost || 0), 0);
+  const totalLucro = totalReceita - totalCustos;
   const evolutionData = [{ month: 'Ago', valor: 3200 }, { month: 'Set', valor: 4100 }, { month: 'Out', valor: 3800 }, { month: 'Nov', valor: 4500 }, { month: 'Dez', valor: 5200 }, { month: 'Jan', valor: totalReceita }];
   const paymentData = [{ name: 'Pix', value: totalPix, color: '#f59e0b' }, { name: 'Cartão', value: totalCartao, color: '#3b82f6' }, { name: 'Dinheiro', value: totalDinheiro, color: '#10b981' }].filter(d => d.value > 0);
   const totalSessions = finances.filter(f => f.category === 'session').reduce((sum, f) => sum + f.value, 0);
   const totalProducts = finances.filter(f => f.category === 'product').reduce((sum, f) => sum + f.value, 0);
   const categoryData = [{ name: 'Sessões', valor: totalSessions }, { name: 'Produtos', valor: totalProducts }];
-  const summaryCards = [{ label: 'Receita', value: totalReceita, icon: DollarSign, color: 'text-primary' }, { label: 'Cartão', value: totalCartao, icon: CreditCard, color: 'text-blue-500' }, { label: 'Pix', value: totalPix, icon: TrendingUp, color: 'text-amber-500' }, { label: 'Dinheiro', value: totalDinheiro, icon: Banknote, color: 'text-emerald-500' }, { label: 'Parcerias', value: totalParcerias, icon: Handshake, color: 'text-purple-500' }];
+  const summaryCards = [
+    { label: 'Receita', value: totalReceita, icon: DollarSign, color: 'text-primary' },
+    { label: 'Custos', value: totalCustos, icon: TrendingDown, color: 'text-red-500' },
+    { label: 'Lucro', value: totalLucro, icon: Sparkles, color: 'text-emerald-500' },
+    { label: 'Cartão', value: totalCartao, icon: CreditCard, color: 'text-blue-500' },
+    { label: 'Pix', value: totalPix, icon: TrendingUp, color: 'text-amber-500' },
+    { label: 'Dinheiro', value: totalDinheiro, icon: Banknote, color: 'text-emerald-500' },
+    { label: 'Parcerias', value: totalParcerias, icon: Handshake, color: 'text-purple-500' },
+  ];
 
   return (
     <div className="space-y-6 h-full flex flex-col overflow-hidden">
@@ -37,7 +48,7 @@ export function FinanceView({ finances, onAddFinance }: FinanceViewProps) {
         </div>
       </div>
       <div className="flex-1 overflow-y-auto custom-scrollbar pb-20 space-y-6 pr-2">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">{summaryCards.map((card, i) => (<BronzeCard key={i} className="bg-secondary/50 p-4 text-center"><div className={`inline-flex items-center justify-center w-10 h-10 rounded-full bg-background mb-2 ${card.color}`}><card.icon size={20} /></div><p className="text-[10px] font-black uppercase text-muted-foreground">{card.label}</p><p className="text-lg font-black">R$ {card.value.toLocaleString('pt-BR')}</p></BronzeCard>))}</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">{summaryCards.map((card, i) => (<BronzeCard key={i} className="bg-secondary/50 p-4 text-center"><div className={`inline-flex items-center justify-center w-10 h-10 rounded-full bg-background mb-2 ${card.color}`}><card.icon size={20} /></div><p className="text-[10px] font-black uppercase text-muted-foreground">{card.label}</p><p className="text-lg font-black">R$ {card.value.toLocaleString('pt-BR')}</p></BronzeCard>))}</div>
         <div className="grid md:grid-cols-2 gap-4">
           <BronzeCard className="bg-secondary/50 p-4"><h3 className="text-sm font-black uppercase text-muted-foreground mb-4">Evolução (6 meses)</h3><div className="h-[200px]"><ResponsiveContainer width="100%" height="100%"><LineChart data={evolutionData}><CartesianGrid strokeDasharray="3 3" stroke="#333" /><XAxis dataKey="month" stroke="#666" fontSize={10} /><YAxis stroke="#666" fontSize={10} /><Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} /><Line type="monotone" dataKey="valor" stroke="#f59e0b" strokeWidth={3} /></LineChart></ResponsiveContainer></div></BronzeCard>
           <BronzeCard className="bg-secondary/50 p-4"><h3 className="text-sm font-black uppercase text-muted-foreground mb-4">Pagamentos</h3><div className="h-[200px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={paymentData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value">{paymentData.map((entry, i) => <Cell key={i} fill={entry.color} />)}</Pie><Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} /></PieChart></ResponsiveContainer></div></BronzeCard>
