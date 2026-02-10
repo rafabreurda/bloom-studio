@@ -19,6 +19,7 @@ import { BlockModal } from '@/components/modals/BlockModal';
 import { WaitlistModal } from '@/components/modals/WaitlistModal';
 import { RestrictedModal } from '@/components/modals/RestrictedModal';
 import { ClientHistoryModal } from '@/components/clients/ClientHistoryModal';
+import { ClientModal } from '@/components/clients/ClientModal';
 import { 
   TabId, 
   UserRole, 
@@ -116,6 +117,10 @@ const Index = () => {
     setShowAddModal(true);
   };
 
+  // State for pre-filled new client registration
+  const [newClientFromAgenda, setNewClientFromAgenda] = useState<{ name: string; phone: string } | null>(null);
+  const [showClientModal, setShowClientModal] = useState(false);
+
   // Handle client click from agenda
   const handleClientClickFromAgenda = (clientName: string, phone: string) => {
     const client = clients.find(c => c.phone === phone) 
@@ -124,7 +129,9 @@ const Index = () => {
     if (client) {
       setHistoryClient(client);
     } else {
-      toast.info(`Cliente "${clientName}" não cadastrado. Cadastre na aba Clientes para visualizar o histórico.`);
+      // Client not registered - open registration modal pre-filled
+      setNewClientFromAgenda({ name: clientName, phone });
+      setShowClientModal(true);
     }
   };
 
@@ -428,6 +435,35 @@ const Index = () => {
             onDelete={deleteAppointment}
             stock={stock}
             partnerships={partnerships}
+          />
+        </div>
+      )}
+
+      {/* Client Registration Modal from Agenda */}
+      {showClientModal && (
+        <div className="fixed inset-0 bg-background/90 z-[150] flex items-end md:items-center justify-center p-0 md:p-4 backdrop-blur-md animate-slide-up">
+          <ClientModal
+            client={newClientFromAgenda ? {
+              id: '',
+              name: newClientFromAgenda.name,
+              phone: newClientFromAgenda.phone,
+              tags: [],
+              isVIP: false,
+              history: [],
+              createdAt: new Date(),
+            } as Client : null}
+            tags={systemConfig.clientTags}
+            partnerships={partnerships}
+            onClose={() => {
+              setShowClientModal(false);
+              setNewClientFromAgenda(null);
+            }}
+            onSave={async (clientData) => {
+              await addClient(clientData);
+              setShowClientModal(false);
+              setNewClientFromAgenda(null);
+              toast.success('Cliente cadastrada com sucesso!');
+            }}
           />
         </div>
       )}

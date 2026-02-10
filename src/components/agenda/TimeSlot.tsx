@@ -1,4 +1,4 @@
-import { Plus, X, Star, CheckCircle2, Copy, MessageSquare, Handshake, Pencil } from 'lucide-react';
+import { Plus, X, Star, CheckCircle2, Copy, MessageSquare, Handshake, Pencil, UserPlus } from 'lucide-react';
 import { Appointment, Block } from '@/types';
 
 interface TimeSlotProps {
@@ -25,6 +25,7 @@ export function TimeSlot({
   onAppointmentClick,
 }: TimeSlotProps) {
   const isVIP = appointment?.tags?.includes('VIP');
+  const isNewClient = appointment?.tags?.includes('Cliente Nova');
   const isPartnership = appointment?.isPartnership;
 
   return (
@@ -89,6 +90,13 @@ export function TimeSlot({
             {isPartnership && !isVIP && (
               <div className="absolute -top-3 -right-2 bg-violet-500 text-white px-2 py-0.5 rounded-full text-[9px] font-black flex items-center gap-1 shadow-lg border border-white">
                 <Handshake size={10} /> PARCERIA
+              </div>
+            )}
+
+            {/* New Client Badge */}
+            {isNewClient && !isVIP && !isPartnership && (
+              <div className="absolute -top-3 -right-2 bg-yellow-400 text-black px-2 py-0.5 rounded-full text-[9px] font-black flex items-center gap-1 shadow-lg border border-white">
+                <UserPlus size={10} /> NOVA
               </div>
             )}
             
