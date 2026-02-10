@@ -45,7 +45,15 @@ export function AgendaView({
     return new Date(y, m - 1, d);
   };
   const [selectedDate, setSelectedDate] = useState(getNowInBrazil);
-  const [viewMode, setViewMode] = useState<ViewMode>('day');
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('bronze_agenda_view_mode');
+    return (saved as ViewMode) || 'day';
+  });
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('bronze_agenda_view_mode', mode);
+  };
 
   // Generate time slots from 8:00 to 22:00
   const timeSlots: string[] = [];
@@ -93,7 +101,7 @@ export function AgendaView({
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
         viewMode={viewMode}
-        onViewModeChange={setViewMode}
+        onViewModeChange={handleViewModeChange}
         onBlockClick={onBlockClick}
         onAddClick={() => onAddClick('')}
         onClearAll={onClearAll}
