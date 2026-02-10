@@ -10,7 +10,8 @@ interface AgendaHeaderProps {
   onViewModeChange: (mode: ViewMode) => void;
   onBlockClick: () => void;
   onAddClick: () => void;
-  onClearAgenda?: () => void;
+  onClearAll?: () => void;
+  onClearByDate?: (date: string) => void;
 }
 
 export function AgendaHeader({
@@ -20,9 +21,16 @@ export function AgendaHeader({
   onViewModeChange,
   onBlockClick,
   onAddClick,
-  onClearAgenda,
+  onClearAll,
+  onClearByDate,
 }: AgendaHeaderProps) {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [clearMode, setClearMode] = useState<'all' | 'date'>('date');
+  const [clearDate, setClearDate] = useState(() => {
+    const now = new Date();
+    const brDateStr = now.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+    return brDateStr;
+  });
   const goToPrev = () => {
     const newDate = new Date(selectedDate);
     if (viewMode === 'day') {
@@ -142,7 +150,7 @@ export function AgendaHeader({
           <BronzeButton variant="success" icon={Plus} size="sm" onClick={onAddClick}>
             Novo
           </BronzeButton>
-          {onClearAgenda && (
+          {(onClearAll || onClearByDate) && (
             <BronzeButton variant="danger" icon={Trash2} size="sm" onClick={() => setShowClearConfirm(true)}>
               Limpar
             </BronzeButton>
@@ -154,12 +162,50 @@ export function AgendaHeader({
       {showClearConfirm && (
         <div className="fixed inset-0 bg-background/90 z-[200] flex items-center justify-center p-4 backdrop-blur-md">
           <div className="rounded-2xl p-6 max-w-sm w-full border shadow-2xl agenda-card agenda-border">
-            <h3 className="text-lg font-black mb-2" style={{ color: 'hsl(var(--agenda-foreground))' }}>
+            <h3 className="text-lg font-black mb-4" style={{ color: 'hsl(var(--agenda-foreground))' }}>
               Limpar Agenda
             </h3>
-            <p className="text-sm mb-6" style={{ color: 'hsl(var(--agenda-muted-foreground))' }}>
-              Tem certeza que deseja remover <strong>todos</strong> os agendamentos? Esta ação não pode ser desfeita.
-            </p>
+            
+            {/* Mode Toggle */}
+            <div className="flex p-1 rounded-xl border mb-4" style={{ backgroundColor: 'hsl(var(--agenda-muted))', borderColor: 'hsl(var(--agenda-border))' }}>
+              <button
+                onClick={() => setClearMode('date')}
+                className={`flex-1 px-3 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
+                  clearMode === 'date' ? 'bg-primary text-primary-foreground shadow-lg' : ''
+                }`}
+                style={clearMode !== 'date' ? { color: 'hsl(var(--agenda-muted-foreground))' } : undefined}
+              >
+                Por Data
+              </button>
+              <button
+                onClick={() => setClearMode('all')}
+                className={`flex-1 px-3 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${
+                  clearMode === 'all' ? 'bg-destructive text-destructive-foreground shadow-lg' : ''
+                }`}
+                style={clearMode !== 'all' ? { color: 'hsl(var(--agenda-muted-foreground))' } : undefined}
+              >
+                Toda Agenda
+              </button>
+            </div>
+
+            {clearMode === 'date' ? (
+              <>
+                <p className="text-sm mb-3" style={{ color: 'hsl(var(--agenda-muted-foreground))' }}>
+                  Selecione a data para limpar:
+                </p>
+                <input
+                  type="date"
+                  value={clearDate}
+                  onChange={(e) => setClearDate(e.target.value)}
+                  className="input-bronze w-full mb-4"
+                />
+              </>
+            ) : (
+              <p className="text-sm mb-4" style={{ color: 'hsl(var(--agenda-muted-foreground))' }}>
+                Tem certeza que deseja remover <strong>todos</strong> os agendamentos? Esta ação não pode ser desfeita.
+              </p>
+            )}
+
             <div className="flex gap-3">
               <button
                 onClick={() => setShowClearConfirm(false)}
@@ -170,12 +216,16 @@ export function AgendaHeader({
               </button>
               <button
                 onClick={() => {
-                  onClearAgenda();
+                  if (clearMode === 'all' && onClearAll) {
+                    onClearAll();
+                  } else if (clearMode === 'date' && onClearByDate && clearDate) {
+                    onClearByDate(clearDate);
+                  }
                   setShowClearConfirm(false);
                 }}
                 className="flex-1 px-4 py-2 rounded-xl text-sm font-bold bg-destructive text-destructive-foreground"
               >
-                Limpar Tudo
+                {clearMode === 'all' ? 'Limpar Tudo' : 'Limpar Data'}
               </button>
             </div>
           </div>

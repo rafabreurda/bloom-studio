@@ -3,6 +3,7 @@ import { X, Star, CheckCircle2, ShoppingCart, Handshake } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { ClientSearchCombobox } from './ClientSearchCombobox';
+import { TimeRollerPicker } from '@/components/ui/TimeRollerPicker';
 import { StockItem, Appointment, Client, Partnership } from '@/types';
 
 interface AddAppointmentModalProps {
@@ -33,6 +34,7 @@ export function AddAppointmentModal({
   const [selectedPartnershipId, setSelectedPartnershipId] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<StockItem[]>([]);
   const [isManualPhone, setIsManualPhone] = useState(true);
+  const [selectedTime, setSelectedTime] = useState(defaultTime || '08:00');
 
   const selectedPartnership = partnerships.find(p => p.id === selectedPartnershipId);
   const productsTotal = selectedProducts.reduce((acc, curr) => acc + Number(curr.price), 0);
@@ -66,7 +68,7 @@ export function AddAppointmentModal({
       clientName: clientName,
       phone: clientPhone,
       date: dateStr,
-      time: formData.get('time') as string,
+      time: selectedTime,
       status: formData.get('status') as 'Aguardando Sinal' | 'Agendado',
       value: Number(sessionValue),
       totalValue: finalTotal,
@@ -131,21 +133,21 @@ export function AddAppointmentModal({
         </div>
 
         {/* Date & Time */}
-        <div className="grid grid-cols-2 gap-4">
-          <input 
-            name="date" 
-            type="date" 
-            className="input-bronze" 
-            defaultValue={selectedDate.toISOString().split('T')[0]} 
-            required 
-          />
-          <input 
-            name="time" 
-            type="time" 
-            className="input-bronze" 
-            defaultValue={defaultTime} 
-            required 
-          />
+        <div className="grid grid-cols-2 gap-4 items-start">
+          <div>
+            <label className="text-[9px] font-black uppercase text-muted-foreground mb-1 block">Data</label>
+            <input 
+              name="date" 
+              type="date" 
+              className="input-bronze w-full" 
+              defaultValue={selectedDate.toISOString().split('T')[0]} 
+              required 
+            />
+          </div>
+          <div>
+            <label className="text-[9px] font-black uppercase text-muted-foreground mb-1 block">Horário</label>
+            <TimeRollerPicker value={selectedTime} onChange={setSelectedTime} />
+          </div>
         </div>
 
         {/* Products */}

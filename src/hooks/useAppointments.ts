@@ -186,7 +186,7 @@ export function useAppointments() {
       const { error } = await supabase
         .from('appointments')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // delete all
+        .neq('id', '00000000-0000-0000-0000-000000000000');
 
       if (error) throw error;
 
@@ -199,6 +199,28 @@ export function useAppointments() {
     }
   };
 
+  const clearAppointmentsByDate = async (dateStr: string) => {
+    try {
+      // dateStr comes as YYYY-MM-DD
+      const { error } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('date', dateStr);
+
+      if (error) throw error;
+
+      // Remove from local state - convert YYYY-MM-DD to DD/MM/YYYY for comparison
+      const [year, month, day] = dateStr.split('-');
+      const localDate = `${day}/${month}/${year}`;
+      setAppointments(prev => prev.filter(a => a.date !== localDate));
+      toast.success(`Agendamentos do dia ${localDate} removidos!`);
+    } catch (error) {
+      console.error('Erro ao limpar agenda por data:', error);
+      toast.error('Erro ao limpar agenda');
+      throw error;
+    }
+  };
+
   return {
     appointments,
     loading,
@@ -206,6 +228,7 @@ export function useAppointments() {
     updateAppointment,
     deleteAppointment,
     clearAllAppointments,
+    clearAppointmentsByDate,
     refetch: fetchAppointments,
   };
 }
