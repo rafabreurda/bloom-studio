@@ -123,11 +123,10 @@ export function AddAppointmentModal({
           <input 
             name="phone" 
             type="text" 
-            placeholder="WhatsApp" 
+            placeholder="WhatsApp (opcional)" 
             className="input-bronze" 
             value={clientPhone}
             onChange={e => setClientPhone(e.target.value)}
-            required 
           />
         </div>
 

@@ -44,7 +44,11 @@ export function AgendaHeader({
   };
 
   const goToToday = () => {
-    onDateChange(new Date());
+    // Force Brazilian timezone
+    const now = new Date();
+    const brDateStr = now.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+    const [y, m, d] = brDateStr.split('-').map(Number);
+    onDateChange(new Date(y, m - 1, d));
   };
 
   const getHeaderLabel = () => {

@@ -33,7 +33,14 @@ export function AgendaView({
   onAppointmentClick,
   pixKey,
 }: AgendaViewProps) {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  // Force Brazilian timezone (America/Sao_Paulo)
+  const getNowInBrazil = () => {
+    const now = new Date();
+    const brDateStr = now.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }); // YYYY-MM-DD
+    const [y, m, d] = brDateStr.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  };
+  const [selectedDate, setSelectedDate] = useState(getNowInBrazil);
   const [viewMode, setViewMode] = useState<ViewMode>('day');
 
   // Generate time slots from 8:00 to 22:00
