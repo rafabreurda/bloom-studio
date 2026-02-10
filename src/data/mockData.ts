@@ -20,6 +20,7 @@ export const mockAppointments: Appointment[] = [
     totalValue: 200,
     productsValue: 50,
     chargedValue: 200,
+    cost: 50,
     paymentMethod: 'Pix',
     tags: ['VIP'],
     isConfirmed: true,
@@ -37,7 +38,8 @@ export const mockAppointments: Appointment[] = [
     value: 120,
     totalValue: 120,
     productsValue: 0,
-    chargedValue: 0, // Parceria 100% - só cobraria produtos
+    chargedValue: 0,
+    cost: 50,
     paymentMethod: 'Cartão',
     tags: [],
     isConfirmed: false,
@@ -58,6 +60,7 @@ export const mockAppointments: Appointment[] = [
     totalValue: 230,
     productsValue: 50,
     chargedValue: 230,
+    cost: 50,
     paymentMethod: 'Dinheiro',
     tags: ['Fidelidade'],
     isConfirmed: true,
@@ -288,6 +291,17 @@ export const defaultWhatsAppTemplates: WhatsAppTemplate[] = [
 
 export const defaultAdmins: AdminUser[] = [];
 
+export const defaultServiceTypes = [
+  { id: '1', name: 'Biquíni de Fita completo', duration: 10, price: 30, cost: 5, isActive: true },
+  { id: '2', name: 'Bronze Intenso', duration: 40, price: 230, cost: 50, isActive: true },
+  { id: '3', name: 'Bronze Médio', duration: 40, price: 210, cost: 50, isActive: true },
+  { id: '4', name: 'Contorno Corporal', duration: 30, price: 320, cost: 50, isActive: true },
+  { id: '5', name: 'Express', duration: 40, price: 260, cost: 50, isActive: true },
+  { id: '6', name: 'Sessão de Bronze a Jato', duration: 50, price: 210, cost: 50, isActive: true },
+  { id: '7', name: 'Deslocamento Domiciliar', duration: 60, price: 80, cost: 0, isActive: true },
+  { id: '8', name: 'Parte Biquíni de Fita', duration: 10, price: 20, cost: 0, isActive: true },
+];
+
 export const defaultConfig: SystemConfig = {
   name: 'BRONZE PRO',
   pixKey: 'pix@bronzepro.com.br',
@@ -296,6 +310,7 @@ export const defaultConfig: SystemConfig = {
   admins: defaultAdmins,
   clientTags: defaultClientTags,
   whatsappTemplates: defaultWhatsAppTemplates,
+  serviceTypes: defaultServiceTypes,
 };
 
 export const chartEvolutionData = [

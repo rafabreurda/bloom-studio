@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { X, Star, CheckCircle2, ShoppingCart, Handshake, Trash2 } from 'lucide-react';
+import { X, Star, CheckCircle2, ShoppingCart, Handshake, Trash2, Sparkles } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
-import { StockItem, Appointment, Partnership } from '@/types';
+import { StockItem, Appointment, Partnership, ServiceType } from '@/types';
 
 interface EditAppointmentModalProps {
   appointment: Appointment;
@@ -11,6 +11,7 @@ interface EditAppointmentModalProps {
   onDelete: (id: string) => void;
   stock: StockItem[];
   partnerships: Partnership[];
+  serviceTypes: ServiceType[];
 }
 
 export function EditAppointmentModal({ 
@@ -20,6 +21,7 @@ export function EditAppointmentModal({
   onDelete,
   stock,
   partnerships,
+  serviceTypes,
 }: EditAppointmentModalProps) {
   const [clientName, setClientName] = useState(appointment.clientName);
   const [clientPhone, setClientPhone] = useState(appointment.phone);
@@ -36,12 +38,24 @@ export function EditAppointmentModal({
   );
   const [paymentMethod, setPaymentMethod] = useState<'Pix' | 'Cartão' | 'Dinheiro'>(appointment.paymentMethod);
   const [status, setStatus] = useState<'Aguardando Sinal' | 'Agendado'>(appointment.status);
+  const [sessionCost, setSessionCost] = useState(appointment.cost || 0);
+  const [selectedServiceId, setSelectedServiceId] = useState(appointment.serviceTypeId || '');
   const [date, setDate] = useState(() => {
-    // Convert from DD/MM/YYYY to YYYY-MM-DD
     const parts = appointment.date.split('/');
     return `${parts[2]}-${parts[1]}-${parts[0]}`;
   });
   const [time, setTime] = useState(appointment.time);
+
+  const activeServices = serviceTypes.filter(s => s.isActive);
+
+  const handleServiceSelect = (serviceId: string) => {
+    setSelectedServiceId(serviceId);
+    const service = serviceTypes.find(s => s.id === serviceId);
+    if (service) {
+      setSessionValue(service.price);
+      setSessionCost(service.cost);
+    }
+  };
 
   const selectedPartnership = partnerships.find(p => p.id === selectedPartnershipId);
   const productsTotal = selectedProducts.reduce((acc, curr) => acc + Number(curr.price), 0);
@@ -53,6 +67,7 @@ export function EditAppointmentModal({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const dateStr = new Date(date).toLocaleDateString('pt-BR');
+    const selectedService = serviceTypes.find(s => s.id === selectedServiceId);
     
     onSave({
       ...appointment,
@@ -65,6 +80,7 @@ export function EditAppointmentModal({
       totalValue: finalTotal,
       productsValue: productsTotal,
       chargedValue: chargedValue,
+      cost: sessionCost,
       tags: isVIP ? ['VIP'] : [],
       paymentMethod,
       isConfirmed,
@@ -72,6 +88,8 @@ export function EditAppointmentModal({
       partnershipId: isPartnership ? selectedPartnershipId : undefined,
       partnershipName: isPartnership ? selectedPartnership?.name : undefined,
       partnershipDiscount: isPartnership ? selectedPartnership?.discount : undefined,
+      serviceTypeId: selectedServiceId || undefined,
+      serviceTypeName: selectedService?.name || undefined,
       products: selectedProducts.map(p => ({
         productId: p.id,
         name: p.name,
@@ -157,6 +175,27 @@ export function EditAppointmentModal({
             required 
           />
         </div>
+
+        {/* Service Type Selector */}
+        {activeServices.length > 0 && (
+          <div className="p-4 bg-secondary rounded-3xl border border-border/10 space-y-2">
+            <p className="text-[10px] font-black uppercase text-foreground flex items-center gap-2">
+              <Sparkles size={14} /> Tipo de Serviço
+            </p>
+            <select
+              value={selectedServiceId}
+              onChange={(e) => handleServiceSelect(e.target.value)}
+              className="w-full p-3 bg-background border border-border rounded-xl text-xs font-bold text-foreground"
+            >
+              <option value="">Selecionar serviço...</option>
+              {activeServices.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.name} — {s.duration}min — R$ {s.price.toFixed(2)}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Products */}
         <div className="p-4 bg-secondary rounded-3xl border border-border/10 space-y-3">

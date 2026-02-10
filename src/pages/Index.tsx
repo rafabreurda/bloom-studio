@@ -275,6 +275,7 @@ const Index = () => {
             <FinanceView
               finances={finances}
               onAddFinance={addFinance}
+              appointments={appointments}
             />
           )}
 
@@ -351,6 +352,7 @@ const Index = () => {
             stock={stock}
             clients={clients}
             partnerships={partnerships}
+            serviceTypes={systemConfig.serviceTypes || []}
           />
         </div>
       )}
@@ -435,6 +437,7 @@ const Index = () => {
             onDelete={deleteAppointment}
             stock={stock}
             partnerships={partnerships}
+            serviceTypes={systemConfig.serviceTypes || []}
           />
         </div>
       )}
