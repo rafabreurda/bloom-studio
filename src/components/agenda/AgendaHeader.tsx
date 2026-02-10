@@ -31,99 +31,118 @@ export function AgendaHeader({
     const brDateStr = now.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
     return brDateStr;
   });
-  const goToPrev = () => {
+  const goToPrevDay = () => {
     const newDate = new Date(selectedDate);
-    if (viewMode === 'day') {
-      newDate.setDate(newDate.getDate() - 1);
-    } else if (viewMode === 'week') {
-      newDate.setDate(newDate.getDate() - 7);
-    } else {
-      newDate.setMonth(newDate.getMonth() - 1);
-    }
+    newDate.setDate(newDate.getDate() - 1);
     onDateChange(newDate);
   };
 
-  const goToNext = () => {
+  const goToNextDay = () => {
     const newDate = new Date(selectedDate);
-    if (viewMode === 'day') {
-      newDate.setDate(newDate.getDate() + 1);
-    } else if (viewMode === 'week') {
-      newDate.setDate(newDate.getDate() + 7);
-    } else {
-      newDate.setMonth(newDate.getMonth() + 1);
-    }
+    newDate.setDate(newDate.getDate() + 1);
+    onDateChange(newDate);
+  };
+
+  const goToPrevMonth = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setMonth(newDate.getMonth() - 1);
+    onDateChange(newDate);
+  };
+
+  const goToNextMonth = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setMonth(newDate.getMonth() + 1);
     onDateChange(newDate);
   };
 
   const goToToday = () => {
-    // Force Brazilian timezone
     const now = new Date();
     const brDateStr = now.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
     const [y, m, d] = brDateStr.split('-').map(Number);
     onDateChange(new Date(y, m - 1, d));
   };
 
-  const getHeaderLabel = () => {
-    if (viewMode === 'day') {
-      return selectedDate.toLocaleDateString('pt-BR', { weekday: 'long' });
-    } else if (viewMode === 'week') {
-      const start = new Date(selectedDate);
-      start.setDate(start.getDate() - start.getDay());
-      const end = new Date(start);
-      end.setDate(end.getDate() + 6);
-      return `${start.getDate()} - ${end.getDate()} ${end.toLocaleDateString('pt-BR', { month: 'short' })}`;
-    } else {
-      return selectedDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-    }
-  };
+  const monthName = selectedDate.toLocaleDateString('pt-BR', { month: 'long' }).toUpperCase();
+  const year = selectedDate.getFullYear();
+  const dayLabel = viewMode === 'day'
+    ? selectedDate.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric' })
+    : viewMode === 'week'
+      ? (() => {
+          const start = new Date(selectedDate);
+          start.setDate(start.getDate() - start.getDay());
+          const end = new Date(start);
+          end.setDate(end.getDate() + 6);
+          return `${start.getDate()} - ${end.getDate()}`;
+        })()
+      : '';
 
   return (
-    <div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 p-4 md:p-5 rounded-2xl md:rounded-3xl shrink-0 agenda-header agenda-card border agenda-border">
-      {/* Date Display */}
-      <div className="flex items-center gap-4">
-        <div className="text-center bg-primary px-4 py-2 rounded-xl border border-accent min-w-[60px]">
-          <p className="text-[9px] font-black text-primary-foreground uppercase">
-            {selectedDate.toLocaleDateString('pt-BR', { month: 'short' })}
-          </p>
-          <p className="text-2xl font-black text-primary-foreground leading-none">
-            {selectedDate.getDate()}
-          </p>
-        </div>
-        <div className="flex-1">
-          <h2 className="text-lg font-black capitalize leading-tight" style={{ color: 'hsl(var(--agenda-foreground))' }}>
-            {getHeaderLabel()}
+    <div className="flex flex-col gap-3 p-4 md:p-5 rounded-2xl md:rounded-3xl shrink-0 agenda-header agenda-card border agenda-border">
+      {/* Top Row: Month navigation centered, Year top-right */}
+      <div className="flex items-center justify-between">
+        {/* Month nav */}
+        <div className="flex items-center gap-2 flex-1">
+          <button 
+            onClick={goToPrevMonth}
+            className="p-2 rounded-lg hover:opacity-80 transition-opacity"
+            style={{ backgroundColor: 'hsl(var(--agenda-muted))', color: 'hsl(var(--agenda-foreground))' }}
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <h2 className="text-lg md:text-xl font-black uppercase tracking-wider flex-1 text-center" style={{ color: 'hsl(var(--agenda-foreground))' }}>
+            {monthName}
           </h2>
-          <div className="flex items-center gap-4 mt-1">
-            <button 
-              onClick={goToPrev}
-              className="p-2 rounded-lg hover:opacity-80 transition-opacity"
-              style={{ backgroundColor: 'hsl(var(--agenda-muted))', color: 'hsl(var(--agenda-foreground))' }}
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <button 
-              onClick={goToToday}
-              className="text-[10px] font-black uppercase hover:opacity-70"
-              style={{ color: 'hsl(var(--agenda-muted-foreground))' }}
-            >
-              Hoje
-            </button>
-            <button 
-              onClick={goToNext}
-              className="p-2 rounded-lg hover:opacity-80 transition-opacity"
-              style={{ backgroundColor: 'hsl(var(--agenda-muted))', color: 'hsl(var(--agenda-foreground))' }}
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
+          <button 
+            onClick={goToNextMonth}
+            className="p-2 rounded-lg hover:opacity-80 transition-opacity"
+            style={{ backgroundColor: 'hsl(var(--agenda-muted))', color: 'hsl(var(--agenda-foreground))' }}
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
+        {/* Year */}
+        <span className="text-sm font-black ml-4 px-3 py-1 rounded-lg" style={{ color: 'hsl(var(--agenda-muted-foreground))', backgroundColor: 'hsl(var(--agenda-muted))' }}>
+          {year}
+        </span>
       </div>
 
-      {/* Controls */}
+      {/* Day navigation row (for day/week views) */}
+      {viewMode !== 'month' && (
+        <div className="flex items-center justify-center gap-3">
+          <button 
+            onClick={goToPrevDay}
+            className="p-1.5 rounded-lg hover:opacity-80 transition-opacity"
+            style={{ backgroundColor: 'hsl(var(--agenda-muted))', color: 'hsl(var(--agenda-foreground))' }}
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <div className="text-center">
+            <p className="text-sm font-black capitalize" style={{ color: 'hsl(var(--agenda-foreground))' }}>
+              {dayLabel}
+            </p>
+          </div>
+          <button 
+            onClick={goToNextDay}
+            className="p-1.5 rounded-lg hover:opacity-80 transition-opacity"
+            style={{ backgroundColor: 'hsl(var(--agenda-muted))', color: 'hsl(var(--agenda-foreground))' }}
+          >
+            <ChevronRight size={16} />
+          </button>
+          <button 
+            onClick={goToToday}
+            className="text-[10px] font-black uppercase hover:opacity-70 ml-2 px-2 py-1 rounded-lg"
+            style={{ color: 'hsl(var(--agenda-muted-foreground))', backgroundColor: 'hsl(var(--agenda-muted))' }}
+          >
+            Hoje
+          </button>
+        </div>
+      )}
+
+      {/* Controls row */}
       <div className="flex flex-col sm:flex-row items-stretch gap-2">
         {/* View Mode Toggle */}
         <div 
-          className="flex p-1 rounded-xl border"
+          className="flex p-1 rounded-xl border flex-1"
           style={{ backgroundColor: 'hsl(var(--agenda-muted))', borderColor: 'hsl(var(--agenda-border))' }}
         >
           {(['day', 'week', 'month'] as ViewMode[]).map(mode => (
