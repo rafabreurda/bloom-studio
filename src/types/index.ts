@@ -182,6 +182,7 @@ export interface WhatsAppTemplate {
   name: string;
   content: string;
   includePixKey: boolean;
+  reminderMinutesBefore?: number; // Tempo de antecedência em minutos (ex: 60, 120, 1440)
 }
 
 export interface SystemConfig {
