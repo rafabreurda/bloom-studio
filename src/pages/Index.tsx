@@ -249,6 +249,7 @@ const Index = () => {
               pixKey={systemConfig.pixKey}
               onClearAll={clearAllAppointments}
               onClearByDate={clearAppointmentsByDate}
+              whatsappTemplates={systemConfig.whatsappTemplates}
             />
           )}
 
