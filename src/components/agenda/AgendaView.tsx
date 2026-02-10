@@ -3,7 +3,8 @@ import { AgendaHeader } from './AgendaHeader';
 import { TimeSlot } from './TimeSlot';
 import { AgendaWeekView } from './AgendaWeekView';
 import { AgendaMonthView } from './AgendaMonthView';
-import { Appointment, Block, StockItem, TabId, ViewMode, Client } from '@/types';
+import { WhatsAppSendModal } from '@/components/modals/WhatsAppSendModal';
+import { Appointment, Block, StockItem, TabId, ViewMode, Client, WhatsAppTemplate } from '@/types';
 import { toast } from 'sonner';
 
 interface AgendaViewProps {
@@ -20,6 +21,7 @@ interface AgendaViewProps {
   onClearAll?: () => void;
   onClearByDate?: (date: string) => void;
   pixKey: string;
+  whatsappTemplates: WhatsAppTemplate[];
 }
 
 export function AgendaView({
@@ -36,11 +38,12 @@ export function AgendaView({
   onClearAll,
   onClearByDate,
   pixKey,
+  whatsappTemplates,
 }: AgendaViewProps) {
   // Force Brazilian timezone (America/Sao_Paulo)
   const getNowInBrazil = () => {
     const now = new Date();
-    const brDateStr = now.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }); // YYYY-MM-DD
+    const brDateStr = now.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
     const [y, m, d] = brDateStr.split('-').map(Number);
     return new Date(y, m - 1, d);
   };
@@ -49,6 +52,7 @@ export function AgendaView({
     const saved = localStorage.getItem('bronze_agenda_view_mode');
     return (saved as ViewMode) || 'day';
   });
+  const [whatsAppTarget, setWhatsAppTarget] = useState<Appointment | null>(null);
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
@@ -70,10 +74,29 @@ export function AgendaView({
   };
 
   const handleSendWhatsApp = (phone: string, clientName: string) => {
-    const msg = `Olá ${clientName}! Passando para confirmar seu bronzeamento. 🌞`;
-    const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone) {
-      window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+    // Find the appointment to get full context
+    const appt = appointments.find(a => a.phone === phone && a.clientName === clientName);
+    if (appt) {
+      setWhatsAppTarget(appt);
+    } else {
+      // Fallback: open modal with just name/phone
+      setWhatsAppTarget({
+        id: '',
+        clientName,
+        phone,
+        date: dateStr,
+        time: '',
+        status: 'Agendado',
+        value: 0,
+        totalValue: 0,
+        productsValue: 0,
+        chargedValue: 0,
+        paymentMethod: 'Pix',
+        tags: [],
+        isConfirmed: false,
+        isPartnership: false,
+        createdAt: new Date(),
+      });
     }
   };
 
@@ -156,6 +179,20 @@ export function AgendaView({
           blocks={blocks}
           onDayClick={handleDayClick}
           onClientClick={onClientClick}
+        />
+      )}
+
+      {/* WhatsApp Send Modal */}
+      {whatsAppTarget && (
+        <WhatsAppSendModal
+          clientName={whatsAppTarget.clientName}
+          phone={whatsAppTarget.phone}
+          date={whatsAppTarget.date}
+          time={whatsAppTarget.time}
+          value={whatsAppTarget.chargedValue || whatsAppTarget.totalValue}
+          pixKey={pixKey}
+          templates={whatsappTemplates}
+          onClose={() => setWhatsAppTarget(null)}
         />
       )}
     </div>
