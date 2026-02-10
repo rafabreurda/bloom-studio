@@ -181,12 +181,31 @@ export function useAppointments() {
     }
   };
 
+  const clearAllAppointments = async () => {
+    try {
+      const { error } = await supabase
+        .from('appointments')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // delete all
+
+      if (error) throw error;
+
+      setAppointments([]);
+      toast.success('Agenda limpa com sucesso!');
+    } catch (error) {
+      console.error('Erro ao limpar agenda:', error);
+      toast.error('Erro ao limpar agenda');
+      throw error;
+    }
+  };
+
   return {
     appointments,
     loading,
     addAppointment,
     updateAppointment,
     deleteAppointment,
+    clearAllAppointments,
     refetch: fetchAppointments,
   };
 }

@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight, Lock, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight, Lock, Plus, Trash2 } from 'lucide-react';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { ViewMode } from '@/types';
 
@@ -9,6 +10,7 @@ interface AgendaHeaderProps {
   onViewModeChange: (mode: ViewMode) => void;
   onBlockClick: () => void;
   onAddClick: () => void;
+  onClearAgenda?: () => void;
 }
 
 export function AgendaHeader({
@@ -18,7 +20,9 @@ export function AgendaHeader({
   onViewModeChange,
   onBlockClick,
   onAddClick,
+  onClearAgenda,
 }: AgendaHeaderProps) {
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const goToPrev = () => {
     const newDate = new Date(selectedDate);
     if (viewMode === 'day') {
@@ -131,15 +135,52 @@ export function AgendaHeader({
         </div>
         
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <BronzeButton variant="danger" icon={Lock} size="sm" onClick={onBlockClick}>
             Bloquear
           </BronzeButton>
           <BronzeButton variant="success" icon={Plus} size="sm" onClick={onAddClick}>
             Novo
           </BronzeButton>
+          {onClearAgenda && (
+            <BronzeButton variant="danger" icon={Trash2} size="sm" onClick={() => setShowClearConfirm(true)}>
+              Limpar
+            </BronzeButton>
+          )}
         </div>
       </div>
+
+      {/* Clear Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 bg-background/90 z-[200] flex items-center justify-center p-4 backdrop-blur-md">
+          <div className="rounded-2xl p-6 max-w-sm w-full border shadow-2xl agenda-card agenda-border">
+            <h3 className="text-lg font-black mb-2" style={{ color: 'hsl(var(--agenda-foreground))' }}>
+              Limpar Agenda
+            </h3>
+            <p className="text-sm mb-6" style={{ color: 'hsl(var(--agenda-muted-foreground))' }}>
+              Tem certeza que deseja remover <strong>todos</strong> os agendamentos? Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                className="flex-1 px-4 py-2 rounded-xl text-sm font-bold border"
+                style={{ borderColor: 'hsl(var(--agenda-border))', color: 'hsl(var(--agenda-foreground))' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  onClearAgenda();
+                  setShowClearConfirm(false);
+                }}
+                className="flex-1 px-4 py-2 rounded-xl text-sm font-bold bg-destructive text-destructive-foreground"
+              >
+                Limpar Tudo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

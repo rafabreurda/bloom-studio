@@ -17,6 +17,7 @@ interface AgendaViewProps {
   onDeleteBlock: (blockId: string) => void;
   onClientClick: (clientName: string, phone: string) => void;
   onAppointmentClick: (appointment: Appointment) => void;
+  onClearAgenda?: () => void;
   pixKey: string;
 }
 
@@ -31,6 +32,7 @@ export function AgendaView({
   onDeleteBlock,
   onClientClick,
   onAppointmentClick,
+  onClearAgenda,
   pixKey,
 }: AgendaViewProps) {
   // Force Brazilian timezone (America/Sao_Paulo)
@@ -92,6 +94,7 @@ export function AgendaView({
         onViewModeChange={setViewMode}
         onBlockClick={onBlockClick}
         onAddClick={() => onAddClick('')}
+        onClearAgenda={onClearAgenda}
       />
 
       {/* Conditional View Rendering */}
