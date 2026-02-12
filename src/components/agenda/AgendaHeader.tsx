@@ -74,7 +74,8 @@ export function AgendaHeader({
     onDateChange(new Date(y, m - 1, d));
   };
 
-  const monthName = selectedDate.toLocaleDateString('pt-BR', { month: 'long' }).toUpperCase();
+  const monthNames = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+  const monthName = monthNames[selectedDate.getMonth()];
   const year = selectedDate.getFullYear();
   const dayLabel = viewMode === 'day'
     ? selectedDate.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric' })
