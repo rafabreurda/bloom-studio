@@ -232,6 +232,7 @@ const Index = () => {
         activeTab={activeTab}
         onTabChange={handleTabChange}
         systemName={systemConfig.name}
+        systemLogo={systemConfig.logo}
       />
 
       <main className="flex-1 flex flex-col md:ml-72 h-screen overflow-hidden relative">
