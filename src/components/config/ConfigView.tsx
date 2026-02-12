@@ -1,13 +1,17 @@
-import { useState } from 'react';
-import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles, UserCircle } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { SystemConfig, ClientTag, WhatsAppTemplate, ServiceType } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 import { TagsSection } from './TagsSection';
 import { MessagesSection } from './MessagesSection';
 import { ServicesSection } from './ServicesSection';
 import { toast } from 'sonner';
+
+const SUPABASE_URL = "https://iphluakvvklyvymwhfxh.supabase.co";
 
 interface ConfigViewProps {
   config: SystemConfig;
@@ -21,9 +25,56 @@ type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens
 
 export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLogo, onUploadBackground }: ConfigViewProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('estudio');
+  const { currentAdmin, refreshAdmins } = useAuth();
+  const [adminName, setAdminName] = useState(currentAdmin?.name || '');
+  const [adminPhoto, setAdminPhoto] = useState<string | null>(null);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  // Load admin photo from system_config
+  useEffect(() => {
+    supabase.from('system_config').select('value').eq('key', 'admin_photo').then(({ data }) => {
+      if (data && data.length > 0) setAdminPhoto(data[0].value as string);
+    });
+  }, []);
 
   const handleSave = () => {
     toast.success('Configurações salvas!');
+  };
+
+  const handleSaveProfile = async () => {
+    if (!currentAdmin) return;
+    setIsSavingProfile(true);
+    try {
+      // Update name in profiles table
+      await supabase.from('profiles').update({ name: adminName }).eq('id', currentAdmin.id);
+      // Save photo URL in system_config
+      if (adminPhoto) {
+        await supabase.from('system_config').upsert({ key: 'admin_photo', value: adminPhoto }, { onConflict: 'key' });
+      }
+      await refreshAdmins();
+      toast.success('Perfil atualizado!');
+    } catch (error) {
+      toast.error('Erro ao salvar perfil');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `admin-photo.${fileExt}`;
+      await supabase.storage.from('studio-assets').remove([fileName]);
+      const { error } = await supabase.storage.from('studio-assets').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const url = `${SUPABASE_URL}/storage/v1/object/public/studio-assets/${fileName}`;
+      setAdminPhoto(url);
+      toast.success('Foto enviada!');
+    } catch (error) {
+      toast.error('Erro ao enviar foto');
+    }
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +151,7 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar pb-20 pr-2">
-        {activeSection === 'estudio' && (
+        {activeSection === 'estudio' && (<>
           <BronzeCard className="bg-secondary/50 space-y-6">
             <h3 className="text-lg font-black uppercase text-primary">Dados do Estúdio</h3>
             
@@ -166,7 +217,63 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
               </div>
             </div>
           </BronzeCard>
-        )}
+
+          {/* User Profile Section */}
+          <BronzeCard className="bg-secondary/50 space-y-6 mt-6">
+            <div className="flex items-center gap-2">
+              <UserCircle size={20} className="text-primary" />
+              <h3 className="text-lg font-black uppercase text-primary">Perfil do Usuário</h3>
+            </div>
+
+            {/* Admin Photo */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                Foto do Usuário
+              </label>
+              <div className="flex items-center gap-4">
+                {adminPhoto ? (
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/30 flex items-center justify-center">
+                    <img src={adminPhoto} alt="Foto" className="max-w-full max-h-full object-contain" />
+                  </div>
+                ) : (
+                  <div className="w-20 h-20 rounded-full border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
+                    <UserCircle size={32} className="text-muted-foreground/50" />
+                  </div>
+                )}
+                <label className="cursor-pointer">
+                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                  <span className="px-4 py-2 bg-secondary border border-border rounded-xl text-xs font-black uppercase hover:bg-secondary/80 transition-all">
+                    {adminPhoto ? 'Alterar Foto' : 'Enviar Foto'}
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Admin Name */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                Nome do Usuário
+              </label>
+              <input
+                type="text"
+                value={adminName}
+                onChange={(e) => setAdminName(e.target.value)}
+                className="input-bronze"
+                placeholder="Seu nome"
+              />
+            </div>
+
+            <BronzeButton
+              variant="gold"
+              size="sm"
+              icon={Save}
+              onClick={handleSaveProfile}
+              disabled={isSavingProfile}
+            >
+              {isSavingProfile ? 'Salvando...' : 'Salvar Perfil'}
+            </BronzeButton>
+          </BronzeCard>
+        </>)}
 
         {activeSection === 'servicos' && (
           <ServicesSection
