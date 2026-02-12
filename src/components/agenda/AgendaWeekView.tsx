@@ -56,7 +56,7 @@ export function AgendaWeekView({
     return appointments.filter(a => a.date === dateStr);
   };
 
-  const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 
   return (
     <div 
