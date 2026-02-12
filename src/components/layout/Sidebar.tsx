@@ -63,35 +63,44 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
         {/* Header */}
         <div className="flex items-center justify-between mb-10 px-2 shrink-0">
           <div className="flex items-center gap-3">
-            {systemLogo ? (
-              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
+            {systemLogo && !systemName ? (
+              // Logo only - larger, centered
+              <div className="w-16 h-16 rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
                 <img src={systemLogo} alt="Logo" className="max-w-full max-h-full object-contain" />
               </div>
+            ) : systemLogo ? (
+              // Logo + name
+              <>
+                <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
+                  <img src={systemLogo} alt="Logo" className="max-w-full max-h-full object-contain" />
+                </div>
+                <h1 
+                  className="font-black text-lg uppercase truncate max-w-[120px]"
+                  style={{ color: 'hsl(var(--sidebar-primary))' }}
+                >
+                  {systemName}
+                </h1>
+              </>
             ) : (
-              <div 
-                className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
-                style={{ backgroundColor: 'hsl(var(--sidebar-primary))' }}
-              >
-                <Calendar 
-                  size={24} 
-                  style={{ color: 'hsl(var(--sidebar-primary-foreground))' }}
-                />
-              </div>
+              // Name only (no logo)
+              <>
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+                  style={{ backgroundColor: 'hsl(var(--sidebar-primary))' }}
+                >
+                  <Calendar 
+                    size={24} 
+                    style={{ color: 'hsl(var(--sidebar-primary-foreground))' }}
+                  />
+                </div>
+                <h1 
+                  className="font-black text-lg uppercase truncate max-w-[120px]"
+                  style={{ color: 'hsl(var(--sidebar-primary))' }}
+                >
+                  {systemName}
+                </h1>
+              </>
             )}
-            <div>
-              <h1 
-                className="font-black text-lg uppercase truncate max-w-[120px]"
-                style={{ color: 'hsl(var(--sidebar-primary))' }}
-              >
-                {systemName}
-              </h1>
-              <p 
-                className="text-[9px] font-bold uppercase tracking-widest"
-                style={{ color: 'hsl(var(--sidebar-accent-foreground))', opacity: 0.5 }}
-              >
-                Master
-              </p>
-            </div>
           </div>
           <button 
             className="md:hidden" 
