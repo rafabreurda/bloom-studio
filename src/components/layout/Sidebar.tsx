@@ -1,12 +1,9 @@
-import { useState } from 'react';
 import { 
   Calendar, Users, DollarSign, ShoppingBag, Truck, Handshake, 
-  ClipboardList, Settings, Lock, UserCheck, X 
+  ClipboardList, Settings, UserCheck, X 
 } from 'lucide-react';
-import { TabId, UserRole } from '@/types';
-import { AdminSwitchModal } from './AdminSwitchModal';
+import { TabId } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { getDisplayRole } from '@/types/admin';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -31,19 +28,8 @@ const menuItems = [
 
 
 export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, systemLogo }: SidebarProps) {
-  const [showAdminModal, setShowAdminModal] = useState(false);
-  const { currentAdmin, hasPermission } = useAuth();
-  
-  const isChefe = currentAdmin?.role === 'admin_chefe';
-  
-  const currentRole = currentAdmin 
-    ? (currentAdmin.role === 'admin_chefe' ? 'Admin Mestre' : 'Admin Pleno') as UserRole
-    : 'Admin Mestre' as UserRole;
+  const { currentAdmin } = useAuth();
 
-  const isRestricted = (tabId: TabId) => {
-    if (!currentAdmin) return false;
-    return !hasPermission(tabId);
-  };
 
   return (
     <>
@@ -125,21 +111,13 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
             >
               <item.icon size={22} />
               <span className="font-black text-xs uppercase">{item.label}</span>
-              {isRestricted(item.id) && (
-                <Lock 
-                  size={12} 
-                  className="absolute right-4"
-                  style={{ color: 'hsl(var(--sidebar-accent-foreground))', opacity: 0.4 }}
-                />
-              )}
             </button>
           ))}
         </nav>
 
-        {/* Footer - Clickable Admin Switcher */}
-        <button 
-          onClick={() => setShowAdminModal(true)}
-          className="mt-auto p-4 rounded-3xl shrink-0 w-full text-left transition-all group"
+        {/* Footer - Admin Info */}
+        <div 
+          className="mt-auto p-4 rounded-3xl shrink-0 w-full"
           style={{ 
             backgroundColor: 'hsl(var(--sidebar-accent))',
             border: '1px solid hsl(var(--sidebar-border))'
@@ -147,7 +125,7 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
         >
           <div className="flex items-center gap-3">
             <div 
-              className="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs transition-transform group-hover:scale-110"
+              className="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs"
               style={{ 
                 backgroundColor: 'hsl(var(--sidebar-primary))',
                 color: 'hsl(var(--sidebar-primary-foreground))',
@@ -165,13 +143,7 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
               </p>
             </div>
           </div>
-        </button>
-
-        {/* Admin Switch Modal */}
-        <AdminSwitchModal 
-          isOpen={showAdminModal} 
-          onClose={() => setShowAdminModal(false)} 
-        />
+        </div>
       </div>
     </>
   );

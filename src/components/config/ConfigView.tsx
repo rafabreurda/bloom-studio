@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Save, Building2, CreditCard, Users, Tag, MessageSquare, Image, Sparkles } from 'lucide-react';
+import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { SystemConfig, ClientTag, WhatsAppTemplate, ServiceType } from '@/types';
-import { AdminSection } from './AdminSection';
+
 import { TagsSection } from './TagsSection';
 import { MessagesSection } from './MessagesSection';
 import { ServicesSection } from './ServicesSection';
@@ -17,7 +17,7 @@ interface ConfigViewProps {
   onUploadBackground?: (file: File) => Promise<string | null>;
 }
 
-type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'admins' | 'tags' | 'mensagens';
+type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens';
 
 export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLogo, onUploadBackground }: ConfigViewProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('estudio');
@@ -66,7 +66,6 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
     { id: 'estudio' as ConfigSection, icon: Building2, label: 'Estúdio' },
     { id: 'servicos' as ConfigSection, icon: Sparkles, label: 'Serviços' },
     { id: 'pagamentos' as ConfigSection, icon: CreditCard, label: 'Pagamentos' },
-    { id: 'admins' as ConfigSection, icon: Users, label: 'Administradores' },
     { id: 'tags' as ConfigSection, icon: Tag, label: 'Tags de Clientes' },
     { id: 'mensagens' as ConfigSection, icon: MessageSquare, label: 'Mensagens' },
   ];
@@ -210,9 +209,6 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
           </BronzeCard>
         )}
 
-        {activeSection === 'admins' && (
-          <AdminSection />
-        )}
 
         {activeSection === 'tags' && (
           <TagsSection
