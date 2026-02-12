@@ -68,21 +68,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Check if admin has permission for a tab
+  // Single admin - always has full permission
   const hasPermission = (tabId: TabId): boolean => {
-    if (!currentAdmin) return false;
-
-    // Admin Mestre has full access
-    if (currentAdmin.role === 'admin_chefe') {
-      return true;
-    }
-
-    // Admin Pleno has access to everything EXCEPT config
-    if (currentAdmin.role === 'admin_pleno') {
-      return tabId !== 'config';
-    }
-
-    return false;
+    return !!currentAdmin;
   };
 
   // Switch to a different admin
@@ -129,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(REMEMBERED_ADMIN_KEY);
   };
 
-  // Initialize
+  // Initialize and auto-login first admin
   useEffect(() => {
     const init = async () => {
       setIsLoading(true);
@@ -140,19 +128,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     init();
   }, []);
 
-  // Auto-login if remembered admin exists
+  // Auto-login first available admin
   useEffect(() => {
     if (!isLoading && admins.length > 0 && !currentAdmin) {
-      const rememberedId = getRememberedAdminId();
-      if (rememberedId) {
-        const admin = admins.find(a => a.id === rememberedId);
-        if (admin) {
-          // For admin mestre, still require password unless we have a valid session
-          if (admin.role !== 'admin_chefe' || !admin.password_hash) {
-            setCurrentAdmin(admin);
-          }
-        }
-      }
+      setCurrentAdmin(admins[0]);
     }
   }, [isLoading, admins, currentAdmin]);
 

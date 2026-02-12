@@ -159,7 +159,6 @@ export interface AdminUser {
   id: string;
   name: string;
   phone: string;
-  role: 'Admin Pleno';
 }
 
 export interface ClientTag {
@@ -208,6 +207,6 @@ export interface ReportConfig {
   includeExpenses: boolean;
 }
 
-export type UserRole = 'Admin Mestre' | 'Admin Pleno';
+export type UserRole = 'Admin Mestre';
 export type ViewMode = 'day' | 'week' | 'month';
 export type TabId = 'agenda' | 'clientes' | 'financeiro' | 'estoque' | 'fornecedores' | 'parcerias' | 'lista-espera' | 'config';
