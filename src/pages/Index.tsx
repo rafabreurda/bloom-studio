@@ -32,7 +32,7 @@ import {
 } from '@/types';
 import { defaultConfig } from '@/data/mockData';
 
-// Import persistence hooks
+import { useSystemConfig } from '@/hooks/useSystemConfig';
 import { usePartnerships } from '@/hooks/usePartnerships';
 import { useClients } from '@/hooks/useClients';
 import { useStock } from '@/hooks/useStock';
@@ -44,28 +44,14 @@ import { useFinances } from '@/hooks/useFinances';
 
 
 
-const LOCAL_STORAGE_CONFIG_KEY = 'bronze_system_config';
-
-const loadSavedConfig = (): SystemConfig => {
-  try {
-    const saved = localStorage.getItem(LOCAL_STORAGE_CONFIG_KEY);
-    if (saved) {
-      return JSON.parse(saved);
-    }
-  } catch (e) {
-    console.error('Error loading saved config:', e);
-  }
-  return defaultConfig;
-};
-
 const Index = () => {
   // State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('agenda');
   const [currentRole, setCurrentRole] = useState<UserRole>('Admin Mestre');
-  const [systemConfig, setSystemConfig] = useState<SystemConfig>(loadSavedConfig);
   
   // Use persistence hooks
+  const { config: systemConfig, updateConfig: handleConfigChange, uploadLogo, uploadBackground } = useSystemConfig();
   const { partnerships, addPartnership, updatePartnership, deletePartnership } = usePartnerships();
   const { clients, addClient, updateClient, deleteClient } = useClients();
   const { stock, addStock, updateStock, deleteStock, adjustQuantity } = useStock();
@@ -91,16 +77,6 @@ const Index = () => {
   const [editingStock, setEditingStock] = useState<StockItem | null>(null);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [editingPartnership, setEditingPartnership] = useState<Partnership | null>(null);
-
-  // Handle config change and save to localStorage
-  const handleConfigChange = (newConfig: SystemConfig) => {
-    setSystemConfig(newConfig);
-    try {
-      localStorage.setItem(LOCAL_STORAGE_CONFIG_KEY, JSON.stringify(newConfig));
-    } catch (e) {
-      console.error('Error saving config:', e);
-    }
-  };
 
   // Handlers
   const handleTabChange = (tabId: TabId) => {
@@ -329,6 +305,8 @@ const Index = () => {
               config={systemConfig}
               onConfigChange={handleConfigChange}
               onExportBackup={handleExportBackup}
+              onUploadLogo={uploadLogo}
+              onUploadBackground={uploadBackground}
             />
           )}
         </div>
