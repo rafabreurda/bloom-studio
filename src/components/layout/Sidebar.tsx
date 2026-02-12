@@ -56,8 +56,8 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
         <div className="flex items-center justify-between mb-10 px-2 shrink-0">
           <div className="flex items-center gap-3">
             {systemLogo ? (
-              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg">
-                <img src={systemLogo} alt="Logo" className="w-full h-full object-cover" />
+              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
+                <img src={systemLogo} alt="Logo" className="max-w-full max-h-full object-contain" />
               </div>
             ) : (
               <div 
