@@ -13,38 +13,38 @@ interface ConfigViewProps {
   config: SystemConfig;
   onConfigChange: (config: SystemConfig) => void;
   onExportBackup: () => void;
+  onUploadLogo?: (file: File) => Promise<string | null>;
+  onUploadBackground?: (file: File) => Promise<string | null>;
 }
 
 type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'admins' | 'tags' | 'mensagens';
 
-export function ConfigView({ config, onConfigChange, onExportBackup }: ConfigViewProps) {
+export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLogo, onUploadBackground }: ConfigViewProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('estudio');
 
   const handleSave = () => {
     toast.success('Configurações salvas!');
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        onConfigChange({ ...config, logo: reader.result as string });
+    if (file && onUploadLogo) {
+      const url = await onUploadLogo(file);
+      if (url) {
+        onConfigChange({ ...config, logo: url });
         toast.success('Logo atualizado!');
-      };
-      reader.readAsDataURL(file);
+      }
     }
   };
 
-  const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        onConfigChange({ ...config, backgroundPhoto: reader.result as string });
+    if (file && onUploadBackground) {
+      const url = await onUploadBackground(file);
+      if (url) {
+        onConfigChange({ ...config, backgroundPhoto: url });
         toast.success('Foto de fundo atualizada!');
-      };
-      reader.readAsDataURL(file);
+      }
     }
   };
 

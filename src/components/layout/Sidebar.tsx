@@ -158,16 +158,10 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
             </div>
             <div className="overflow-hidden flex-1">
               <p 
-                className="text-[9px] font-black uppercase tracking-tighter"
-                style={{ color: 'hsl(var(--sidebar-accent-foreground))', opacity: 0.5 }}
-              >
-                Período Ativo
-              </p>
-              <p 
                 className="text-xs font-bold truncate"
                 style={{ color: 'hsl(var(--sidebar-foreground))' }}
               >
-                {currentAdmin ? currentAdmin.name : currentRole}
+                {currentAdmin ? `Olá, ${currentAdmin.name}` : 'Olá'}
               </p>
             </div>
           </div>
