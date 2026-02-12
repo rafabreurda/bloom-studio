@@ -1,9 +1,11 @@
+import { useState, useEffect } from 'react';
 import { 
   Calendar, Users, DollarSign, ShoppingBag, Truck, Handshake, 
   ClipboardList, Settings, UserCheck, X 
 } from 'lucide-react';
 import { TabId } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -29,7 +31,13 @@ const menuItems = [
 
 export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, systemLogo }: SidebarProps) {
   const { currentAdmin } = useAuth();
+  const [adminPhoto, setAdminPhoto] = useState<string | null>(null);
 
+  useEffect(() => {
+    supabase.from('system_config').select('value').eq('key', 'admin_photo').then(({ data }) => {
+      if (data && data.length > 0) setAdminPhoto(data[0].value as string);
+    });
+  }, [currentAdmin]);
 
   return (
     <>
@@ -124,16 +132,24 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
           }}
         >
           <div className="flex items-center gap-3">
-            <div 
-              className="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs"
-              style={{ 
-                backgroundColor: 'hsl(var(--sidebar-primary))',
-                color: 'hsl(var(--sidebar-primary-foreground))',
-                border: '1px solid hsl(var(--sidebar-border))'
-              }}
-            >
-              <UserCheck size={14} />
-            </div>
+            {adminPhoto ? (
+              <div className="w-8 h-8 rounded-full overflow-hidden shrink-0"
+                style={{ border: '1px solid hsl(var(--sidebar-border))' }}
+              >
+                <img src={adminPhoto} alt="Foto" className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div 
+                className="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs shrink-0"
+                style={{ 
+                  backgroundColor: 'hsl(var(--sidebar-primary))',
+                  color: 'hsl(var(--sidebar-primary-foreground))',
+                  border: '1px solid hsl(var(--sidebar-border))'
+                }}
+              >
+                <UserCheck size={14} />
+              </div>
+            )}
             <div className="overflow-hidden flex-1">
               <p 
                 className="text-xs font-bold truncate"
