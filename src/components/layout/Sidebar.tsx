@@ -28,7 +28,7 @@ const menuItems = [
   { id: 'config' as TabId, icon: Settings, label: 'Configurações' },
 ];
 
-const juniorPermissions: TabId[] = ['agenda', 'clientes', 'estoque', 'lista-espera'];
+
 
 export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, systemLogo }: SidebarProps) {
   const [showAdminModal, setShowAdminModal] = useState(false);
@@ -37,10 +37,8 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
   const isChefe = currentAdmin?.role === 'admin_chefe';
   
   const currentRole = currentAdmin 
-    ? (currentAdmin.role === 'admin_chefe' ? 'Admin Chefe' 
-       : currentAdmin.role === 'admin_pleno' ? 'Admin Pleno' 
-       : 'Admin Junior') as UserRole
-    : 'Admin Chefe' as UserRole;
+    ? (currentAdmin.role === 'admin_chefe' ? 'Admin Mestre' : 'Admin Pleno') as UserRole
+    : 'Admin Mestre' as UserRole;
 
   const isRestricted = (tabId: TabId) => {
     if (!currentAdmin) return false;

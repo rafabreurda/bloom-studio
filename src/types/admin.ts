@@ -1,6 +1,6 @@
 // Admin types for the authentication system
 
-export type AdminRoleType = 'admin_chefe' | 'admin_pleno' | 'admin_junior';
+export type AdminRoleType = 'admin_chefe' | 'admin_pleno';
 
 export interface AdminProfile {
   id: string;
@@ -41,9 +41,8 @@ export interface AdminWithRole extends AdminProfile {
 
 // Display labels for roles
 export const roleLabels: Record<AdminRoleType, string> = {
-  admin_chefe: 'Admin Chefe',
+  admin_chefe: 'Admin Mestre',
   admin_pleno: 'Admin Pleno',
-  admin_junior: 'Admin Junior',
 };
 
 // Convert database role to display role

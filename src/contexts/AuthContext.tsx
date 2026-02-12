@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         return {
           ...profile,
-          role: (userRole?.role || 'admin_junior') as AdminRoleType,
+          role: (userRole?.role || 'admin_pleno') as AdminRoleType,
           permissions: userPermissions as AdminPermissions | undefined,
         };
       });
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasPermission = (tabId: TabId): boolean => {
     if (!currentAdmin) return false;
 
-    // Admin Chefe has full access
+    // Admin Mestre has full access
     if (currentAdmin.role === 'admin_chefe') {
       return true;
     }
@@ -80,23 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Admin Pleno has access to everything EXCEPT config
     if (currentAdmin.role === 'admin_pleno') {
       return tabId !== 'config';
-    }
-
-    // Admin Junior - check permissions
-    if (currentAdmin.permissions) {
-      const permissionMap: Record<TabId, keyof AdminPermissions> = {
-        agenda: 'agenda',
-        clientes: 'clientes',
-        financeiro: 'financeiro',
-        estoque: 'estoque',
-        fornecedores: 'fornecedores',
-        parcerias: 'parcerias',
-        'lista-espera': 'lista_espera',
-        config: 'config',
-      };
-
-      const permKey = permissionMap[tabId];
-      return permKey ? Boolean(currentAdmin.permissions[permKey]) : false;
     }
 
     return false;
@@ -164,8 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (rememberedId) {
         const admin = admins.find(a => a.id === rememberedId);
         if (admin) {
-          // For admin chefe, still require password unless we have a valid session
-          // For others, auto-login
+          // For admin mestre, still require password unless we have a valid session
           if (admin.role !== 'admin_chefe' || !admin.password_hash) {
             setCurrentAdmin(admin);
           }

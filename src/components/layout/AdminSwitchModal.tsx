@@ -76,8 +76,8 @@ export function AdminSwitchModal({ isOpen, onClose }: AdminSwitchModalProps) {
 
   // Sort admins: chefe first, then pleno, then junior
   const sortedAdmins = [...admins].sort((a, b) => {
-    const order = { admin_chefe: 0, admin_pleno: 1, admin_junior: 2 };
-    return order[a.role] - order[b.role];
+    const order: Record<string, number> = { admin_chefe: 0, admin_pleno: 1 };
+    return (order[a.role] ?? 2) - (order[b.role] ?? 2);
   });
 
   return (
