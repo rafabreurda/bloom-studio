@@ -1,33 +1,18 @@
-import { createContext, useContext, ReactNode, useMemo } from 'react';
-import { useAuth } from './AuthContext';
-
-type ThemeMode = 'chefe' | 'standard';
+import { createContext, useContext, ReactNode } from 'react';
 
 interface ThemeContextType {
-  themeMode: ThemeMode;
-  isChefe: boolean;
+  themeMode: 'standard';
+  isChefe: false;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const { currentAdmin } = useAuth();
-
-  const themeMode: ThemeMode = useMemo(() => {
-    if (currentAdmin?.role === 'admin_chefe') {
-      return 'chefe';
-    }
-    return 'standard';
-  }, [currentAdmin]);
-
-  const value = useMemo(() => ({
-    themeMode,
-    isChefe: themeMode === 'chefe',
-  }), [themeMode]);
+  const value: ThemeContextType = { themeMode: 'standard', isChefe: false };
 
   return (
     <ThemeContext.Provider value={value}>
-      <div className={themeMode === 'chefe' ? 'theme-chefe' : 'theme-standard'}>
+      <div className="theme-standard">
         {children}
       </div>
     </ThemeContext.Provider>
