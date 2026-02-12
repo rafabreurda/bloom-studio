@@ -1,3 +1,4 @@
+import { useRef, useCallback } from 'react';
 import { Appointment, Block } from '@/types';
 import { Lock, Star } from 'lucide-react';
 
@@ -7,6 +8,7 @@ interface AgendaMonthViewProps {
   blocks: Block[];
   onDayClick: (date: Date) => void;
   onClientClick?: (clientName: string, phone: string) => void;
+  onMonthChange?: (date: Date) => void;
 }
 
 export function AgendaMonthView({
@@ -15,7 +17,31 @@ export function AgendaMonthView({
   blocks,
   onDayClick,
   onClientClick,
+  onMonthChange,
 }: AgendaMonthViewProps) {
+  const scrollTimeoutRef = useRef<number | null>(null);
+  
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (scrollTimeoutRef.current) return;
+    
+    const delta = e.deltaY;
+    if (Math.abs(delta) < 10) return;
+    
+    scrollTimeoutRef.current = window.setTimeout(() => {
+      scrollTimeoutRef.current = null;
+    }, 400);
+    
+    if (onMonthChange) {
+      const newDate = new Date(selectedDate);
+      if (delta > 0) {
+        newDate.setMonth(newDate.getMonth() + 1);
+      } else {
+        newDate.setMonth(newDate.getMonth() - 1);
+      }
+      onMonthChange(newDate);
+    }
+  }, [selectedDate, onMonthChange]);
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -72,6 +98,7 @@ export function AgendaMonthView({
   return (
     <div 
       className="flex-1 rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col agenda-card"
+      onWheel={handleWheel}
       style={{ 
         backgroundColor: 'hsl(var(--agenda-background))', 
         borderWidth: '1px', 

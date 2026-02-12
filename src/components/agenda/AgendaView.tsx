@@ -180,6 +180,7 @@ export function AgendaView({
           blocks={blocks}
           onDayClick={handleDayClick}
           onClientClick={onClientClick}
+          onMonthChange={setSelectedDate}
         />
       )}
 
