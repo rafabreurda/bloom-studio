@@ -75,10 +75,11 @@ export function AgendaHeader({
   };
 
   const monthNames = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+  const weekdayNames = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
   const monthName = monthNames[selectedDate.getMonth()];
   const year = selectedDate.getFullYear();
   const dayLabel = viewMode === 'day'
-    ? selectedDate.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric' })
+    ? `${weekdayNames[selectedDate.getDay()]}, ${selectedDate.getDate()}`
     : viewMode === 'week'
       ? (() => {
           const start = new Date(selectedDate);

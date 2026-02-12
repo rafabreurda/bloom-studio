@@ -14,6 +14,7 @@ interface SidebarProps {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
   systemName: string;
+  systemLogo?: string;
 }
 
 const menuItems = [
@@ -29,7 +30,7 @@ const menuItems = [
 
 const juniorPermissions: TabId[] = ['agenda', 'clientes', 'estoque', 'lista-espera'];
 
-export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, systemLogo }: SidebarProps) {
   const [showAdminModal, setShowAdminModal] = useState(false);
   const { currentAdmin, hasPermission } = useAuth();
   
@@ -70,15 +71,21 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName }:
         {/* Header */}
         <div className="flex items-center justify-between mb-10 px-2 shrink-0">
           <div className="flex items-center gap-3">
-            <div 
-              className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
-              style={{ backgroundColor: 'hsl(var(--sidebar-primary))' }}
-            >
-              <Calendar 
-                size={24} 
-                style={{ color: 'hsl(var(--sidebar-primary-foreground))' }}
-              />
-            </div>
+            {systemLogo ? (
+              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg">
+                <img src={systemLogo} alt="Logo" className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div 
+                className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+                style={{ backgroundColor: 'hsl(var(--sidebar-primary))' }}
+              >
+                <Calendar 
+                  size={24} 
+                  style={{ color: 'hsl(var(--sidebar-primary-foreground))' }}
+                />
+              </div>
+            )}
             <div>
               <h1 
                 className="font-black text-lg uppercase truncate max-w-[120px]"
