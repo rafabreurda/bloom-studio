@@ -153,21 +153,11 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
       <div className="flex-1 overflow-y-auto custom-scrollbar pb-20 pr-2">
         {activeSection === 'estudio' && (<>
           <BronzeCard className="bg-secondary/50 space-y-6">
-            <h3 className="text-lg font-black uppercase text-primary">Dados do Estúdio</h3>
+            <h3 className="text-lg font-black uppercase text-primary">Identidade do Estúdio</h3>
             
-            {/* Studio Name */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                Nome do Estúdio
-              </label>
-              <input
-                type="text"
-                value={config.name}
-                onChange={(e) => onConfigChange({ ...config, name: e.target.value.toUpperCase() })}
-                className="input-bronze"
-                placeholder="Nome do seu estúdio"
-              />
-            </div>
+            <p className="text-xs text-muted-foreground">
+              Escolha entre enviar uma logo ou digitar o nome do estúdio. A logo tem prioridade na sidebar.
+            </p>
 
             {/* Logo Upload */}
             <div className="space-y-2">
@@ -176,21 +166,45 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
               </label>
               <div className="flex items-center gap-4">
                 {config.logo ? (
-                  <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-primary/30">
-                    <img src={config.logo} alt="Logo" className="w-full h-full object-cover" />
+                  <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-primary/30 flex items-center justify-center">
+                    <img src={config.logo} alt="Logo" className="max-w-full max-h-full object-contain" />
                   </div>
                 ) : (
                   <div className="w-20 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
                     <Image size={24} className="text-muted-foreground/50" />
                   </div>
                 )}
-                <label className="cursor-pointer">
-                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-                  <span className="px-4 py-2 bg-secondary border border-border rounded-xl text-xs font-black uppercase hover:bg-secondary/80 transition-all">
-                    {config.logo ? 'Alterar Logo' : 'Enviar Logo'}
-                  </span>
-                </label>
+                <div className="flex flex-col gap-2">
+                  <label className="cursor-pointer">
+                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                    <span className="px-4 py-2 bg-secondary border border-border rounded-xl text-xs font-black uppercase hover:bg-secondary/80 transition-all inline-block">
+                      {config.logo ? 'Alterar Logo' : 'Enviar Logo'}
+                    </span>
+                  </label>
+                  {config.logo && (
+                    <button
+                      onClick={() => onConfigChange({ ...config, logo: undefined })}
+                      className="px-4 py-2 bg-destructive/10 text-destructive border border-destructive/30 rounded-xl text-xs font-black uppercase hover:bg-destructive/20 transition-all"
+                    >
+                      Remover Logo
+                    </button>
+                  )}
+                </div>
               </div>
+            </div>
+
+            {/* Studio Name - shown as alternative */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                {config.logo ? 'Nome do Estúdio (usado como fallback)' : 'Nome do Estúdio (exibido na sidebar)'}
+              </label>
+              <input
+                type="text"
+                value={config.name}
+                onChange={(e) => onConfigChange({ ...config, name: e.target.value.toUpperCase() })}
+                className="input-bronze"
+                placeholder="Nome do seu estúdio"
+              />
             </div>
 
             {/* Background Photo */}
