@@ -6,28 +6,17 @@ import { toast } from 'sonner';
 interface CreateAdminData {
   name: string;
   phone: string;
-  role: 'Admin Pleno' | 'Admin Junior';
-  permissions?: {
-    agenda: boolean;
-    clientes: boolean;
-    estoque: boolean;
-    listaEspera: boolean;
-    financeiro: boolean;
-    fornecedores: boolean;
-    parcerias: boolean;
-  };
+  role: 'Admin Pleno';
 }
 
 // Map frontend role names to database role names
 const roleMap: Record<string, AdminRoleType> = {
   'Admin Pleno': 'admin_pleno',
-  'Admin Junior': 'admin_junior',
 };
 
 const reverseRoleMap: Record<AdminRoleType, string> = {
-  'admin_chefe': 'Admin Chefe',
+  'admin_chefe': 'Admin Mestre',
   'admin_pleno': 'Admin Pleno',
-  'admin_junior': 'Admin Junior',
 };
 
 export function useAdminsCRUD() {
@@ -58,25 +47,6 @@ export function useAdminsCRUD() {
         });
 
       if (roleError) throw roleError;
-
-      // 3. Create permissions (for Junior admins)
-      if (data.role === 'Admin Junior' && data.permissions) {
-        const { error: permError } = await supabase
-          .from('admin_permissions')
-          .insert({
-            user_id: profile.id,
-            agenda: data.permissions.agenda,
-            clientes: data.permissions.clientes,
-            estoque: data.permissions.estoque,
-            lista_espera: data.permissions.listaEspera,
-            financeiro: data.permissions.financeiro,
-            fornecedores: data.permissions.fornecedores,
-            parcerias: data.permissions.parcerias,
-            config: false,
-          });
-
-        if (permError) throw permError;
-      }
 
       toast.success('Administrador cadastrado com sucesso!');
       return true;
@@ -113,7 +83,6 @@ export function useAdminsCRUD() {
       if (data.role) {
         const dbRole = roleMap[data.role];
         
-        // Delete existing role and create new one
         await supabase.from('user_roles').delete().eq('user_id', id);
         
         const { error: roleError } = await supabase
@@ -124,42 +93,6 @@ export function useAdminsCRUD() {
           });
 
         if (roleError) throw roleError;
-      }
-
-      // 3. Update permissions
-      if (data.permissions) {
-        // Check if permissions exist
-        const { data: existingPerm } = await supabase
-          .from('admin_permissions')
-          .select('id')
-          .eq('user_id', id)
-          .single();
-
-        const permData = {
-          user_id: id,
-          agenda: data.permissions.agenda,
-          clientes: data.permissions.clientes,
-          estoque: data.permissions.estoque,
-          lista_espera: data.permissions.listaEspera,
-          financeiro: data.permissions.financeiro,
-          fornecedores: data.permissions.fornecedores,
-          parcerias: data.permissions.parcerias,
-        };
-
-        if (existingPerm) {
-          const { error: permError } = await supabase
-            .from('admin_permissions')
-            .update(permData)
-            .eq('user_id', id);
-
-          if (permError) throw permError;
-        } else {
-          const { error: permError } = await supabase
-            .from('admin_permissions')
-            .insert({ ...permData, config: false });
-
-          if (permError) throw permError;
-        }
       }
 
       toast.success('Administrador atualizado!');
@@ -176,7 +109,6 @@ export function useAdminsCRUD() {
   const deleteAdmin = useCallback(async (id: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Delete in order: permissions, role, profile (cascade will handle it but let's be explicit)
       await supabase.from('admin_permissions').delete().eq('user_id', id);
       await supabase.from('user_roles').delete().eq('user_id', id);
       

@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 /* BRONZE PRO Master - Premium Tanning Studio Design System */
-/* Theme: Standard (White/Black) for Admin Pleno/Junior */
-/* Theme: Chefe (Black/Gold) for Admin Chefe */
+/* Theme: Standard (White/Black) for Admin Pleno */
+/* Theme: Mestre (Black/Gold) for Admin Mestre */
 
 @layer base {
   :root {
@@ -85,7 +85,7 @@
     --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.08);
   }
 
-  /* ADMIN CHEFE THEME - Black/Gold Premium */
+  /* ADMIN MESTRE THEME - Black/Gold Premium */
   .theme-chefe {
     --background: 0 0% 0%;
     --foreground: 43 96% 56%;

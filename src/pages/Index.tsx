@@ -42,7 +42,7 @@ import { useBlocks } from '@/hooks/useBlocks';
 import { useWaitingList } from '@/hooks/useWaitingList';
 import { useFinances } from '@/hooks/useFinances';
 
-const juniorPermissions: TabId[] = ['agenda', 'clientes', 'estoque', 'lista-espera'];
+
 
 const LOCAL_STORAGE_CONFIG_KEY = 'bronze_system_config';
 
@@ -62,7 +62,7 @@ const Index = () => {
   // State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('agenda');
-  const [currentRole, setCurrentRole] = useState<UserRole>('Admin Chefe');
+  const [currentRole, setCurrentRole] = useState<UserRole>('Admin Mestre');
   const [systemConfig, setSystemConfig] = useState<SystemConfig>(loadSavedConfig);
   
   // Use persistence hooks
@@ -104,10 +104,6 @@ const Index = () => {
 
   // Handlers
   const handleTabChange = (tabId: TabId) => {
-    if (currentRole === 'Admin Junior' && !juniorPermissions.includes(tabId)) {
-      setShowRestrictedModal(true);
-      return;
-    }
     setActiveTab(tabId);
     setIsSidebarOpen(false);
   };

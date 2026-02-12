@@ -155,22 +155,11 @@ export interface Partnership {
   contact: string;
 }
 
-export interface AdminJuniorPermissions {
-  agenda: boolean;
-  clientes: boolean;
-  estoque: boolean;
-  listaEspera: boolean;
-  financeiro: boolean;
-  fornecedores: boolean;
-  parcerias: boolean;
-}
-
 export interface AdminUser {
   id: string;
   name: string;
   phone: string;
-  role: 'Admin Pleno' | 'Admin Junior';
-  permissions?: AdminJuniorPermissions;
+  role: 'Admin Pleno';
 }
 
 export interface ClientTag {
@@ -219,6 +208,6 @@ export interface ReportConfig {
   includeExpenses: boolean;
 }
 
-export type UserRole = 'Admin Chefe' | 'Admin Pleno' | 'Admin Junior';
+export type UserRole = 'Admin Mestre' | 'Admin Pleno';
 export type ViewMode = 'day' | 'week' | 'month';
 export type TabId = 'agenda' | 'clientes' | 'financeiro' | 'estoque' | 'fornecedores' | 'parcerias' | 'lista-espera' | 'config';
