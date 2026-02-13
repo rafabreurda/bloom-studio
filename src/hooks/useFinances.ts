@@ -18,7 +18,7 @@ export function useFinances() {
 
       setFinances(data?.map(f => ({
         id: f.id,
-        date: new Date(f.date).toLocaleDateString('pt-BR'),
+        date: (() => { const [y, m, d] = f.date.split('-'); return `${d}/${m}/${y}`; })(),
         description: f.description,
         type: f.type as 'in' | 'out',
         value: Number(f.value),
@@ -64,7 +64,7 @@ export function useFinances() {
 
       const newFinance: Finance = {
         id: data.id,
-        date: new Date(data.date).toLocaleDateString('pt-BR'),
+        date: (() => { const [y, m, d] = data.date.split('-'); return `${d}/${m}/${y}`; })(),
         description: data.description,
         type: data.type as 'in' | 'out',
         value: Number(data.value),
