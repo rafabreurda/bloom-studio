@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Lock, Phone, Mail, Globe, MessageSquare } from 'lucide-react';
+import { Save, Lock, Globe, MessageSquare, Building2, Copy, Check } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,11 +8,35 @@ import { toast } from 'sonner';
 const SUPPORT_PASSWORD = '607652';
 
 interface SupportData {
-  phone: string;
-  email: string;
+  company: string;
   whatsapp: string;
   website: string;
-  notes: string;
+}
+
+function CopyableText({ text, isLink }: { text: string; isLink?: boolean }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    toast.success('Copiado!');
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="flex items-center gap-2 group cursor-pointer" onClick={handleCopy}>
+      {isLink ? (
+        <a href={text} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline" onClick={e => e.stopPropagation()}>
+          {text}
+        </a>
+      ) : (
+        <p className="text-sm font-semibold text-foreground select-all">{text}</p>
+      )}
+      <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-muted">
+        {copied ? <Check size={12} className="text-green-500" /> : <Copy size={12} className="text-muted-foreground" />}
+      </button>
+    </div>
+  );
 }
 
 export function SupportSection() {
@@ -20,18 +44,13 @@ export function SupportSection() {
   const [passwordInput, setPasswordInput] = useState('');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [data, setData] = useState<SupportData>({
-    phone: '',
-    email: '',
-    whatsapp: '',
-    website: '',
-    notes: '',
-  });
+  const [data, setData] = useState<SupportData>({ company: '', whatsapp: '', website: '' });
 
   useEffect(() => {
     supabase.from('system_config').select('value').eq('key', 'support_data').then(({ data: rows }) => {
       if (rows && rows.length > 0) {
-        setData(rows[0].value as unknown as SupportData);
+        const raw = rows[0].value as any;
+        setData({ company: raw.company || '', whatsapp: raw.whatsapp || '', website: raw.website || '' });
       }
     });
   }, []);
@@ -51,10 +70,7 @@ export function SupportSection() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await supabase.from('system_config').upsert(
-        { key: 'support_data', value: data as any },
-        { onConflict: 'key' }
-      );
+      await supabase.from('system_config').upsert({ key: 'support_data', value: data as any }, { onConflict: 'key' });
       toast.success('Dados de suporte salvos!');
     } catch {
       toast.error('Erro ao salvar');
@@ -63,20 +79,14 @@ export function SupportSection() {
     }
   };
 
-  const hasAnyData = data.phone || data.email || data.whatsapp || data.website || data.notes;
+  const hasAnyData = data.company || data.whatsapp || data.website;
 
   return (
     <div className="space-y-6">
-      {/* Business Card View */}
       <BronzeCard className="bg-gradient-to-br from-secondary/80 to-secondary/40 border border-border overflow-hidden relative">
-        {/* Edit button */}
         <div className="absolute top-4 right-4">
           {!isUnlocked ? (
-            <button
-              onClick={() => setShowPasswordModal(true)}
-              className="p-2 rounded-full bg-muted/60 hover:bg-muted transition-all"
-              title="Editar"
-            >
+            <button onClick={() => setShowPasswordModal(true)} className="p-2 rounded-full bg-muted/60 hover:bg-muted transition-all" title="Editar">
               <Lock size={14} className="text-muted-foreground" />
             </button>
           ) : (
@@ -95,43 +105,23 @@ export function SupportSection() {
           <p className="text-sm text-muted-foreground italic">Nenhum dado de suporte cadastrado.</p>
         ) : (
           <div className="space-y-4">
-            {/* Phone */}
             {isUnlocked ? (
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Telefone</label>
-                <input type="text" value={data.phone} onChange={e => setData({ ...data, phone: e.target.value })} className="input-bronze" placeholder="(00) 00000-0000" />
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Nome / Empresa</label>
+                <input type="text" value={data.company} onChange={e => setData({ ...data, company: e.target.value })} className="input-bronze" placeholder="Nome ou empresa" />
               </div>
-            ) : data.phone ? (
+            ) : data.company ? (
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Phone size={14} className="text-primary" />
+                  <Building2 size={14} className="text-primary" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Telefone</p>
-                  <p className="text-sm font-semibold text-foreground">{data.phone}</p>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Empresa</p>
+                  <CopyableText text={data.company} />
                 </div>
               </div>
             ) : null}
 
-            {/* Email */}
-            {isUnlocked ? (
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">E-mail</label>
-                <input type="email" value={data.email} onChange={e => setData({ ...data, email: e.target.value })} className="input-bronze" placeholder="email@exemplo.com" />
-              </div>
-            ) : data.email ? (
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Mail size={14} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">E-mail</p>
-                  <p className="text-sm font-semibold text-foreground">{data.email}</p>
-                </div>
-              </div>
-            ) : null}
-
-            {/* WhatsApp */}
             {isUnlocked ? (
               <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">WhatsApp</label>
@@ -144,12 +134,11 @@ export function SupportSection() {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">WhatsApp</p>
-                  <p className="text-sm font-semibold text-foreground">{data.whatsapp}</p>
+                  <CopyableText text={data.whatsapp} />
                 </div>
               </div>
             ) : null}
 
-            {/* Website */}
             {isUnlocked ? (
               <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Website</label>
@@ -162,27 +151,14 @@ export function SupportSection() {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Website</p>
-                  <a href={data.website} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline">{data.website}</a>
+                  <CopyableText text={data.website} isLink />
                 </div>
-              </div>
-            ) : null}
-
-            {/* Notes */}
-            {isUnlocked ? (
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Observações</label>
-                <textarea value={data.notes} onChange={e => setData({ ...data, notes: e.target.value })} className="input-bronze min-h-[80px]" placeholder="Informações adicionais..." />
-              </div>
-            ) : data.notes ? (
-              <div className="pt-3 mt-2 border-t border-border/50">
-                <p className="text-xs text-muted-foreground whitespace-pre-wrap">{data.notes}</p>
               </div>
             ) : null}
           </div>
         )}
       </BronzeCard>
 
-      {/* Password Modal */}
       {showPasswordModal && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center" onClick={() => setShowPasswordModal(false)}>
           <div className="bg-card border border-border rounded-2xl p-6 w-80 space-y-4 shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -197,10 +173,7 @@ export function SupportSection() {
               autoFocus
             />
             <div className="flex gap-2">
-              <button
-                onClick={() => { setShowPasswordModal(false); setPasswordInput(''); }}
-                className="flex-1 px-4 py-2 bg-secondary border border-border rounded-xl text-xs font-black uppercase"
-              >
+              <button onClick={() => { setShowPasswordModal(false); setPasswordInput(''); }} className="flex-1 px-4 py-2 bg-secondary border border-border rounded-xl text-xs font-black uppercase">
                 Cancelar
               </button>
               <BronzeButton variant="gold" size="sm" onClick={handleUnlock} className="flex-1">
