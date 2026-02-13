@@ -5,7 +5,7 @@ import { BronzeButton } from '@/components/ui/BronzeButton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-const SUPPORT_PASSWORD = 'suporte2024';
+const SUPPORT_PASSWORD = '607652';
 
 interface SupportData {
   phone: string;
@@ -63,21 +63,124 @@ export function SupportSection() {
     }
   };
 
+  const hasAnyData = data.phone || data.email || data.whatsapp || data.website || data.notes;
+
   return (
-    <BronzeCard className="bg-secondary/50 space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-black uppercase text-primary">Dados de Suporte</h3>
-        {!isUnlocked && (
-          <BronzeButton
-            variant="gold"
-            size="sm"
-            icon={Lock}
-            onClick={() => setShowPasswordModal(true)}
-          >
-            Editar
-          </BronzeButton>
+    <div className="space-y-6">
+      {/* Business Card View */}
+      <BronzeCard className="bg-gradient-to-br from-secondary/80 to-secondary/40 border border-border overflow-hidden relative">
+        {/* Edit button */}
+        <div className="absolute top-4 right-4">
+          {!isUnlocked ? (
+            <button
+              onClick={() => setShowPasswordModal(true)}
+              className="p-2 rounded-full bg-muted/60 hover:bg-muted transition-all"
+              title="Editar"
+            >
+              <Lock size={14} className="text-muted-foreground" />
+            </button>
+          ) : (
+            <BronzeButton variant="gold" size="sm" icon={Save} onClick={handleSave} disabled={isSaving}>
+              {isSaving ? 'Salvando...' : 'Salvar'}
+            </BronzeButton>
+          )}
+        </div>
+
+        <div className="space-y-1 mb-6">
+          <h3 className="text-lg font-black uppercase text-primary tracking-tight">Suporte</h3>
+          <div className="w-10 h-0.5 bg-primary/40 rounded-full" />
+        </div>
+
+        {!hasAnyData && !isUnlocked ? (
+          <p className="text-sm text-muted-foreground italic">Nenhum dado de suporte cadastrado.</p>
+        ) : (
+          <div className="space-y-4">
+            {/* Phone */}
+            {isUnlocked ? (
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Telefone</label>
+                <input type="text" value={data.phone} onChange={e => setData({ ...data, phone: e.target.value })} className="input-bronze" placeholder="(00) 00000-0000" />
+              </div>
+            ) : data.phone ? (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Phone size={14} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Telefone</p>
+                  <p className="text-sm font-semibold text-foreground">{data.phone}</p>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Email */}
+            {isUnlocked ? (
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">E-mail</label>
+                <input type="email" value={data.email} onChange={e => setData({ ...data, email: e.target.value })} className="input-bronze" placeholder="email@exemplo.com" />
+              </div>
+            ) : data.email ? (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Mail size={14} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">E-mail</p>
+                  <p className="text-sm font-semibold text-foreground">{data.email}</p>
+                </div>
+              </div>
+            ) : null}
+
+            {/* WhatsApp */}
+            {isUnlocked ? (
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">WhatsApp</label>
+                <input type="text" value={data.whatsapp} onChange={e => setData({ ...data, whatsapp: e.target.value })} className="input-bronze" placeholder="(00) 00000-0000" />
+              </div>
+            ) : data.whatsapp ? (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <MessageSquare size={14} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">WhatsApp</p>
+                  <p className="text-sm font-semibold text-foreground">{data.whatsapp}</p>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Website */}
+            {isUnlocked ? (
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Website</label>
+                <input type="text" value={data.website} onChange={e => setData({ ...data, website: e.target.value })} className="input-bronze" placeholder="https://..." />
+              </div>
+            ) : data.website ? (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Globe size={14} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Website</p>
+                  <a href={data.website} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline">{data.website}</a>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Notes */}
+            {isUnlocked ? (
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Observações</label>
+                <textarea value={data.notes} onChange={e => setData({ ...data, notes: e.target.value })} className="input-bronze min-h-[80px]" placeholder="Informações adicionais..." />
+              </div>
+            ) : data.notes ? (
+              <div className="pt-3 mt-2 border-t border-border/50">
+                <p className="text-xs text-muted-foreground whitespace-pre-wrap">{data.notes}</p>
+              </div>
+            ) : null}
+          </div>
         )}
-      </div>
+      </BronzeCard>
 
       {/* Password Modal */}
       {showPasswordModal && (
@@ -107,70 +210,6 @@ export function SupportSection() {
           </div>
         </div>
       )}
-
-      {/* Support Fields */}
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-1">
-            <Phone size={12} /> Telefone
-          </label>
-          {isUnlocked ? (
-            <input type="text" value={data.phone} onChange={e => setData({ ...data, phone: e.target.value })} className="input-bronze" placeholder="(00) 00000-0000" />
-          ) : (
-            <p className="text-sm text-foreground px-3 py-2 bg-muted/50 rounded-xl">{data.phone || '—'}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-1">
-            <Mail size={12} /> E-mail
-          </label>
-          {isUnlocked ? (
-            <input type="email" value={data.email} onChange={e => setData({ ...data, email: e.target.value })} className="input-bronze" placeholder="email@exemplo.com" />
-          ) : (
-            <p className="text-sm text-foreground px-3 py-2 bg-muted/50 rounded-xl">{data.email || '—'}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-1">
-            <MessageSquare size={12} /> WhatsApp
-          </label>
-          {isUnlocked ? (
-            <input type="text" value={data.whatsapp} onChange={e => setData({ ...data, whatsapp: e.target.value })} className="input-bronze" placeholder="(00) 00000-0000" />
-          ) : (
-            <p className="text-sm text-foreground px-3 py-2 bg-muted/50 rounded-xl">{data.whatsapp || '—'}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-1">
-            <Globe size={12} /> Website
-          </label>
-          {isUnlocked ? (
-            <input type="text" value={data.website} onChange={e => setData({ ...data, website: e.target.value })} className="input-bronze" placeholder="https://..." />
-          ) : (
-            <p className="text-sm text-foreground px-3 py-2 bg-muted/50 rounded-xl">{data.website || '—'}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-            Observações
-          </label>
-          {isUnlocked ? (
-            <textarea value={data.notes} onChange={e => setData({ ...data, notes: e.target.value })} className="input-bronze min-h-[80px]" placeholder="Informações adicionais..." />
-          ) : (
-            <p className="text-sm text-foreground px-3 py-2 bg-muted/50 rounded-xl whitespace-pre-wrap">{data.notes || '—'}</p>
-          )}
-        </div>
-      </div>
-
-      {isUnlocked && (
-        <BronzeButton variant="gold" size="sm" icon={Save} onClick={handleSave} disabled={isSaving}>
-          {isSaving ? 'Salvando...' : 'Salvar Suporte'}
-        </BronzeButton>
-      )}
-    </BronzeCard>
+    </div>
   );
 }
