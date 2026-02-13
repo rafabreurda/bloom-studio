@@ -76,6 +76,7 @@ export type Database = {
           id: string
           is_confirmed: boolean
           is_partnership: boolean
+          package_id: string | null
           partnership_discount: number | null
           partnership_id: string | null
           partnership_name: string | null
@@ -98,6 +99,7 @@ export type Database = {
           id?: string
           is_confirmed?: boolean
           is_partnership?: boolean
+          package_id?: string | null
           partnership_discount?: number | null
           partnership_id?: string | null
           partnership_name?: string | null
@@ -120,6 +122,7 @@ export type Database = {
           id?: string
           is_confirmed?: boolean
           is_partnership?: boolean
+          package_id?: string | null
           partnership_discount?: number | null
           partnership_id?: string | null
           partnership_name?: string | null
@@ -135,6 +138,13 @@ export type Database = {
           value?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "appointments_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appointments_partnership_id_fkey"
             columns: ["partnership_id"]
@@ -269,6 +279,48 @@ export type Database = {
           payment_method?: string | null
           type?: string
           value?: number
+        }
+        Relationships: []
+      }
+      packages: {
+        Row: {
+          client_name: string
+          client_phone: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          session_value: number | null
+          status: string
+          total_sessions: number
+          total_value: number
+          updated_at: string
+          used_sessions: number
+        }
+        Insert: {
+          client_name: string
+          client_phone?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          session_value?: number | null
+          status?: string
+          total_sessions?: number
+          total_value?: number
+          updated_at?: string
+          used_sessions?: number
+        }
+        Update: {
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          session_value?: number | null
+          status?: string
+          total_sessions?: number
+          total_value?: number
+          updated_at?: string
+          used_sessions?: number
         }
         Relationships: []
       }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles, UserCircle, Headphones } from 'lucide-react';
+import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles, UserCircle, Headphones, FileText } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { SystemConfig, ClientTag, WhatsAppTemplate, ServiceType } from '@/types';
@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { TagsSection } from './TagsSection';
 import { MessagesSection } from './MessagesSection';
 import { ServicesSection } from './ServicesSection';
+import { ReceiptSection } from './ReceiptSection';
 import { SupportSection } from './SupportSection';
 import { toast } from 'sonner';
 
@@ -22,7 +23,7 @@ interface ConfigViewProps {
   onUploadBackground?: (file: File) => Promise<string | null>;
 }
 
-type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens' | 'suporte';
+type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens' | 'recibo' | 'suporte';
 
 export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLogo, onUploadBackground }: ConfigViewProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('estudio');
@@ -120,6 +121,7 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
     { id: 'pagamentos' as ConfigSection, icon: CreditCard, label: 'Pagamentos' },
     { id: 'tags' as ConfigSection, icon: Tag, label: 'Tags de Clientes' },
     { id: 'mensagens' as ConfigSection, icon: MessageSquare, label: 'Mensagens' },
+    { id: 'recibo' as ConfigSection, icon: FileText, label: 'Recibo' },
     { id: 'suporte' as ConfigSection, icon: Headphones, label: 'Suporte' },
   ];
 
@@ -345,6 +347,10 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
             templates={config.whatsappTemplates}
             onUpdate={handleTemplateUpdate}
           />
+        )}
+
+        {activeSection === 'recibo' && (
+          <ReceiptSection />
         )}
 
         {activeSection === 'suporte' && (

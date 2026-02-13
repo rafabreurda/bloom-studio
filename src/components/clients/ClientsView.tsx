@@ -1,26 +1,31 @@
 import { useState, useMemo, useRef } from 'react';
-import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown } from 'lucide-react';
+import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown, Crown } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
-import { Client, ClientTag, Partnership } from '@/types';
+import { Client, ClientTag, Partnership, Appointment, WhatsAppTemplate } from '@/types';
 import { ClientModal } from './ClientModal';
 import { ClientHistoryModal } from './ClientHistoryModal';
+import { BestClientsView } from './BestClientsView';
 
 interface ClientsViewProps {
   clients: Client[];
   tags: ClientTag[];
   partnerships: Partnership[];
+  appointments: Appointment[];
+  whatsappTemplates: WhatsAppTemplate[];
   onAddClient: (client: Omit<Client, 'id' | 'createdAt' | 'history'>) => void;
   onEditClient: (client: Client) => void;
   onDeleteClient: (id: string) => void;
 }
 
-export function ClientsView({ clients, tags, partnerships, onAddClient, onEditClient, onDeleteClient }: ClientsViewProps) {
+export function ClientsView({ clients, tags, partnerships, appointments, whatsappTemplates, onAddClient, onEditClient, onDeleteClient }: ClientsViewProps) {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [viewingClient, setViewingClient] = useState<Client | null>(null);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
+  const [subTab, setSubTab] = useState<'list' | 'analytics'>('list');
+  const [inactivityDays, setInactivityDays] = useState(30);
   const tabsRef = useRef<HTMLDivElement>(null);
 
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -76,16 +81,34 @@ export function ClientsView({ clients, tags, partnerships, onAddClient, onEditCl
     <div className="h-full flex flex-col overflow-hidden gap-3">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
-        <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight">Clientes</h2>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-56 lg:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-            <input type="text" placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-bronze pl-9 w-full text-sm" />
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight">Clientes</h2>
+          <div className="flex gap-1">
+            <button onClick={() => setSubTab('list')} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${subTab === 'list' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}>Lista</button>
+            <button onClick={() => setSubTab('analytics')} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all flex items-center gap-1 ${subTab === 'analytics' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}><Crown size={12} /> Ranking</button>
           </div>
-          <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => { setEditingClient(null); setShowModal(true); }}>Novo</BronzeButton>
         </div>
+        {subTab === 'list' && (
+          <div className="flex gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-56 lg:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+              <input type="text" placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-bronze pl-9 w-full text-sm" />
+            </div>
+            <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => { setEditingClient(null); setShowModal(true); }}>Novo</BronzeButton>
+          </div>
+        )}
       </div>
 
+      {subTab === 'analytics' ? (
+        <BestClientsView
+          clients={clients}
+          appointments={appointments}
+          inactivityDays={inactivityDays}
+          onInactivityDaysChange={setInactivityDays}
+          whatsappTemplates={whatsappTemplates}
+        />
+      ) : (
+      <>
       {/* Count */}
       <div className="text-xs text-muted-foreground shrink-0">
         {filteredClients.length} cliente{filteredClients.length !== 1 ? 's' : ''}
@@ -184,6 +207,8 @@ export function ClientsView({ clients, tags, partnerships, onAddClient, onEditCl
           )}
         </div>
       </div>
+      </>
+      )}
 
       {showModal && <div className="fixed inset-0 bg-black/80 z-[100] flex items-end md:items-center justify-center"><ClientModal client={editingClient} tags={tags} partnerships={partnerships} onClose={() => { setShowModal(false); setEditingClient(null); }} onSave={handleSave} /></div>}
       {viewingClient && <ClientHistoryModal client={viewingClient} tags={tags} onClose={() => setViewingClient(null)} />}
