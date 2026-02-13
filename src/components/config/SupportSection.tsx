@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Lock, Globe, MessageSquare, Building2, Copy, Check } from 'lucide-react';
+import { Save, Lock, Globe, MessageSquare, Building2, Copy, Check, Instagram } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +11,7 @@ interface SupportData {
   company: string;
   whatsapp: string;
   website: string;
+  instagram: string;
 }
 
 function CopyableText({ text, isLink }: { text: string; isLink?: boolean }) {
@@ -44,13 +45,13 @@ export function SupportSection() {
   const [passwordInput, setPasswordInput] = useState('');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [data, setData] = useState<SupportData>({ company: '', whatsapp: '', website: '' });
+  const [data, setData] = useState<SupportData>({ company: '', whatsapp: '', website: '', instagram: '' });
 
   useEffect(() => {
     supabase.from('system_config').select('value').eq('key', 'support_data').then(({ data: rows }) => {
       if (rows && rows.length > 0) {
         const raw = rows[0].value as any;
-        setData({ company: raw.company || '', whatsapp: raw.whatsapp || '', website: raw.website || '' });
+        setData({ company: raw.company || '', whatsapp: raw.whatsapp || '', website: raw.website || '', instagram: raw.instagram || '' });
       }
     });
   }, []);
@@ -79,7 +80,7 @@ export function SupportSection() {
     }
   };
 
-  const hasAnyData = data.company || data.whatsapp || data.website;
+  const hasAnyData = data.company || data.whatsapp || data.website || data.instagram;
 
   return (
     <div className="space-y-6">
@@ -152,6 +153,23 @@ export function SupportSection() {
                 <div>
                   <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Website</p>
                   <CopyableText text={data.website} isLink />
+                </div>
+              </div>
+            ) : null}
+
+            {isUnlocked ? (
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Instagram</label>
+                <input type="text" value={data.instagram} onChange={e => setData({ ...data, instagram: e.target.value })} className="input-bronze" placeholder="https://instagram.com/..." />
+              </div>
+            ) : data.instagram ? (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Instagram size={14} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Instagram</p>
+                  <CopyableText text={data.instagram} isLink />
                 </div>
               </div>
             ) : null}
