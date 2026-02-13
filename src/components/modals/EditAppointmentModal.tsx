@@ -68,7 +68,9 @@ export function EditAppointmentModal({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const dateStr = new Date(date).toLocaleDateString('pt-BR');
+    // Parse date manually to avoid timezone issues
+    const [year, month, day] = date.split('-');
+    const dateStr = `${day}/${month}/${year}`;
     const selectedService = serviceTypes.find(s => s.id === selectedServiceId);
     
     onSave({

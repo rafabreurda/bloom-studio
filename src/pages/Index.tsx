@@ -423,7 +423,25 @@ const Index = () => {
           <EditAppointmentModal
             appointment={editingAppointment}
             onClose={() => setEditingAppointment(null)}
-            onSave={updateAppointment}
+            onSave={async (appointment) => {
+              const wasWaiting = editingAppointment?.status === 'Aguardando Sinal';
+              const isNowConfirmed = appointment.status === 'Agendado';
+              
+              await updateAppointment(appointment);
+              
+              // Create finance entry when status changes to "Agendado" (paid)
+              if (wasWaiting && isNowConfirmed && appointment.chargedValue > 0) {
+                await addFinance({
+                  date: appointment.date,
+                  description: `Sessão - ${appointment.clientName}`,
+                  type: 'in',
+                  value: appointment.chargedValue,
+                  paymentMethod: appointment.paymentMethod,
+                  category: appointment.isPartnership ? 'partnership' : 'session',
+                  isPartnership: appointment.isPartnership,
+                });
+              }
+            }}
             onDelete={deleteAppointment}
             stock={stock}
             partnerships={partnerships}
