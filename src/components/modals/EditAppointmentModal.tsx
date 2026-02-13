@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Star, CheckCircle2, ShoppingCart, Handshake, Trash2, Sparkles, FileText } from 'lucide-react';
+import { X, Star, CheckCircle2, ShoppingCart, Handshake, Trash2, Sparkles, FileText, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { ReceiptModal } from './ReceiptModal';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
@@ -47,6 +47,7 @@ export function EditAppointmentModal({
   });
   const [time, setTime] = useState(appointment.time);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
 
   const activeServices = serviceTypes.filter(s => s.isActive);
 
@@ -66,27 +67,25 @@ export function EditAppointmentModal({
   const chargedValue = isFullPartnership ? productsTotal : Number(sessionValue) + productsTotal;
   const finalTotal = Number(sessionValue) + productsTotal;
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Parse date manually to avoid timezone issues
+  const buildAppointmentData = (finalPaymentMethod: 'Pix' | 'Cartão' | 'Dinheiro', finalStatus: 'Aguardando Sinal' | 'Agendado'): Appointment => {
     const [year, month, day] = date.split('-');
     const dateStr = `${day}/${month}/${year}`;
     const selectedService = serviceTypes.find(s => s.id === selectedServiceId);
     
-    onSave({
+    return {
       ...appointment,
       clientName,
       phone: clientPhone,
       date: dateStr,
       time,
-      status,
+      status: finalStatus,
       value: Number(sessionValue),
       totalValue: finalTotal,
       productsValue: productsTotal,
       chargedValue: chargedValue,
       cost: sessionCost,
       tags: isVIP ? ['VIP'] : [],
-      paymentMethod,
+      paymentMethod: finalPaymentMethod,
       isConfirmed,
       isPartnership,
       partnershipId: isPartnership ? selectedPartnershipId : undefined,
@@ -100,8 +99,27 @@ export function EditAppointmentModal({
         quantity: 1,
         price: p.price,
       })),
-    });
+    };
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     
+    // If changing to "Agendado" from "Aguardando Sinal", show payment confirmation
+    const wasWaiting = appointment.status === 'Aguardando Sinal';
+    if (wasWaiting && status === 'Agendado') {
+      setShowPaymentConfirm(true);
+      return;
+    }
+    
+    onSave(buildAppointmentData(paymentMethod, status));
+    onClose();
+  };
+
+  const handlePaymentConfirm = (method: 'Pix' | 'Cartão' | 'Dinheiro') => {
+    setPaymentMethod(method);
+    setShowPaymentConfirm(false);
+    onSave(buildAppointmentData(method, 'Agendado'));
     onClose();
   };
 
@@ -390,6 +408,58 @@ export function EditAppointmentModal({
 
       {showReceipt && (
         <ReceiptModal appointment={appointment} onClose={() => setShowReceipt(false)} />
+      )}
+
+      {/* Payment Confirmation Overlay */}
+      {showPaymentConfirm && (
+        <div className="fixed inset-0 bg-black/80 z-[200] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+          <div className="bg-card rounded-3xl p-8 max-w-sm w-full space-y-6 border border-primary/30 shadow-2xl">
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-black uppercase text-foreground">Confirmar Pagamento</h3>
+              <p className="text-3xl font-black text-primary">R$ {chargedValue.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground">{clientName}</p>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => handlePaymentConfirm('Pix')}
+                className="w-full flex items-center gap-4 p-4 bg-secondary hover:bg-muted rounded-2xl border border-border/10 transition-all group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                  <Smartphone size={22} className="text-emerald-500" />
+                </div>
+                <span className="text-sm font-black uppercase text-foreground">Pix</span>
+              </button>
+
+              <button
+                onClick={() => handlePaymentConfirm('Cartão')}
+                className="w-full flex items-center gap-4 p-4 bg-secondary hover:bg-muted rounded-2xl border border-border/10 transition-all group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <CreditCard size={22} className="text-blue-500" />
+                </div>
+                <span className="text-sm font-black uppercase text-foreground">Cartão</span>
+              </button>
+
+              <button
+                onClick={() => handlePaymentConfirm('Dinheiro')}
+                className="w-full flex items-center gap-4 p-4 bg-secondary hover:bg-muted rounded-2xl border border-border/10 transition-all group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+                  <Banknote size={22} className="text-yellow-500" />
+                </div>
+                <span className="text-sm font-black uppercase text-foreground">Dinheiro</span>
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowPaymentConfirm(false)}
+              className="w-full text-xs font-bold text-muted-foreground hover:text-foreground py-2"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
       )}
     </BronzeCard>
   );
