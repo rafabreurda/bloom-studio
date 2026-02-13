@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { X, Star, CheckCircle2, ShoppingCart, Handshake, Trash2, Sparkles } from 'lucide-react';
+import { X, Star, CheckCircle2, ShoppingCart, Handshake, Trash2, Sparkles, FileText } from 'lucide-react';
+import { ReceiptModal } from './ReceiptModal';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { StockItem, Appointment, Partnership, ServiceType } from '@/types';
@@ -45,6 +46,7 @@ export function EditAppointmentModal({
     return `${parts[2]}-${parts[1]}-${parts[0]}`;
   });
   const [time, setTime] = useState(appointment.time);
+  const [showReceipt, setShowReceipt] = useState(false);
 
   const activeServices = serviceTypes.filter(s => s.isActive);
 
@@ -362,16 +364,31 @@ export function EditAppointmentModal({
           </div>
         </div>
 
-        {/* Submit */}
-        <BronzeButton 
-          className="w-full h-[70px]" 
-          variant="gold" 
-          type="submit" 
-          icon={CheckCircle2}
-        >
-          Salvar Alterações
-        </BronzeButton>
+        {/* Receipt + Submit */}
+        <div className="flex gap-3">
+          <BronzeButton
+            type="button"
+            variant="outline"
+            icon={FileText}
+            className="h-[60px]"
+            onClick={() => setShowReceipt(true)}
+          >
+            Recibo
+          </BronzeButton>
+          <BronzeButton 
+            className="flex-1 h-[60px]" 
+            variant="gold" 
+            type="submit" 
+            icon={CheckCircle2}
+          >
+            Salvar Alterações
+          </BronzeButton>
+        </div>
       </form>
+
+      {showReceipt && (
+        <ReceiptModal appointment={appointment} onClose={() => setShowReceipt(false)} />
+      )}
     </BronzeCard>
   );
 }

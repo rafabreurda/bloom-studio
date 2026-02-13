@@ -12,6 +12,7 @@ import { StockModal } from '@/components/stock/StockModal';
 import { SuppliersView } from '@/components/suppliers/SuppliersView';
 import { SupplierModal } from '@/components/suppliers/SupplierModal';
 import { PartnershipsView } from '@/components/partnerships/PartnershipsView';
+import { PackagesView } from '@/components/packages/PackagesView';
 import { PartnershipModal } from '@/components/partnerships/PartnershipModal';
 import { AddAppointmentModal } from '@/components/modals/AddAppointmentModal';
 import { EditAppointmentModal } from '@/components/modals/EditAppointmentModal';
@@ -41,6 +42,7 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useBlocks } from '@/hooks/useBlocks';
 import { useWaitingList } from '@/hooks/useWaitingList';
 import { useFinances } from '@/hooks/useFinances';
+import { usePackages } from '@/hooks/usePackages';
 
 
 
@@ -60,6 +62,7 @@ const Index = () => {
   const { blocks, addBlock, deleteBlock } = useBlocks();
   const { waitingList, addWaiting, completeWaiting } = useWaitingList();
   const { finances, addFinance } = useFinances();
+  const { packages, addPackage, updatePackage, deletePackage, useSession } = usePackages();
   
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -238,9 +241,21 @@ const Index = () => {
               clients={clients}
               tags={systemConfig.clientTags}
               partnerships={partnerships}
+              appointments={appointments}
+              whatsappTemplates={systemConfig.whatsappTemplates}
               onAddClient={addClient}
               onEditClient={updateClient}
               onDeleteClient={deleteClient}
+            />
+          )}
+
+          {activeTab === 'pacotes' && (
+            <PackagesView
+              packages={packages}
+              onAdd={addPackage}
+              onUpdate={updatePackage}
+              onDelete={deletePackage}
+              onUseSession={useSession}
             />
           )}
 
