@@ -57,13 +57,15 @@ interface FinanceViewProps {
 export function FinanceView({ finances, onAddFinance, appointments }: FinanceViewProps) {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showFinanceModal, setShowFinanceModal] = useState(false);
-  const totalReceita = finances.filter(f => f.type === 'in').reduce((sum, f) => sum + f.value, 0);
-  const totalCartao = finances.filter(f => f.type === 'in' && f.paymentMethod === 'Cartão').reduce((sum, f) => sum + f.value, 0);
-  const totalPix = finances.filter(f => f.type === 'in' && f.paymentMethod === 'Pix').reduce((sum, f) => sum + f.value, 0);
-  const totalDinheiro = finances.filter(f => f.type === 'in' && f.paymentMethod === 'Dinheiro').reduce((sum, f) => sum + f.value, 0);
-  const totalParcerias = finances.filter(f => f.isPartnership).reduce((sum, f) => sum + f.value, 0);
+  const totalReceita = finances.filter(f => f.type === 'in' && !f.isPartnership).reduce((sum, f) => sum + f.value, 0);
+  const totalCartao = finances.filter(f => f.type === 'in' && !f.isPartnership && f.paymentMethod === 'Cartão').reduce((sum, f) => sum + f.value, 0);
+  const totalPix = finances.filter(f => f.type === 'in' && !f.isPartnership && f.paymentMethod === 'Pix').reduce((sum, f) => sum + f.value, 0);
+  const totalDinheiro = finances.filter(f => f.type === 'in' && !f.isPartnership && f.paymentMethod === 'Dinheiro').reduce((sum, f) => sum + f.value, 0);
+  // Parcerias: soma o valor da sessão (value) dos agendamentos de parceria
+  const totalParcerias = appointments.filter(a => a.isPartnership).reduce((sum, a) => sum + a.value, 0);
   const totalCustos = appointments.reduce((sum, a) => sum + (a.cost || 0), 0);
-  const totalLucro = totalReceita - totalCustos;
+  const totalDespesas = finances.filter(f => f.type === 'out').reduce((sum, f) => sum + f.value, 0);
+  const totalLucro = totalReceita - totalCustos - totalDespesas;
   const evolutionData = [{ month: 'Ago', valor: 3200 }, { month: 'Set', valor: 4100 }, { month: 'Out', valor: 3800 }, { month: 'Nov', valor: 4500 }, { month: 'Dez', valor: 5200 }, { month: 'Jan', valor: totalReceita }];
   const paymentData = [{ name: 'Pix', value: totalPix, color: '#f59e0b' }, { name: 'Cartão', value: totalCartao, color: '#3b82f6' }, { name: 'Dinheiro', value: totalDinheiro, color: '#10b981' }].filter(d => d.value > 0);
   const totalSessions = finances.filter(f => f.category === 'session').reduce((sum, f) => sum + f.value, 0);
