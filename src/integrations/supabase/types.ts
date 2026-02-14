@@ -71,6 +71,7 @@ export type Database = {
         Row: {
           charged_value: number
           client_name: string
+          cost: number
           created_at: string
           date: string
           id: string
@@ -94,6 +95,7 @@ export type Database = {
         Insert: {
           charged_value?: number
           client_name: string
+          cost?: number
           created_at?: string
           date: string
           id?: string
@@ -117,6 +119,7 @@ export type Database = {
         Update: {
           charged_value?: number
           client_name?: string
+          cost?: number
           created_at?: string
           date?: string
           id?: string
