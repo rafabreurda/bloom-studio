@@ -34,7 +34,7 @@ export function useAppointments() {
           totalValue: Number(a.total_value),
           productsValue: Number(a.products_value),
           chargedValue: Number(a.charged_value),
-          cost: 0,
+          cost: Number(a.cost) || 0,
           paymentMethod: a.payment_method as 'Pix' | 'Cartão' | 'Dinheiro',
           tags: a.tags || [],
           isConfirmed: a.is_confirmed,
@@ -83,6 +83,7 @@ export function useAppointments() {
           partnership_name: appointment.partnershipName,
           partnership_discount: appointment.partnershipDiscount,
           products: (appointment.products || []) as unknown as Json,
+          cost: appointment.cost || 0,
         })
         .select()
         .single();
@@ -151,6 +152,7 @@ export function useAppointments() {
           partnership_name: appointment.partnershipName,
           partnership_discount: appointment.partnershipDiscount,
           products: (appointment.products || []) as unknown as Json,
+          cost: appointment.cost || 0,
         })
         .eq('id', appointment.id);
 
