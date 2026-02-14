@@ -38,7 +38,7 @@ export function EditAppointmentModal({
     }) || []
   );
   const [paymentMethod, setPaymentMethod] = useState<'Pix' | 'Cartão' | 'Dinheiro'>(appointment.paymentMethod);
-  const [status, setStatus] = useState<'Aguardando Sinal' | 'Agendado'>(appointment.status);
+  const [status, setStatus] = useState<'Aguardando Sinal' | 'Agendado' | 'Concluído'>(appointment.status);
   const [sessionCost, setSessionCost] = useState(appointment.cost || 0);
   const [selectedServiceId, setSelectedServiceId] = useState(appointment.serviceTypeId || '');
   const [date, setDate] = useState(() => {
@@ -67,7 +67,7 @@ export function EditAppointmentModal({
   const chargedValue = isFullPartnership ? productsTotal : Number(sessionValue) + productsTotal;
   const finalTotal = Number(sessionValue) + productsTotal;
 
-  const buildAppointmentData = (finalPaymentMethod: 'Pix' | 'Cartão' | 'Dinheiro', finalStatus: 'Aguardando Sinal' | 'Agendado'): Appointment => {
+  const buildAppointmentData = (finalPaymentMethod: 'Pix' | 'Cartão' | 'Dinheiro', finalStatus: 'Aguardando Sinal' | 'Agendado' | 'Concluído'): Appointment => {
     const [year, month, day] = date.split('-');
     const dateStr = `${day}/${month}/${year}`;
     const selectedService = serviceTypes.find(s => s.id === selectedServiceId);

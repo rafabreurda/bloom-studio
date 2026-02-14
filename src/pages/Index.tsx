@@ -43,7 +43,7 @@ import { useBlocks } from '@/hooks/useBlocks';
 import { useWaitingList } from '@/hooks/useWaitingList';
 import { useFinances } from '@/hooks/useFinances';
 import { usePackages } from '@/hooks/usePackages';
-
+import { useAutoClose } from '@/hooks/useAutoClose';
 
 
 const Index = () => {
@@ -63,7 +63,14 @@ const Index = () => {
   const { waitingList, addWaiting, completeWaiting } = useWaitingList();
   const { finances, addFinance } = useFinances();
   const { packages, addPackage, updatePackage, deletePackage, useSession } = usePackages();
-  
+
+  // Auto-close appointments when next appointment time arrives
+  useAutoClose({
+    appointments,
+    onUpdateAppointment: updateAppointment,
+    onAddFinance: addFinance,
+  });
+
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBlockModal, setShowBlockModal] = useState(false);

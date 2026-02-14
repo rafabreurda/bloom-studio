@@ -4,7 +4,7 @@ export interface Appointment {
   phone: string;
   date: string;
   time: string;
-  status: 'Aguardando Sinal' | 'Agendado';
+  status: 'Aguardando Sinal' | 'Agendado' | 'Concluído';
   value: number;
   totalValue: number;
   productsValue: number;
