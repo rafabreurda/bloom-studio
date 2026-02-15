@@ -304,12 +304,12 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
                     <Handshake size={12} className="text-violet-500" />
                     Vincular a Parceria
                   </label>
-                  <Select value={partnershipId} onValueChange={setPartnershipId}>
+                  <Select value={partnershipId || "none"} onValueChange={(v) => setPartnershipId(v === "none" ? "" : v)}>
                     <SelectTrigger className="input-bronze">
                       <SelectValue placeholder="Selecione uma parceria (opcional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Nenhuma</SelectItem>
+                      <SelectItem value="none">Nenhuma</SelectItem>
                       {partnerships.map(p => (
                         <SelectItem key={p.id} value={p.id}>
                           <span className="flex items-center gap-2">
