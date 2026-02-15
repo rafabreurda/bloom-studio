@@ -1,18 +1,18 @@
 import { createContext, useContext, ReactNode } from 'react';
 
 interface ThemeContextType {
-  themeMode: 'chefe';
-  isChefe: true;
+  themeMode: 'standard';
+  isChefe: false;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const value: ThemeContextType = { themeMode: 'chefe', isChefe: true };
+  const value: ThemeContextType = { themeMode: 'standard', isChefe: false };
 
   return (
     <ThemeContext.Provider value={value}>
-      <div className="theme-chefe">
+      <div className="theme-standard">
         {children}
       </div>
     </ThemeContext.Provider>
