@@ -79,7 +79,7 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
   const summaryCards = [
     { label: 'Receita', value: totalReceita, icon: DollarSign, color: 'text-primary' },
     { label: 'Custos', value: totalCustos, icon: TrendingDown, color: 'text-red-500' },
-    { label: 'Despesas', value: totalDespesas, icon: Receipt, color: 'text-orange-500' },
+    { label: 'Despesas', value: totalDespesas, icon: Receipt, color: 'text-red-500' },
     { label: 'Lucro', value: totalLucro, icon: Sparkles, color: 'text-emerald-500' },
     { label: 'Cartão', value: totalCartao, icon: CreditCard, color: 'text-blue-500' },
     { label: 'Pix', value: totalPix, icon: TrendingUp, color: 'text-amber-500' },
