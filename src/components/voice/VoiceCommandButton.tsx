@@ -131,7 +131,7 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment }: VoiceComm
         className={`fixed bottom-6 right-6 z-[100] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
           isListening
             ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-            : 'bg-primary hover:bg-primary/90'
+            : 'bg-blue-500 hover:bg-blue-600'
         }`}
       >
         {isListening ? (
