@@ -53,12 +53,18 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment }: VoiceComm
         });
         toast.success(`💰 Receita de R$ ${result.value?.toFixed(2)} adicionada!`);
       } else if (result.type === 'appointment') {
-        if (!result.clientName || !result.time) {
-          toast.error('Informe o nome do cliente e horário. Ex: "Agende cliente Maria às 14h"');
+        if (!result.clientName) {
+          toast.error('Informe o nome do cliente. Ex: "Agende Claudia dia 21-02 19hs bronze medio"');
+          setIsProcessing(false);
+          return;
+        }
+        if (!result.time) {
+          toast.error('Informe o horário. Ex: "Agende Claudia dia 21-02 19hs"');
           setIsProcessing(false);
           return;
         }
         const isoDate = result.date || today.toISOString().split('T')[0];
+        const tags = result.service ? [result.service] : [];
         await onAddAppointment({
           clientName: result.clientName,
           phone: result.phone || '',
@@ -71,12 +77,12 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment }: VoiceComm
           chargedValue: result.value || 0,
           cost: 0,
           paymentMethod: 'Dinheiro',
-          tags: [],
+          tags,
           isConfirmed: true,
           isPartnership: false,
           products: [],
         });
-        toast.success(`📅 ${result.clientName} agendada às ${result.time}!`);
+        toast.success(`📅 ${result.clientName} agendada às ${result.time}${result.service ? ` - ${result.service}` : ''}!`);
       }
 
       handleClose();
