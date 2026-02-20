@@ -70,19 +70,24 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment }: VoiceComm
           phone: result.phone || '',
           date: toDisplayDate(isoDate),
           time: result.time,
-          status: 'Agendado',
+          status: result.status || 'Agendado',
           value: result.value || 0,
           totalValue: result.value || 0,
           productsValue: 0,
           chargedValue: result.value || 0,
           cost: 0,
-          paymentMethod: 'Dinheiro',
+          paymentMethod: result.paymentMethod || 'Dinheiro',
           tags,
           isConfirmed: true,
-          isPartnership: false,
+          isPartnership: result.isPartnership || false,
+          partnershipName: result.partnershipName,
           products: [],
         });
-        toast.success(`📅 ${result.clientName} agendada às ${result.time}${result.service ? ` - ${result.service}` : ''}!`);
+        const extras = [
+          result.service,
+          result.isPartnership ? `parceria${result.partnershipName ? ` ${result.partnershipName}` : ''}` : null,
+        ].filter(Boolean).join(' · ');
+        toast.success(`📅 ${result.clientName} agendada às ${result.time}${extras ? ` - ${extras}` : ''}!`);
       }
 
       handleClose();
@@ -181,7 +186,7 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment }: VoiceComm
           </button>
 
           <p className="text-xs text-muted-foreground mt-3">
-            Exemplos: "adicione 50 reais nas despesas aluguel" · "adicione 100 no faturamento" · "agende cliente Maria às 14h"
+            Exemplos: "agende Claudia dia 21-02 19hs bronze medio" · "agende Maria dia 25-03 14h parceria Ana pix" · "adicione 50 nas despesas"
           </p>
         </div>
       )}

@@ -11,6 +11,9 @@ interface VoiceCommandResult {
   date?: string;
   service?: string;
   paymentMethod?: 'Pix' | 'Cartão' | 'Dinheiro';
+  isPartnership?: boolean;
+  partnershipName?: string;
+  status?: 'Aguardando Sinal' | 'Agendado' | 'Concluído';
 }
 
 // Check browser support
@@ -113,6 +116,25 @@ export function useVoiceCommand() {
         ? serviceMatch[0].split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
         : undefined;
 
+      // Detect partnership - "parceria [name]" or "parceria com [name]"
+      let isPartnership = false;
+      let partnershipName: string | undefined;
+      const partnershipMatch = lower.match(/parceria\s+(?:com\s+)?([\p{L}\s]+?)(?:\s+(?:dia|às|as|para|\d|bronze|pix|cartão|cartao|dinheiro|valor|aguardando|conclu|$))/u);
+      if (lower.includes('parceria')) {
+        isPartnership = true;
+        if (partnershipMatch) {
+          partnershipName = partnershipMatch[1].trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+      }
+
+      // Detect status
+      let status: 'Aguardando Sinal' | 'Agendado' | 'Concluído' = 'Agendado';
+      if (lower.includes('aguardando sinal') || lower.includes('aguardando')) {
+        status = 'Aguardando Sinal';
+      } else if (lower.includes('concluído') || lower.includes('concluido')) {
+        status = 'Concluído';
+      }
+
       // Parse date - default to today
       let date = new Date().toISOString().split('T')[0];
       if (lower.includes('amanhã') || lower.includes('amanha')) {
@@ -156,7 +178,7 @@ export function useVoiceCommand() {
         }
       }
 
-      return { type: 'appointment', clientName, phone, time, date, value, service };
+      return { type: 'appointment', clientName, phone, time, date, value, service, isPartnership, partnershipName, status, paymentMethod };
     }
 
     return { type: 'unknown' };
