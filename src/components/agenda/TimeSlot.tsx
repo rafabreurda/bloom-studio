@@ -1,4 +1,5 @@
 import { Plus, X, Star, CheckCircle2, Copy, MessageSquare, Handshake, Pencil, UserPlus } from 'lucide-react';
+import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { Appointment, Block } from '@/types';
 
 interface TimeSlotProps {
@@ -55,12 +56,15 @@ export function TimeSlot({
             >
               {block.reason}
             </span>
-            <button 
-              onClick={() => onDeleteBlock(block.id)} 
-              className="text-destructive p-2 hover:opacity-80"
-            >
-              <X size={18} />
-            </button>
+            <ConfirmDeleteDialog
+              description="Tem certeza que deseja remover este bloqueio?"
+              onConfirm={() => onDeleteBlock(block.id)}
+              trigger={
+                <button className="text-destructive p-2 hover:opacity-80">
+                  <X size={18} />
+                </button>
+              }
+            />
           </div>
         ) : appointment ? (
           // Appointment Slot

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search, Plus, Package as PackageIcon, Trash2, Edit2, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { PackageModal } from './PackageModal';
@@ -104,9 +105,15 @@ export function PackagesView({ packages, onAdd, onUpdate, onDelete, onUseSession
                   <button onClick={() => { setEditingPackage(pkg); setShowModal(true); }} className="w-9 h-9 rounded-xl bg-muted text-muted-foreground flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all">
                     <Edit2 size={16} />
                   </button>
-                  <button onClick={() => onDelete(pkg.id)} className="w-9 h-9 rounded-xl bg-muted text-muted-foreground flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-all">
-                    <Trash2 size={16} />
-                  </button>
+                  <ConfirmDeleteDialog
+                    description="Tem certeza que deseja excluir este pacote?"
+                    onConfirm={() => onDelete(pkg.id)}
+                    trigger={
+                      <button className="w-9 h-9 rounded-xl bg-muted text-muted-foreground flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-all">
+                        <Trash2 size={16} />
+                      </button>
+                    }
+                  />
                 </div>
               </div>
 

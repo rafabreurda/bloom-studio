@@ -1,4 +1,5 @@
 import { Plus, MessageSquare, Pencil, Trash2, Truck, Package } from 'lucide-react';
+import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { Supplier } from '@/types';
@@ -63,12 +64,15 @@ export function SuppliersView({
                   >
                     <Pencil size={18} />
                   </button>
-                  <button
-                    onClick={() => onDeleteClick(supplier.id)}
-                    className="w-10 h-10 bg-destructive/20 text-destructive rounded-xl flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-all"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <ConfirmDeleteDialog
+                    description="Tem certeza que deseja excluir este fornecedor?"
+                    onConfirm={() => onDeleteClick(supplier.id)}
+                    trigger={
+                      <button className="w-10 h-10 bg-destructive/20 text-destructive rounded-xl flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-all">
+                        <Trash2 size={18} />
+                      </button>
+                    }
+                  />
                 </div>
               </div>
             </BronzeCard>
