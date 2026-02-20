@@ -26,6 +26,7 @@ export function useVoiceCommand() {
   const [transcript, setTranscript] = useState('');
   const [lastResult, setLastResult] = useState<VoiceCommandResult | null>(null);
   const recognitionRef = useRef<any>(null);
+  const initializedRef = useRef(false);
 
   const parseCommand = useCallback((text: string): VoiceCommandResult => {
     const lower = text.toLowerCase().trim();
@@ -184,11 +185,13 @@ export function useVoiceCommand() {
     return { type: 'unknown' };
   }, []);
 
-  const startListening = useCallback(() => {
-    if (!SpeechRecognition) {
-      toast.error('Reconhecimento de voz não suportado neste navegador. Use Chrome ou Edge.');
-      return;
+  // Initialize recognition once and reuse
+  const getRecognition = useCallback(() => {
+    if (recognitionRef.current && initializedRef.current) {
+      return recognitionRef.current;
     }
+
+    if (!SpeechRecognition) return null;
 
     const recognition = new SpeechRecognition();
     recognition.lang = 'pt-BR';
@@ -237,8 +240,25 @@ export function useVoiceCommand() {
     };
 
     recognitionRef.current = recognition;
-    recognition.start();
+    initializedRef.current = true;
+    return recognition;
   }, [parseCommand]);
+
+  const startListening = useCallback(() => {
+    const recognition = getRecognition();
+    if (!recognition) {
+      toast.error('Reconhecimento de voz não suportado neste navegador. Use Chrome ou Edge.');
+      return;
+    }
+
+    try {
+      recognition.start();
+    } catch (e) {
+      // If already started, abort and restart
+      recognition.abort();
+      setTimeout(() => recognition.start(), 100);
+    }
+  }, [getRecognition]);
 
   const stopListening = useCallback(() => {
     recognitionRef.current?.stop();
