@@ -44,6 +44,7 @@ import { useWaitingList } from '@/hooks/useWaitingList';
 import { useFinances } from '@/hooks/useFinances';
 import { usePackages } from '@/hooks/usePackages';
 import { useAutoClose } from '@/hooks/useAutoClose';
+import { VoiceCommandButton } from '@/components/voice/VoiceCommandButton';
 
 
 const Index = () => {
@@ -485,6 +486,12 @@ const Index = () => {
           />
         </div>
       )}
+
+      {/* Voice Command FAB */}
+      <VoiceCommandButton
+        onAddFinance={addFinance}
+        onAddAppointment={addAppointment}
+      />
     </div>
   );
 };
