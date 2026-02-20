@@ -33,6 +33,12 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment }: VoiceComm
       const today = new Date();
       const dateStr = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
 
+      // Convert ISO date (YYYY-MM-DD) to DD/MM/YYYY for addAppointment
+      const toDisplayDate = (isoDate: string) => {
+        const [y, m, d] = isoDate.split('-');
+        return `${d}/${m}/${y}`;
+      };
+
       if (lastResult.type === 'expense') {
         await onAddFinance({
           date: dateStr,
@@ -61,10 +67,11 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment }: VoiceComm
           setIsProcessing(false);
           return;
         }
+        const isoDate = lastResult.date || today.toISOString().split('T')[0];
         await onAddAppointment({
           clientName: lastResult.clientName,
           phone: lastResult.phone || '',
-          date: lastResult.date || today.toISOString().split('T')[0],
+          date: toDisplayDate(isoDate),
           time: lastResult.time,
           status: 'Agendado',
           value: lastResult.value || 0,

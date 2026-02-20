@@ -79,20 +79,43 @@ export function useVoiceCommand() {
 
     // Detect APPOINTMENT commands
     if (lower.includes('agende') || lower.includes('agendamento') || lower.includes('marque') || lower.includes('marcar')) {
-      // Extract client name
-      const nameMatch = lower.match(/(?:cliente|para)\s+([\w\s]+?)(?:\s+(?:às|as|para|no|telefone|fone)\s+|$)/);
+      // Extract client name - skip "chamada" keyword
+      const nameMatch = lower.match(/(?:cliente\s+(?:chamad[ao]\s+)?|chamad[ao]\s+)([\w\s]+?)(?:\s+(?:às|as|para\s+as|no|telefone|fone|dia)\s+|$)/);
       const clientName = nameMatch ? nameMatch[1].trim() : undefined;
 
       // Extract phone
       const phoneMatch = lower.match(/(?:telefone|fone|cel)\s*([\d\s\-]+)/);
       const phone = phoneMatch ? phoneMatch[1].replace(/\s/g, '') : undefined;
 
-      // Default to today
+      // Parse date - default to today
       let date = new Date().toISOString().split('T')[0];
       if (lower.includes('amanhã') || lower.includes('amanha')) {
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         date = tomorrow.toISOString().split('T')[0];
+      } else {
+        // Try to parse "dia 20 de março" or "20/03" patterns
+        const monthNames: Record<string, string> = {
+          janeiro: '01', fevereiro: '02', março: '03', marco: '03',
+          abril: '04', maio: '05', junho: '06', julho: '07',
+          agosto: '08', setembro: '09', outubro: '10', novembro: '11', dezembro: '12'
+        };
+        const dayMonthMatch = lower.match(/dia\s+(\d{1,2})\s+de\s+(\w+)/);
+        if (dayMonthMatch) {
+          const day = dayMonthMatch[1].padStart(2, '0');
+          const month = monthNames[dayMonthMatch[2]] || new Date().toISOString().slice(5, 7);
+          const year = new Date().getFullYear();
+          date = `${year}-${month}-${day}`;
+        }
+        const slashMatch = lower.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
+        if (slashMatch && !dayMonthMatch) {
+          const day = slashMatch[1].padStart(2, '0');
+          const month = slashMatch[2].padStart(2, '0');
+          const year = slashMatch[3] 
+            ? (slashMatch[3].length === 2 ? `20${slashMatch[3]}` : slashMatch[3])
+            : new Date().getFullYear().toString();
+          date = `${year}-${month}-${day}`;
+        }
       }
 
       return { type: 'appointment', clientName, phone, time, date, value };
