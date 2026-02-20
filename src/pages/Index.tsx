@@ -13,6 +13,7 @@ import { SuppliersView } from '@/components/suppliers/SuppliersView';
 import { SupplierModal } from '@/components/suppliers/SupplierModal';
 import { PartnershipsView } from '@/components/partnerships/PartnershipsView';
 import { PackagesView } from '@/components/packages/PackagesView';
+import { ExpensesView } from '@/components/expenses/ExpensesView';
 import { PartnershipModal } from '@/components/partnerships/PartnershipModal';
 import { AddAppointmentModal } from '@/components/modals/AddAppointmentModal';
 import { EditAppointmentModal } from '@/components/modals/EditAppointmentModal';
@@ -46,7 +47,6 @@ import { usePackages } from '@/hooks/usePackages';
 import { useAutoClose } from '@/hooks/useAutoClose';
 import { VoiceCommandButton } from '@/components/voice/VoiceCommandButton';
 
-
 const Index = () => {
   // State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -62,7 +62,7 @@ const Index = () => {
   const { appointments, addAppointment, updateAppointment, deleteAppointment, clearAllAppointments, clearAppointmentsByDate } = useAppointments();
   const { blocks, addBlock, deleteBlock } = useBlocks();
   const { waitingList, addWaiting, completeWaiting } = useWaitingList();
-  const { finances, addFinance } = useFinances();
+  const { finances, addFinance, deleteFinance } = useFinances();
   const { packages, addPackage, updatePackage, deletePackage, useSession } = usePackages();
 
   // Auto-close appointments when next appointment time arrives
@@ -272,6 +272,14 @@ const Index = () => {
               finances={finances}
               onAddFinance={addFinance}
               appointments={appointments}
+            />
+          )}
+
+          {activeTab === 'despesas' && (
+            <ExpensesView
+              finances={finances}
+              onAddFinance={addFinance}
+              onDeleteFinance={deleteFinance}
             />
           )}
 
