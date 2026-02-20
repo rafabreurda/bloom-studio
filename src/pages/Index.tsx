@@ -13,7 +13,7 @@ import { SuppliersView } from '@/components/suppliers/SuppliersView';
 import { SupplierModal } from '@/components/suppliers/SupplierModal';
 import { PartnershipsView } from '@/components/partnerships/PartnershipsView';
 import { PackagesView } from '@/components/packages/PackagesView';
-import { ExpensesView } from '@/components/expenses/ExpensesView';
+
 import { PartnershipModal } from '@/components/partnerships/PartnershipModal';
 import { AddAppointmentModal } from '@/components/modals/AddAppointmentModal';
 import { EditAppointmentModal } from '@/components/modals/EditAppointmentModal';
@@ -271,15 +271,8 @@ const Index = () => {
             <FinanceView
               finances={finances}
               onAddFinance={addFinance}
-              appointments={appointments}
-            />
-          )}
-
-          {activeTab === 'despesas' && (
-            <ExpensesView
-              finances={finances}
-              onAddFinance={addFinance}
               onDeleteFinance={deleteFinance}
+              appointments={appointments}
             />
           )}
 

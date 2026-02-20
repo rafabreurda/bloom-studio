@@ -83,11 +83,7 @@ export function ExpensesView({ finances, onAddFinance, onDeleteFinance }: Expens
   return (
     <div className="space-y-6 h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center shrink-0">
-        <h2 className="text-2xl font-black uppercase tracking-tight flex items-center gap-2">
-          <Receipt className="text-red-500" size={26} />
-          Despesas
-        </h2>
+      <div className="flex justify-end shrink-0">
         <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => setShowModal(true)}>
           Nova Despesa
         </BronzeButton>
