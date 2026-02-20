@@ -209,4 +209,4 @@ export interface ReportConfig {
 
 export type UserRole = 'Admin Mestre';
 export type ViewMode = 'day' | 'week' | 'month';
-export type TabId = 'agenda' | 'clientes' | 'financeiro' | 'despesas' | 'estoque' | 'fornecedores' | 'parcerias' | 'lista-espera' | 'pacotes' | 'config';
+export type TabId = 'agenda' | 'clientes' | 'financeiro' | 'estoque' | 'fornecedores' | 'parcerias' | 'lista-espera' | 'pacotes' | 'config';
