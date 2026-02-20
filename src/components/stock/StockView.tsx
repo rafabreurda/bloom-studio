@@ -1,4 +1,5 @@
 import { Plus, Minus, Pencil, Trash2, AlertCircle, ShoppingBag } from 'lucide-react';
+import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { StockItem } from '@/types';
@@ -108,12 +109,15 @@ export function StockView({
                     >
                       <Pencil size={18} />
                     </button>
-                    <button
-                      onClick={() => onDeleteClick(item.id)}
-                      className="w-10 h-10 bg-destructive/20 text-destructive rounded-xl flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-all"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    <ConfirmDeleteDialog
+                      description="Tem certeza que deseja excluir este produto do estoque?"
+                      onConfirm={() => onDeleteClick(item.id)}
+                      trigger={
+                        <button className="w-10 h-10 bg-destructive/20 text-destructive rounded-xl flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-all">
+                          <Trash2 size={18} />
+                        </button>
+                      }
+                    />
                   </div>
                 </div>
               </BronzeCard>

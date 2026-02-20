@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Plus, Trash2, Receipt, TrendingDown, Calendar, Search } from 'lucide-react';
+import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { Finance } from '@/types';
@@ -192,12 +193,15 @@ export function ExpensesView({ finances, onAddFinance, onDeleteFinance }: Expens
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-black text-red-500">-R$ {f.value.toLocaleString('pt-BR')}</span>
-                  <button
-                    onClick={() => onDeleteFinance(f.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-red-500"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  <ConfirmDeleteDialog
+                    description="Tem certeza que deseja excluir esta despesa?"
+                    onConfirm={() => onDeleteFinance(f.id)}
+                    trigger={
+                      <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-red-500">
+                        <Trash2 size={14} />
+                      </button>
+                    }
+                  />
                 </div>
               </div>
             ))}

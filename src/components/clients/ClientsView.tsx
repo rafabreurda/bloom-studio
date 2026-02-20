@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown, Crown } from 'lucide-react';
+import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { Client, ClientTag, Partnership, Appointment, WhatsAppTemplate } from '@/types';
@@ -191,7 +192,13 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
                 <div className="flex gap-2 shrink-0">
                   <button onClick={() => openWhatsApp(client.phone)} className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all"><Phone size={16} /></button>
                   <button onClick={() => { setEditingClient(client); setShowModal(true); }} className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all"><Edit2 size={16} /></button>
-                  <button onClick={() => onDeleteClient(client.id)} className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-all"><Trash2 size={16} /></button>
+                  <ConfirmDeleteDialog
+                    description={`Tem certeza que deseja excluir o cliente ${client.name}?`}
+                    onConfirm={() => onDeleteClient(client.id)}
+                    trigger={
+                      <button className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-muted text-muted-foreground flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-all"><Trash2 size={16} /></button>
+                    }
+                  />
                 </div>
               </BronzeCard>
             );
