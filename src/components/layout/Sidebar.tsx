@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Calendar, Users, DollarSign, ShoppingBag, Truck, Handshake, 
-  ClipboardList, Settings, UserCheck, X, Package 
+  ClipboardList, Settings, UserCheck, X, Package, Receipt
 } from 'lucide-react';
 import { TabId } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,6 +20,7 @@ const menuItems = [
   { id: 'agenda' as TabId, icon: Calendar, label: 'Agenda' },
   { id: 'clientes' as TabId, icon: Users, label: 'Clientes' },
   { id: 'financeiro' as TabId, icon: DollarSign, label: 'Financeiro' },
+  { id: 'despesas' as TabId, icon: Receipt, label: 'Despesas' },
   { id: 'pacotes' as TabId, icon: Package, label: 'Pacotes' },
   { id: 'estoque' as TabId, icon: ShoppingBag, label: 'Estoque' },
   { id: 'fornecedores' as TabId, icon: Truck, label: 'Fornecedores' },

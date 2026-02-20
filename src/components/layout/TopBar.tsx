@@ -12,6 +12,7 @@ export function TopBar({ onMenuClick, activeTab }: TopBarProps) {
       'agenda': 'Agenda',
       'clientes': 'Clientes',
       'financeiro': 'Financeiro',
+      'despesas': 'Despesas',
       'pacotes': 'Pacotes',
       'estoque': 'Estoque',
       'fornecedores': 'Fornecedores',
