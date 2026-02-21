@@ -7,12 +7,15 @@ import { Finance } from '@/types';
 interface VoiceCommandButtonProps {
   onAddFinance: (finance: Omit<Finance, 'id'>) => Promise<any>;
   onAddAppointment: (appointment: any) => Promise<any>;
+  externalTrigger?: boolean;
+  onStateChange?: (isListening: boolean) => void;
 }
 
-export function VoiceCommandButton({ onAddFinance, onAddAppointment }: VoiceCommandButtonProps) {
+export function VoiceCommandButton({ onAddFinance, onAddAppointment, externalTrigger, onStateChange }: VoiceCommandButtonProps) {
   const { isListening, transcript, lastResult, startListening, stopListening, reset, isSupported } = useVoiceCommand();
   const [showPanel, setShowPanel] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [lastTrigger, setLastTrigger] = useState(false);
 
   const toDisplayDate = (isoDate: string) => {
     const [y, m, d] = isoDate.split('-');
@@ -106,6 +109,20 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment }: VoiceComm
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastResult, isListening]);
 
+  // Report listening state to parent
+  useEffect(() => {
+    onStateChange?.(isListening);
+  }, [isListening, onStateChange]);
+
+  // Handle external trigger (from sidebar mic button)
+  useEffect(() => {
+    if (externalTrigger && externalTrigger !== lastTrigger) {
+      handleMicClick();
+    }
+    setLastTrigger(!!externalTrigger);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalTrigger]);
+
   if (!isSupported) return null;
 
   const handleMicClick = () => {
@@ -125,22 +142,6 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment }: VoiceComm
 
   return (
     <>
-      {/* FAB */}
-      <button
-        onClick={handleMicClick}
-        className={`fixed bottom-24 right-6 z-[90] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
-          isListening
-            ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-            : 'bg-blue-500 hover:bg-blue-600'
-        }`}
-      >
-        {isListening ? (
-          <MicOff className="w-6 h-6 text-white" />
-        ) : (
-          <Mic className="w-6 h-6 text-primary-foreground" />
-        )}
-      </button>
-
       {/* Panel */}
       {showPanel && (
         <div className="fixed bottom-40 right-4 left-4 md:left-auto md:w-96 z-[90] bg-card border border-border rounded-2xl shadow-2xl p-5 animate-slide-up">
