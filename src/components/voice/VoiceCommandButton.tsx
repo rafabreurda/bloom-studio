@@ -128,7 +128,7 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment }: VoiceComm
       {/* FAB */}
       <button
         onClick={handleMicClick}
-        className={`fixed bottom-6 right-6 z-[100] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
+        className={`fixed bottom-24 right-6 z-[90] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
           isListening
             ? 'bg-red-500 hover:bg-red-600 animate-pulse'
             : 'bg-blue-500 hover:bg-blue-600'
@@ -143,7 +143,7 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment }: VoiceComm
 
       {/* Panel */}
       {showPanel && (
-        <div className="fixed bottom-24 right-4 left-4 md:left-auto md:w-96 z-[100] bg-card border border-border rounded-2xl shadow-2xl p-5 animate-slide-up">
+        <div className="fixed bottom-40 right-4 left-4 md:left-auto md:w-96 z-[90] bg-card border border-border rounded-2xl shadow-2xl p-5 animate-slide-up">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Mic className="w-4 h-4 text-primary" />
