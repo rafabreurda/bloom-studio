@@ -52,6 +52,8 @@ const Index = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('agenda');
   const [currentRole, setCurrentRole] = useState<UserRole>('Admin Mestre');
+  const [micTrigger, setMicTrigger] = useState(false);
+  const [isMicListening, setIsMicListening] = useState(false);
   
   // Use persistence hooks
   const { config: systemConfig, updateConfig: handleConfigChange, uploadLogo, uploadBackground } = useSystemConfig();
@@ -216,6 +218,8 @@ const Index = () => {
         onTabChange={handleTabChange}
         systemName={systemConfig.name}
         systemLogo={systemConfig.logo}
+        onMicClick={() => setMicTrigger(prev => !prev)}
+        isMicListening={isMicListening}
       />
 
       <main className="flex-1 flex flex-col md:ml-72 h-screen overflow-hidden relative">
@@ -488,10 +492,12 @@ const Index = () => {
         </div>
       )}
 
-      {/* Voice Command FAB */}
+      {/* Voice Command (panel only, no FAB) */}
       <VoiceCommandButton
         onAddFinance={addFinance}
         onAddAppointment={addAppointment}
+        externalTrigger={micTrigger}
+        onStateChange={setIsMicListening}
       />
     </div>
   );
