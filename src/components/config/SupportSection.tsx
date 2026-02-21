@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Save, Lock, Globe, MessageSquare, Building2, Copy, Check, Instagram } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Save, Lock, Upload, Copy, Check, Image as ImageIcon } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,51 +7,20 @@ import { toast } from 'sonner';
 
 const SUPPORT_PASSWORD = '607652';
 
-interface SupportData {
-  company: string;
-  whatsapp: string;
-  website: string;
-  instagram: string;
-}
-
-function CopyableText({ text, isLink }: { text: string; isLink?: boolean }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    toast.success('Copiado!');
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="flex items-center gap-2 group cursor-pointer" onClick={handleCopy}>
-      {isLink ? (
-        <a href={text} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline" onClick={e => e.stopPropagation()}>
-          {text}
-        </a>
-      ) : (
-        <p className="text-sm font-semibold text-foreground select-all">{text}</p>
-      )}
-      <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-muted">
-        {copied ? <Check size={12} className="text-green-500" /> : <Copy size={12} className="text-muted-foreground" />}
-      </button>
-    </div>
-  );
-}
-
 export function SupportSection() {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [data, setData] = useState<SupportData>({ company: '', whatsapp: '', website: '', instagram: '' });
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    supabase.from('system_config').select('value').eq('key', 'support_data').then(({ data: rows }) => {
+    supabase.from('system_config').select('value').eq('key', 'support_card_image').then(({ data: rows }) => {
       if (rows && rows.length > 0) {
         const raw = rows[0].value as any;
-        setData({ company: raw.company || '', whatsapp: raw.whatsapp || '', website: raw.website || '', instagram: raw.instagram || '' });
+        if (raw?.url) setImageUrl(raw.url);
       }
     });
   }, []);
@@ -68,111 +37,115 @@ export function SupportSection() {
     }
   };
 
-  const handleSave = async () => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     setIsSaving(true);
     try {
-      await supabase.from('system_config').upsert({ key: 'support_data', value: data as any }, { onConflict: 'key' });
-      toast.success('Dados de suporte salvos!');
+      const ext = file.name.split('.').pop();
+      const fileName = `support-card-${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('studio-assets')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('studio-assets')
+        .getPublicUrl(fileName);
+
+      const url = urlData.publicUrl;
+
+      await supabase.from('system_config').upsert(
+        { key: 'support_card_image', value: { url } as any },
+        { onConflict: 'key' }
+      );
+
+      setImageUrl(url);
+      toast.success('Cartão de visita atualizado!');
     } catch {
-      toast.error('Erro ao salvar');
+      toast.error('Erro ao fazer upload da imagem');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const hasAnyData = data.company || data.whatsapp || data.website || data.instagram;
+  const handleCopyImage = async () => {
+    if (!imageUrl) return;
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      await navigator.clipboard.write([
+        new ClipboardItem({ [blob.type]: blob }),
+      ]);
+      setCopied(true);
+      toast.success('Imagem copiada!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback: copy URL
+      await navigator.clipboard.writeText(imageUrl);
+      setCopied(true);
+      toast.success('Link da imagem copiado!');
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <div className="space-y-6">
       <BronzeCard className="bg-gradient-to-br from-secondary/80 to-secondary/40 border border-border overflow-hidden relative">
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 z-10">
           {!isUnlocked ? (
             <button onClick={() => setShowPasswordModal(true)} className="p-2 rounded-full bg-muted/60 hover:bg-muted transition-all" title="Editar">
               <Lock size={14} className="text-muted-foreground" />
             </button>
           ) : (
-            <BronzeButton variant="gold" size="sm" icon={Save} onClick={handleSave} disabled={isSaving}>
-              {isSaving ? 'Salvando...' : 'Salvar'}
+            <BronzeButton variant="gold" size="sm" icon={Upload} onClick={() => fileInputRef.current?.click()} disabled={isSaving}>
+              {isSaving ? 'Enviando...' : 'Trocar Imagem'}
             </BronzeButton>
           )}
         </div>
+
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleUpload} className="hidden" />
 
         <div className="space-y-1 mb-6">
           <h3 className="text-lg font-black uppercase text-primary tracking-tight">Suporte</h3>
           <div className="w-10 h-0.5 bg-primary/40 rounded-full" />
         </div>
 
-        {!hasAnyData && !isUnlocked ? (
-          <p className="text-sm text-muted-foreground italic">Nenhum dado de suporte cadastrado.</p>
+        {imageUrl ? (
+          <div
+            className="relative group cursor-pointer rounded-xl overflow-hidden"
+            onClick={handleCopyImage}
+          >
+            <img
+              src={imageUrl}
+              alt="Cartão de visita"
+              className="w-full h-auto rounded-xl border border-border/50 transition-transform group-hover:scale-[1.01]"
+            />
+            <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-all flex items-center justify-center">
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-card/90 backdrop-blur-sm px-4 py-2 rounded-xl border border-border flex items-center gap-2 shadow-lg">
+                {copied ? (
+                  <>
+                    <Check size={16} className="text-green-500" />
+                    <span className="text-xs font-bold text-green-500">Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={16} className="text-foreground" />
+                    <span className="text-xs font-bold text-foreground">Copiar imagem</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         ) : (
-          <div className="space-y-4">
-            {isUnlocked ? (
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Nome / Empresa</label>
-                <input type="text" value={data.company} onChange={e => setData({ ...data, company: e.target.value })} className="input-bronze" placeholder="Nome ou empresa" />
-              </div>
-            ) : data.company ? (
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Building2 size={14} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Empresa</p>
-                  <CopyableText text={data.company} />
-                </div>
-              </div>
-            ) : null}
-
-            {isUnlocked ? (
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">WhatsApp</label>
-                <input type="text" value={data.whatsapp} onChange={e => setData({ ...data, whatsapp: e.target.value })} className="input-bronze" placeholder="(00) 00000-0000" />
-              </div>
-            ) : data.whatsapp ? (
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <MessageSquare size={14} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">WhatsApp</p>
-                  <CopyableText text={data.whatsapp} />
-                </div>
-              </div>
-            ) : null}
-
-            {isUnlocked ? (
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Website</label>
-                <input type="text" value={data.website} onChange={e => setData({ ...data, website: e.target.value })} className="input-bronze" placeholder="https://..." />
-              </div>
-            ) : data.website ? (
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Globe size={14} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Website</p>
-                  <CopyableText text={data.website} isLink />
-                </div>
-              </div>
-            ) : null}
-
-            {isUnlocked ? (
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Instagram</label>
-                <input type="text" value={data.instagram} onChange={e => setData({ ...data, instagram: e.target.value })} className="input-bronze" placeholder="https://instagram.com/..." />
-              </div>
-            ) : data.instagram ? (
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Instagram size={14} className="text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Instagram</p>
-                  <CopyableText text={data.instagram} isLink />
-                </div>
-              </div>
-            ) : null}
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
+            <ImageIcon size={40} className="opacity-30" />
+            <p className="text-xs font-bold uppercase tracking-widest opacity-50">
+              {isUnlocked ? 'Clique em "Trocar Imagem" para adicionar o cartão' : 'Nenhum cartão cadastrado'}
+            </p>
           </div>
         )}
       </BronzeCard>
