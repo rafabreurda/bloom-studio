@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
@@ -46,6 +46,7 @@ import { useFinances } from '@/hooks/useFinances';
 import { usePackages } from '@/hooks/usePackages';
 import { useAutoClose } from '@/hooks/useAutoClose';
 import { VoiceCommandButton } from '@/components/voice/VoiceCommandButton';
+import { Mic } from 'lucide-react';
 
 const Index = () => {
   // State
@@ -54,6 +55,13 @@ const Index = () => {
   const [currentRole, setCurrentRole] = useState<UserRole>('Admin Mestre');
   const [micTrigger, setMicTrigger] = useState(false);
   const [isMicListening, setIsMicListening] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches
+      || (navigator as any).standalone === true;
+    setIsStandalone(standalone);
+  }, []);
   
   // Use persistence hooks
   const { config: systemConfig, updateConfig: handleConfigChange, uploadLogo, uploadBackground } = useSystemConfig();
@@ -218,8 +226,6 @@ const Index = () => {
         onTabChange={handleTabChange}
         systemName={systemConfig.name}
         systemLogo={systemConfig.logo}
-        onMicClick={() => setMicTrigger(prev => !prev)}
-        isMicListening={isMicListening}
       />
 
       <main className="flex-1 flex flex-col md:ml-72 h-screen overflow-hidden relative">
@@ -492,13 +498,28 @@ const Index = () => {
         </div>
       )}
 
-      {/* Voice Command (panel only, no FAB) */}
+      {/* Voice Command */}
       <VoiceCommandButton
         onAddFinance={addFinance}
         onAddAppointment={addAppointment}
         externalTrigger={micTrigger}
         onStateChange={setIsMicListening}
       />
+
+      {/* Floating Mic FAB - only in standalone/installed mode */}
+      {isStandalone && (
+        <button
+          onClick={() => setMicTrigger(prev => !prev)}
+          className={`fixed bottom-6 right-6 z-[80] w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 ${
+            isMicListening
+              ? 'bg-red-500 animate-pulse'
+              : 'bg-primary text-primary-foreground'
+          }`}
+          style={isMicListening ? { color: 'white' } : undefined}
+        >
+          <Mic size={24} />
+        </button>
+      )}
     </div>
   );
 };
