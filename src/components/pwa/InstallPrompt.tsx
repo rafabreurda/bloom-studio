@@ -1,48 +1,53 @@
 import { useState, useEffect } from 'react';
-import { Download, X, Share, MoreVertical } from 'lucide-react';
+import { Download, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+// Store the deferred prompt globally so the install page can use it
+let globalDeferredPrompt: BeforeInstallPromptEvent | null = null;
+
+export function getGlobalDeferredPrompt() {
+  return globalDeferredPrompt;
+}
+
+export function clearGlobalDeferredPrompt() {
+  globalDeferredPrompt = null;
+}
+
 export function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(true);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Check if already installed (standalone mode)
     const standalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (navigator as any).standalone === true;
     setIsStandalone(standalone);
-
-    // Detect iOS
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    setIsIOS(ios);
+    setReady(true);
 
     if (standalone) return;
 
-    // Check if previously dismissed (session only)
     const wasDismissed = sessionStorage.getItem('pwa-install-dismissed');
     if (wasDismissed) {
       setDismissed(true);
     }
 
-    // Listen for the native install prompt (Android/Chrome)
+    // Capture the beforeinstallprompt globally
     const handler = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      globalDeferredPrompt = e as BeforeInstallPromptEvent;
     };
 
     window.addEventListener('beforeinstallprompt', handler);
 
-    // Listen for successful install
     const installedHandler = () => {
       setDismissed(true);
-      setDeferredPrompt(null);
+      globalDeferredPrompt = null;
     };
     window.addEventListener('appinstalled', installedHandler);
 
@@ -52,82 +57,38 @@ export function InstallPrompt() {
     };
   }, []);
 
-  const handleInstall = async () => {
-    if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setDismissed(true);
-    }
-    setDeferredPrompt(null);
-  };
-
   const handleDismiss = () => {
     setDismissed(true);
     sessionStorage.setItem('pwa-install-dismissed', 'true');
   };
 
-  // Don't show if already installed or dismissed
-  if (isStandalone || dismissed) return null;
+  if (!ready || isStandalone || dismissed) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-[100] p-3 animate-slide-up">
-      <div
-        className="rounded-2xl p-4 shadow-2xl border border-border max-w-lg mx-auto"
-        style={{ backgroundColor: 'hsl(var(--card))', color: 'hsl(var(--card-foreground))' }}
-      >
-        <div className="flex items-start gap-3">
-          <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-            style={{ backgroundColor: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }}
-          >
-            <Download size={24} />
+      <div className="rounded-2xl p-4 shadow-2xl border border-border max-w-lg mx-auto bg-card text-card-foreground">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-primary text-primary-foreground">
+            <Download size={20} />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-sm">Instalar NeuroFlux</h3>
-            <p className="text-xs mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>
-              {isIOS ? (
-                <>
-                  Toque em{' '}
-                  <Share size={14} className="inline -mt-0.5" />{' '}
-                  <strong>(Compartilhar)</strong> e depois{' '}
-                  <strong>"Adicionar à Tela de Início"</strong>
-                </>
-              ) : deferredPrompt ? (
-                'Instale o app para acesso rápido direto da sua tela inicial.'
-              ) : (
-                <>
-                  Toque em{' '}
-                  <MoreVertical size={14} className="inline -mt-0.5" />{' '}
-                  no navegador e selecione{' '}
-                  <strong>"Instalar aplicativo"</strong> ou{' '}
-                  <strong>"Adicionar à tela inicial"</strong>
-                </>
-              )}
-            </p>
+            <p className="text-xs text-muted-foreground">Acesse mais rápido pela tela inicial</p>
           </div>
+          <a
+            href="/install"
+            className="shrink-0 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider bg-primary text-primary-foreground active:scale-95 transition-transform"
+          >
+            Instalar
+          </a>
           <button
             onClick={handleDismiss}
             className="shrink-0 p-1 rounded-full opacity-50 hover:opacity-100 transition-opacity"
             aria-label="Fechar"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
-
-        {/* Native install button - only on Android/Chrome when available */}
-        {!isIOS && deferredPrompt && (
-          <button
-            onClick={handleInstall}
-            className="w-full mt-3 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all active:scale-95"
-            style={{
-              backgroundColor: 'hsl(var(--primary))',
-              color: 'hsl(var(--primary-foreground))',
-            }}
-          >
-            Instalar Agora
-          </button>
-        )}
       </div>
     </div>
   );
