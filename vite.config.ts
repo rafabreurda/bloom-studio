@@ -24,9 +24,9 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
       },
       manifest: {
-        name: "Sol e Mio",
-        short_name: "Sol e Mio",
-        description: "Sistema de gestão Sol e Mio",
+        name: "NeuroFlux",
+        short_name: "NeuroFlux",
+        description: "Sistema de gestão NeuroFlux",
         theme_color: "#000000",
         background_color: "#000000",
         display: "standalone",
