@@ -43,7 +43,7 @@ export function InstallScreen() {
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-2xl font-black tracking-tight">Sol e Mio</h1>
+          <h1 className="text-2xl font-black tracking-tight">NeuroFlux</h1>
           <p className="text-sm text-muted-foreground">
             Instale o aplicativo para continuar
           </p>

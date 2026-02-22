@@ -75,7 +75,7 @@ export function InstallPrompt() {
             <Download size={24} />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-sm">Instalar Sol e Mio</h3>
+            <h3 className="font-bold text-sm">Instalar NeuroFlux</h3>
             <p className="text-xs mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>
               {isIOS
                 ? <>Toque em <Share size={14} className="inline -mt-0.5" /> e depois <strong>"Adicionar à Tela de Início"</strong></>
