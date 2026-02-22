@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import Index from "./pages/Index";
+import InstallPage from "./pages/InstallPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,10 +20,11 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <InstallPrompt />
             <BrowserRouter>
+              <InstallPrompt />
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/install" element={<InstallPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
