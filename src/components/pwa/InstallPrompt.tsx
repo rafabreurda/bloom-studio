@@ -8,9 +8,9 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(true); // default true to avoid flash
 
   useEffect(() => {
     const standalone = window.matchMedia('(display-mode: standalone)').matches
@@ -22,22 +22,14 @@ export function InstallPrompt() {
 
     if (standalone) return;
 
-    // Show iOS prompt after 3 seconds
-    if (ios) {
-      const dismissed = sessionStorage.getItem('pwa-install-dismissed');
-      if (!dismissed) {
-        setTimeout(() => setShowPrompt(true), 3000);
-      }
-      return;
+    const wasDismissed = sessionStorage.getItem('pwa-install-dismissed');
+    if (wasDismissed) {
+      setDismissed(true);
     }
 
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      const dismissed = sessionStorage.getItem('pwa-install-dismissed');
-      if (!dismissed) {
-        setShowPrompt(true);
-      }
     };
 
     window.addEventListener('beforeinstallprompt', handler);
@@ -49,17 +41,18 @@ export function InstallPrompt() {
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
-      setShowPrompt(false);
+      setDismissed(true);
     }
     setDeferredPrompt(null);
   };
 
   const handleDismiss = () => {
-    setShowPrompt(false);
+    setDismissed(true);
     sessionStorage.setItem('pwa-install-dismissed', 'true');
   };
 
-  if (isStandalone || !showPrompt) return null;
+  // Don't show if already installed or dismissed
+  if (isStandalone || dismissed) return null;
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-[100] animate-slide-up">
@@ -79,7 +72,9 @@ export function InstallPrompt() {
             <p className="text-xs mt-1" style={{ color: 'hsl(var(--muted-foreground))' }}>
               {isIOS
                 ? <>Toque em <Share size={14} className="inline -mt-0.5" /> e depois <strong>"Adicionar à Tela de Início"</strong></>
-                : 'Instale o app para acesso rápido direto da sua tela inicial.'
+                : deferredPrompt
+                  ? 'Instale o app para acesso rápido direto da sua tela inicial.'
+                  : <>Abra o menu do navegador <strong>(⋮)</strong> e selecione <strong>"Instalar aplicativo"</strong></>
               }
             </p>
           </div>
