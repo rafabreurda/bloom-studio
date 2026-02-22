@@ -14,6 +14,7 @@ export default function InstallPage() {
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [installing, setInstalling] = useState(false);
+  const [showIOSSteps, setShowIOSSteps] = useState(false);
 
   useEffect(() => {
     const standalone =
@@ -94,28 +95,41 @@ export default function InstallPage() {
 
           {/* Install Section */}
           {isIOS ? (
-            /* iOS - Can only install manually via Safari share menu */
             <div className="space-y-4">
-              <div className="bg-card border border-border rounded-2xl p-5 space-y-4 text-left">
-                <p className="text-sm font-bold">Como instalar no iPhone/iPad:</p>
-                <div className="space-y-3">
-                  <Step n={1}>
-                    Toque em <Share size={15} className="inline -mt-0.5 text-primary" /> <strong>Compartilhar</strong> na barra do Safari
-                  </Step>
-                  <Step n={2}>
-                    Role e toque em <strong>"Adicionar à Tela de Início"</strong>
-                  </Step>
-                  <Step n={3}>
-                    Toque em <strong>"Adicionar"</strong> no canto superior
-                  </Step>
+              {!showIOSSteps ? (
+                <>
+                  <button
+                    onClick={() => setShowIOSSteps(true)}
+                    className="w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider bg-primary text-primary-foreground shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3"
+                  >
+                    <Download size={22} />
+                    Instalar Agora
+                  </button>
+                  <p className="text-xs text-muted-foreground">
+                    Toque no botão acima para iniciar a instalação
+                  </p>
+                </>
+              ) : (
+                <div className="bg-card border border-border rounded-2xl p-5 space-y-4 text-left animate-slide-up">
+                  <p className="text-sm font-bold">Siga estes passos para instalar:</p>
+                  <div className="space-y-3">
+                    <Step n={1}>
+                      Toque em <Share size={15} className="inline -mt-0.5 text-primary" /> <strong>Compartilhar</strong> na barra inferior do Safari
+                    </Step>
+                    <Step n={2}>
+                      Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong>
+                    </Step>
+                    <Step n={3}>
+                      Toque em <strong>"Adicionar"</strong> no canto superior direito
+                    </Step>
+                  </div>
+                  <p className="text-xs text-muted-foreground pt-2">
+                    ⚠️ Funciona apenas no <strong>Safari</strong>. Se estiver usando outro navegador, copie o link e abra no Safari.
+                  </p>
                 </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                ⚠️ Funciona apenas no <strong>Safari</strong>. Se estiver usando outro navegador, abra este link no Safari.
-              </p>
+              )}
             </div>
           ) : deferredPrompt ? (
-            /* Android/Chrome - Native install available */
             <div className="space-y-4">
               <button
                 onClick={handleInstall}
@@ -130,7 +144,6 @@ export default function InstallPage() {
               </p>
             </div>
           ) : (
-            /* Android but no beforeinstallprompt - manual instructions */
             <div className="space-y-4">
               <div className="bg-card border border-border rounded-2xl p-5 space-y-4 text-left">
                 <p className="text-sm font-bold">Como instalar no Android:</p>
