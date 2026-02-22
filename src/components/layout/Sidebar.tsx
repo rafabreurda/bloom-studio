@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Calendar, Users, DollarSign, ShoppingBag, Truck, Handshake, 
-  ClipboardList, Settings, UserCheck, X, Package, Mic 
+  ClipboardList, Settings, UserCheck, X, Package 
 } from 'lucide-react';
 import { TabId } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,8 +14,6 @@ interface SidebarProps {
   onTabChange: (tab: TabId) => void;
   systemName: string;
   systemLogo?: string;
-  onMicClick?: () => void;
-  isMicListening?: boolean;
 }
 
 const menuItems = [
@@ -32,16 +30,11 @@ const menuItems = [
 
 
 
-export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, systemLogo, onMicClick, isMicListening }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, systemLogo }: SidebarProps) {
   const { currentAdmin } = useAuth();
   const [adminPhoto, setAdminPhoto] = useState<string | null>(null);
-  const [isStandalone, setIsStandalone] = useState(false);
 
-  useEffect(() => {
-    const standalone = window.matchMedia('(display-mode: standalone)').matches
-      || (navigator as any).standalone === true;
-    setIsStandalone(standalone);
-  }, []);
+
 
   useEffect(() => {
     supabase.from('system_config').select('value').eq('key', 'admin_photo').then(({ data }) => {
@@ -177,22 +170,6 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
                 {currentAdmin ? `Olá, ${currentAdmin.name}` : 'Olá'}
               </p>
             </div>
-            {isStandalone && onMicClick && (
-              <button
-                onClick={onMicClick}
-                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${
-                  isMicListening
-                    ? 'bg-red-500 animate-pulse'
-                    : ''
-                }`}
-                style={!isMicListening ? {
-                  backgroundColor: 'hsl(var(--sidebar-primary))',
-                  color: 'hsl(var(--sidebar-primary-foreground))',
-                } : { color: 'white' }}
-              >
-                <Mic size={14} />
-              </button>
-            )}
           </div>
         </div>
       </div>
