@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 
 interface VoiceCommandResult {
@@ -27,6 +27,27 @@ export function useVoiceCommand() {
   const [lastResult, setLastResult] = useState<VoiceCommandResult | null>(null);
   const recognitionRef = useRef<any>(null);
   const initializedRef = useRef(false);
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearSilenceTimer = useCallback(() => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+  }, []);
+
+  const startSilenceTimer = useCallback(() => {
+    clearSilenceTimer();
+    silenceTimerRef.current = setTimeout(() => {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    }, 5000);
+  }, [clearSilenceTimer]);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => clearSilenceTimer();
+  }, [clearSilenceTimer]);
 
   const parseCommand = useCallback((text: string): VoiceCommandResult => {
     const lower = text.toLowerCase().trim();
@@ -203,6 +224,7 @@ export function useVoiceCommand() {
       setIsListening(true);
       setTranscript('');
       setLastResult(null);
+      startSilenceTimer(); // Start 5s silence countdown
     };
 
     recognition.onresult = (event: any) => {
@@ -218,6 +240,11 @@ export function useVoiceCommand() {
       }
 
       setTranscript(finalTranscript || interimTranscript);
+      
+      // Reset silence timer on any speech activity
+      if (interimTranscript || finalTranscript) {
+        startSilenceTimer();
+      }
 
       if (finalTranscript) {
         const result = parseCommand(finalTranscript);
@@ -237,12 +264,13 @@ export function useVoiceCommand() {
 
     recognition.onend = () => {
       setIsListening(false);
+      clearSilenceTimer();
     };
 
     recognitionRef.current = recognition;
     initializedRef.current = true;
     return recognition;
-  }, [parseCommand]);
+  }, [parseCommand, startSilenceTimer, clearSilenceTimer]);
 
   const startListening = useCallback(() => {
     const recognition = getRecognition();
@@ -261,9 +289,10 @@ export function useVoiceCommand() {
   }, [getRecognition]);
 
   const stopListening = useCallback(() => {
+    clearSilenceTimer();
     recognitionRef.current?.stop();
     setIsListening(false);
-  }, []);
+  }, [clearSilenceTimer]);
 
   const reset = useCallback(() => {
     setTranscript('');

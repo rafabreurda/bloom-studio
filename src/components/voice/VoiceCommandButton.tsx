@@ -101,10 +101,15 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment, externalTri
     }
   };
 
-  // Auto-execute when recognition finishes (no confirmation needed)
+  // Auto-execute when recognition finishes, or auto-close if nothing was said
   useEffect(() => {
-    if (lastResult && !isListening && !isProcessing) {
-      executeCommand(lastResult);
+    if (!isListening && !isProcessing) {
+      if (lastResult) {
+        executeCommand(lastResult);
+      } else if (showPanel && !transcript) {
+        // Silence timeout - auto close panel
+        handleClose();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastResult, isListening]);
@@ -126,8 +131,9 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment, externalTri
   if (!isSupported) return null;
 
   const handleMicClick = () => {
-    if (isListening) {
-      stopListening();
+    if (showPanel) {
+      // If panel is open, close everything
+      handleClose();
     } else {
       setShowPanel(true);
       startListening();
@@ -144,7 +150,7 @@ export function VoiceCommandButton({ onAddFinance, onAddAppointment, externalTri
     <>
       {/* Panel */}
       {showPanel && (
-        <div className="fixed bottom-40 right-4 left-4 md:left-auto md:w-96 z-[90] bg-card border border-border rounded-2xl shadow-2xl p-5 animate-slide-up">
+        <div className="fixed bottom-24 right-3 left-3 sm:left-auto sm:w-80 md:bottom-28 md:right-6 md:w-96 lg:bottom-32 lg:right-8 z-[90] bg-card border border-border rounded-2xl shadow-2xl p-4 md:p-5 animate-slide-up">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Mic className="w-4 h-4 text-primary" />
