@@ -506,18 +506,22 @@ const Index = () => {
         onStateChange={setIsMicListening}
       />
 
-      {/* Floating Mic FAB - only in standalone/installed mode */}
+      {/* Floating Mic FAB - only in standalone/installed mode, responsive sizing */}
       {isStandalone && (
         <button
           onClick={() => setMicTrigger(prev => !prev)}
-          className={`fixed bottom-6 right-6 z-[80] w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 ${
+          className={`fixed z-[80] rounded-full flex items-center justify-center shadow-2xl transition-all duration-300
+            bottom-4 right-4 w-12 h-12
+            sm:bottom-5 sm:right-5 sm:w-13 sm:h-13
+            md:bottom-6 md:right-6 md:w-14 md:h-14
+            lg:bottom-8 lg:right-8 lg:w-16 lg:h-16 ${
             isMicListening
               ? 'bg-red-500 animate-pulse'
               : 'bg-primary text-primary-foreground'
           }`}
           style={isMicListening ? { color: 'white' } : undefined}
         >
-          <Mic size={24} />
+          <Mic className="w-5 h-5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 lg:w-7 lg:h-7" />
         </button>
       )}
     </div>
