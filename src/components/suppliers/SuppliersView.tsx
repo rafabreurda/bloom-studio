@@ -1,4 +1,5 @@
 import { Plus, MessageSquare, Pencil, Trash2, Truck, Package } from 'lucide-react';
+import { ExportButton } from '@/components/ui/ExportButton';
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
@@ -26,9 +27,22 @@ export function SuppliersView({
           <Truck size={28} />
           Fornecedores
         </h2>
-        <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
-          Novo Fornecedor
-        </BronzeButton>
+        <div className="flex gap-2">
+          <ExportButton
+            fileName="fornecedores"
+            title="Fornecedores"
+            sheetName="Fornecedores"
+            data={suppliers}
+            columns={[
+              { key: 'name', label: 'Nome' },
+              { key: 'contact', label: 'Contato' },
+              { key: 'products', label: 'Produtos' },
+            ]}
+          />
+          <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
+            Novo Fornecedor
+          </BronzeButton>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar pb-20 pr-2">

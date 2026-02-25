@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Plus, Trash2, Receipt, TrendingDown, Calendar, Search } from 'lucide-react';
+import { ExportButton } from '@/components/ui/ExportButton';
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
@@ -84,7 +85,19 @@ export function ExpensesView({ finances, onAddFinance, onDeleteFinance }: Expens
   return (
     <div className="space-y-6 h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex justify-end shrink-0">
+      <div className="flex justify-end gap-2 shrink-0">
+        <ExportButton
+          fileName="despesas"
+          title="Relatório de Despesas"
+          sheetName="Despesas"
+          data={expenses}
+          columns={[
+            { key: 'date', label: 'Data' },
+            { key: 'description', label: 'Descrição' },
+            { key: 'value', label: 'Valor (R$)' },
+            { key: 'paymentMethod', label: 'Pagamento' },
+          ]}
+        />
         <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => setShowModal(true)}>
           Nova Despesa
         </BronzeButton>
