@@ -1,4 +1,5 @@
 import { Plus, Minus, Pencil, Trash2, AlertCircle, ShoppingBag } from 'lucide-react';
+import { ExportButton } from '@/components/ui/ExportButton';
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
@@ -35,9 +36,23 @@ export function StockView({
           <ShoppingBag size={28} />
           Estoque
         </h2>
-        <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
-          Novo Produto
-        </BronzeButton>
+        <div className="flex gap-2">
+          <ExportButton
+            fileName="estoque"
+            title="Estoque de Produtos"
+            sheetName="Estoque"
+            data={stock}
+            columns={[
+              { key: 'name', label: 'Produto' },
+              { key: 'quantity', label: 'Quantidade' },
+              { key: 'price', label: 'Preço (R$)' },
+              { key: 'minStock', label: 'Estoque Mínimo' },
+            ]}
+          />
+          <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
+            Novo Produto
+          </BronzeButton>
+        </div>
       </div>
 
       {lowStockItems.length > 0 && (

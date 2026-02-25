@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, TrendingUp, CreditCard, Banknote, Handshake, DollarSign, FileText, TrendingDown, Sparkles, Receipt } from 'lucide-react';
+import { ExportButton } from '@/components/ui/ExportButton';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { Finance, Appointment } from '@/types';
@@ -92,6 +93,20 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
       <div className="flex justify-between items-center shrink-0">
         <h2 className="text-2xl font-black uppercase tracking-tight">Financeiro</h2>
         <div className="flex gap-2">
+          <ExportButton
+            fileName="financeiro"
+            title="Relatório Financeiro"
+            sheetName="Finanças"
+            data={finances}
+            columns={[
+              { key: 'date', label: 'Data' },
+              { key: 'description', label: 'Descrição' },
+              { key: 'type', label: 'Tipo' },
+              { key: 'value', label: 'Valor (R$)' },
+              { key: 'paymentMethod', label: 'Pagamento' },
+              { key: 'category', label: 'Categoria' },
+            ]}
+          />
           <BronzeButton variant="secondary" icon={FileText} size="sm" onClick={() => setShowReportModal(true)}>Relatório</BronzeButton>
           <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => setShowFinanceModal(true)}>Nova Entrada</BronzeButton>
         </div>

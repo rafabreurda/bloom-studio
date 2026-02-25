@@ -1,4 +1,5 @@
 import { Plus, MessageSquare, Pencil, Trash2, Handshake, Percent } from 'lucide-react';
+import { ExportButton } from '@/components/ui/ExportButton';
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
@@ -26,9 +27,22 @@ export function PartnershipsView({
           <Handshake size={28} />
           Parcerias
         </h2>
-        <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
-          Nova Parceria
-        </BronzeButton>
+        <div className="flex gap-2">
+          <ExportButton
+            fileName="parcerias"
+            title="Parcerias"
+            sheetName="Parcerias"
+            data={partnerships}
+            columns={[
+              { key: 'name', label: 'Nome' },
+              { key: 'discount', label: 'Desconto (%)' },
+              { key: 'contact', label: 'Contato' },
+            ]}
+          />
+          <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
+            Nova Parceria
+          </BronzeButton>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar pb-20 pr-2">
