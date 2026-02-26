@@ -10,14 +10,30 @@ export function useAppointments() {
 
   const fetchAppointments = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('appointments')
-        .select('*')
-        .order('date', { ascending: false });
+      // Fetch all appointments (Supabase limits to 1000 per query)
+      let allData: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      let hasMore = true;
 
-      if (error) throw error;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('appointments')
+          .select('*')
+          .order('date', { ascending: false })
+          .range(from, from + pageSize - 1);
 
-      setAppointments(data?.map(a => {
+        if (error) throw error;
+        if (data && data.length > 0) {
+          allData = allData.concat(data);
+          from += pageSize;
+          hasMore = data.length === pageSize;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      setAppointments(allData?.map(a => {
         // Parse date manually to avoid timezone issues
         // Database stores as YYYY-MM-DD
         const [year, month, day] = a.date.split('-');
