@@ -17,15 +17,15 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { id: 'agenda' as TabId, icon: Calendar, label: 'Agenda' },
-  { id: 'clientes' as TabId, icon: Users, label: 'Clientes' },
-  { id: 'financeiro' as TabId, icon: DollarSign, label: 'Financeiro' },
-  { id: 'pacotes' as TabId, icon: Package, label: 'Pacotes' },
-  { id: 'estoque' as TabId, icon: ShoppingBag, label: 'Estoque' },
-  { id: 'fornecedores' as TabId, icon: Truck, label: 'Fornecedores' },
-  { id: 'parcerias' as TabId, icon: Handshake, label: 'Parcerias' },
-  { id: 'lista-espera' as TabId, icon: ClipboardList, label: 'Lista de Espera' },
-  { id: 'config' as TabId, icon: Settings, label: 'Configurações' },
+  { id: 'agenda' as TabId, icon: Calendar, label: 'Agenda', color: '#f97316' },
+  { id: 'clientes' as TabId, icon: Users, label: 'Clientes', color: '#3b82f6' },
+  { id: 'financeiro' as TabId, icon: DollarSign, label: 'Financeiro', color: '#22c55e' },
+  { id: 'pacotes' as TabId, icon: Package, label: 'Pacotes', color: '#a855f7' },
+  { id: 'estoque' as TabId, icon: ShoppingBag, label: 'Estoque', color: '#eab308' },
+  { id: 'fornecedores' as TabId, icon: Truck, label: 'Fornecedores', color: '#ef4444' },
+  { id: 'parcerias' as TabId, icon: Handshake, label: 'Parcerias', color: '#ec4899' },
+  { id: 'lista-espera' as TabId, icon: ClipboardList, label: 'Lista de Espera', color: '#14b8a6' },
+  { id: 'config' as TabId, icon: Settings, label: 'Configurações', color: '#6b7280' },
 ];
 
 
@@ -129,7 +129,7 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
                 boxShadow: activeTab === item.id ? '0 20px 25px -5px rgba(0, 0, 0, 0.1)' : 'none',
               }}
             >
-              <item.icon size={22} />
+              <item.icon size={22} style={{ color: activeTab === item.id ? undefined : item.color }} />
               <span className="font-black text-xs uppercase">{item.label}</span>
             </button>
           ))}
