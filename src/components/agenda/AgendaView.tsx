@@ -141,7 +141,7 @@ export function AgendaView({
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             <div className="divide-y agenda-border">
               {timeSlots.map(time => {
-                const appointment = appointments.find(a => a.date === dateStr && a.time === time);
+                const appointment = appointments.find(a => a.date === dateStr && (a.time === time || a.time.startsWith(time.split(':')[0] + ':' + time.split(':')[1])));
                 const block = blocks.find(b => b.date === dateStr && b.time === time);
                 const isDayBlocked = isDateBlocked(dateStr);
                 
