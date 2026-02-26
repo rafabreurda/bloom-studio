@@ -9,6 +9,7 @@ import { ReportModal } from './ReportModal';
 import { FinanceModal } from './FinanceModal';
 import { ExpensesView } from '@/components/expenses/ExpensesView';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+import { ExtractModal } from './ExtractModal';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
@@ -65,6 +66,7 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
   const [showReportModal, setShowReportModal] = useState(false);
   const [showFinanceModal, setShowFinanceModal] = useState(false);
   const [subTab, setSubTab] = useState<FinanceSubTab>('resumo');
+  const [extractCard, setExtractCard] = useState<string | null>(null);
 
   // Month filter - defaults to current month
   const now = new Date();
@@ -145,15 +147,29 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
   const totalProducts = filteredFinances.filter(f => f.category === 'product').reduce((sum, f) => sum + f.value, 0);
   const categoryData = [{ name: 'Sessões', valor: totalSessions }, { name: 'Produtos', valor: totalProducts }];
   const summaryCards = [
-    { label: 'Receita', value: totalReceita, icon: DollarSign, color: 'text-primary' },
-    { label: 'Custos', value: totalCustos, icon: TrendingDown, color: 'text-red-500' },
-    { label: 'Despesas', value: totalDespesas, icon: Receipt, color: 'text-red-500' },
-    { label: 'Lucro', value: totalLucro, icon: Sparkles, color: 'text-emerald-500' },
-    { label: 'Cartão', value: totalCartao, icon: CreditCard, color: 'text-blue-500' },
-    { label: 'Pix', value: totalPix, icon: TrendingUp, color: 'text-amber-500' },
-    { label: 'Dinheiro', value: totalDinheiro, icon: Banknote, color: 'text-emerald-500' },
-    { label: 'Parcerias', value: totalParcerias, icon: Handshake, color: 'text-purple-500' },
+    { label: 'Receita', value: totalReceita, icon: DollarSign, color: 'text-primary', key: 'receita' },
+    { label: 'Custos', value: totalCustos, icon: TrendingDown, color: 'text-red-500', key: 'custos' },
+    { label: 'Despesas', value: totalDespesas, icon: Receipt, color: 'text-red-500', key: 'despesas' },
+    { label: 'Lucro', value: totalLucro, icon: Sparkles, color: 'text-emerald-500', key: 'lucro' },
+    { label: 'Cartão', value: totalCartao, icon: CreditCard, color: 'text-blue-500', key: 'cartao' },
+    { label: 'Pix', value: totalPix, icon: TrendingUp, color: 'text-amber-500', key: 'pix' },
+    { label: 'Dinheiro', value: totalDinheiro, icon: Banknote, color: 'text-emerald-500', key: 'dinheiro' },
+    { label: 'Parcerias', value: totalParcerias, icon: Handshake, color: 'text-purple-500', key: 'parcerias' },
   ];
+
+  const getExtractData = (key: string) => {
+    switch (key) {
+      case 'receita': return filteredFinances.filter(f => f.type === 'in' && !f.isPartnership);
+      case 'custos': return filteredFinances.filter(f => f.type === 'out' && f.category === 'expense');
+      case 'despesas': return filteredFinances.filter(f => f.type === 'out');
+      case 'lucro': return filteredFinances;
+      case 'cartao': return filteredFinances.filter(f => f.type === 'in' && f.paymentMethod === 'Cartão');
+      case 'pix': return filteredFinances.filter(f => f.type === 'in' && f.paymentMethod === 'Pix');
+      case 'dinheiro': return filteredFinances.filter(f => f.type === 'in' && f.paymentMethod === 'Dinheiro');
+      case 'parcerias': return filteredFinances.filter(f => f.isPartnership);
+      default: return [];
+    }
+  };
 
   return (
     <div className="space-y-6 h-full flex flex-col overflow-hidden">
@@ -234,7 +250,7 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
 
       {subTab === 'resumo' && (
         <div className="flex-1 overflow-y-auto custom-scrollbar pb-20 space-y-6 pr-2">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">{summaryCards.map((card, i) => (<BronzeCard key={i} className="bg-secondary/50 p-4 text-center"><div className={`inline-flex items-center justify-center w-10 h-10 rounded-full bg-background mb-2 ${card.color}`}><card.icon size={20} /></div><p className="text-[10px] font-black uppercase text-muted-foreground">{card.label}</p><p className="text-lg font-black">R$ {card.value.toLocaleString('pt-BR')}</p></BronzeCard>))}</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">{summaryCards.map((card, i) => (<BronzeCard key={i} className="bg-secondary/50 p-4 text-center cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all" onClick={() => setExtractCard(card.key)}><div className={`inline-flex items-center justify-center w-10 h-10 rounded-full bg-background mb-2 ${card.color}`}><card.icon size={20} /></div><p className="text-[10px] font-black uppercase text-muted-foreground">{card.label}</p><p className="text-lg font-black">R$ {card.value.toLocaleString('pt-BR')}</p></BronzeCard>))}</div>
           <div className="grid md:grid-cols-2 gap-4">
              <BronzeCard className="bg-secondary/50 p-4"><h3 className="text-sm font-black uppercase text-muted-foreground mb-4">Evolução (6 meses)</h3><div className="h-[200px]"><ResponsiveContainer width="100%" height="100%"><LineChart data={evolutionData}><CartesianGrid strokeDasharray="3 3" stroke="#333" /><XAxis dataKey="month" stroke="#666" fontSize={10} /><YAxis stroke="#666" fontSize={10} /><Tooltip content={<CustomTooltip />} /><Line type="monotone" dataKey="valor" stroke="#f59e0b" strokeWidth={3} /></LineChart></ResponsiveContainer></div></BronzeCard>
             <BronzeCard className="bg-secondary/50 p-4"><h3 className="text-sm font-black uppercase text-muted-foreground mb-4">Pagamentos</h3><div className="h-[200px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={paymentData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>{paymentData.map((entry, i) => <Cell key={i} fill={entry.color} />)}</Pie><Tooltip content={<PieTooltip />} /></PieChart></ResponsiveContainer></div></BronzeCard>
@@ -256,6 +272,15 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
 
       {showReportModal && <ReportModal finances={finances} onClose={() => setShowReportModal(false)} />}
       {showFinanceModal && <FinanceModal onClose={() => setShowFinanceModal(false)} onSave={onAddFinance} />}
+      {extractCard && (
+        <ExtractModal
+          open={!!extractCard}
+          onClose={() => setExtractCard(null)}
+          title={`Extrato: ${summaryCards.find(c => c.key === extractCard)?.label || ''}`}
+          finances={getExtractData(extractCard)}
+          color={summaryCards.find(c => c.key === extractCard)?.color || 'text-foreground'}
+        />
+      )}
     </div>
   );
 }
