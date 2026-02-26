@@ -65,15 +65,15 @@ const Index = () => {
   
   // Use persistence hooks
   const { config: systemConfig, updateConfig: handleConfigChange, uploadLogo, uploadBackground } = useSystemConfig();
-  const { partnerships, addPartnership, updatePartnership, deletePartnership } = usePartnerships();
+  const { partnerships, addPartnership, updatePartnership, deletePartnership, refetch: refetchPartnerships } = usePartnerships();
   const { clients, addClient, updateClient, deleteClient, deleteAllClients, refetch: refetchClients } = useClients();
-  const { stock, addStock, updateStock, deleteStock, adjustQuantity } = useStock();
-  const { suppliers, addSupplier, updateSupplier, deleteSupplier } = useSuppliers();
-  const { appointments, addAppointment, updateAppointment, deleteAppointment, clearAllAppointments, clearAppointmentsByDate } = useAppointments();
+  const { stock, addStock, updateStock, deleteStock, adjustQuantity, refetch: refetchStock } = useStock();
+  const { suppliers, addSupplier, updateSupplier, deleteSupplier, refetch: refetchSuppliers } = useSuppliers();
+  const { appointments, addAppointment, updateAppointment, deleteAppointment, clearAllAppointments, clearAppointmentsByDate, refetch: refetchAppointments } = useAppointments();
   const { blocks, addBlock, deleteBlock } = useBlocks();
   const { waitingList, addWaiting, completeWaiting } = useWaitingList();
-  const { finances, addFinance, deleteFinance } = useFinances();
-  const { packages, addPackage, updatePackage, deletePackage, useSession } = usePackages();
+  const { finances, addFinance, deleteFinance, refetch: refetchFinances } = useFinances();
+  const { packages, addPackage, updatePackage, deletePackage, useSession, refetch: refetchPackages } = usePackages();
 
   // Auto-close appointments when next appointment time arrives
   useAutoClose({
@@ -250,6 +250,7 @@ const Index = () => {
               pixKey={systemConfig.pixKey}
               onClearAll={clearAllAppointments}
               onClearByDate={clearAppointmentsByDate}
+              onRefetch={refetchAppointments}
               whatsappTemplates={systemConfig.whatsappTemplates}
             />
           )}
@@ -276,6 +277,7 @@ const Index = () => {
               onUpdate={updatePackage}
               onDelete={deletePackage}
               onUseSession={useSession}
+              onRefetch={refetchPackages}
             />
           )}
 
@@ -285,6 +287,7 @@ const Index = () => {
               onAddFinance={addFinance}
               onDeleteFinance={deleteFinance}
               appointments={appointments}
+              onRefetch={refetchFinances}
             />
           )}
 
@@ -298,6 +301,7 @@ const Index = () => {
               onEditClick={handleEditStock}
               onDeleteClick={deleteStock}
               onAdjustQuantity={adjustQuantity}
+              onRefetch={refetchStock}
             />
           )}
 
@@ -311,6 +315,7 @@ const Index = () => {
               onEditClick={handleEditSupplier}
               onDeleteClick={deleteSupplier}
               onSendMessage={handleSendWhatsApp}
+              onRefetch={refetchSuppliers}
             />
           )}
 
@@ -324,6 +329,7 @@ const Index = () => {
               onEditClick={handleEditPartnership}
               onDeleteClick={deletePartnership}
               onSendMessage={handleSendWhatsApp}
+              onRefetch={refetchPartnerships}
             />
           )}
 

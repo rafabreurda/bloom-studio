@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Lock, Plus, Trash2 } from 'lucide-react';
 import { BronzeButton } from '@/components/ui/BronzeButton';
+import { ImportDataButton, transforms } from '@/components/ui/ImportDataButton';
 import { ViewMode } from '@/types';
 
 interface AgendaHeaderProps {
@@ -12,6 +13,7 @@ interface AgendaHeaderProps {
   onAddClick: () => void;
   onClearAll?: () => void;
   onClearByDate?: (date: string) => void;
+  onRefetch?: () => void;
 }
 
 export function AgendaHeader({
@@ -23,6 +25,7 @@ export function AgendaHeader({
   onAddClick,
   onClearAll,
   onClearByDate,
+  onRefetch,
 }: AgendaHeaderProps) {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [clearMode, setClearMode] = useState<'all' | 'date'>('date');
@@ -192,7 +195,21 @@ export function AgendaHeader({
         </div>
         
         {/* Action Buttons */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <ImportDataButton
+            table="appointments"
+            label="Agendamentos"
+            columns={[
+              { candidates: ['cliente', 'nome', 'client', 'name'], dbColumn: 'client_name', fallback: 'Sem nome' },
+              { candidates: ['telefone', 'phone', 'celular'], dbColumn: 'phone', transform: (v) => transforms.phone(v) || '0' },
+              { candidates: ['data', 'date'], dbColumn: 'date', transform: (v) => transforms.date(v) || new Date().toISOString().split('T')[0] },
+              { candidates: ['hora', 'horário', 'time'], dbColumn: 'time', fallback: '10:00' },
+              { candidates: ['valor', 'value', 'preço'], dbColumn: 'value', transform: transforms.number },
+              { candidates: ['status'], dbColumn: 'status', fallback: 'Agendado' },
+              { candidates: ['pagamento', 'payment'], dbColumn: 'payment_method', fallback: 'Pix' },
+            ]}
+            onImportComplete={() => onRefetch?.()}
+          />
           <BronzeButton variant="danger" icon={Lock} size="sm" onClick={onBlockClick}>
             Bloquear
           </BronzeButton>
