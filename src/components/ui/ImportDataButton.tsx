@@ -26,6 +26,8 @@ interface ImportDataButtonProps {
   columns: ColumnMapping[];
   /** Extra default fields to add to every row */
   defaults?: Record<string, any>;
+  /** Optional async function to enrich/transform rows before insert (e.g. client lookup) */
+  onPreProcess?: (rows: Record<string, any>[]) => Promise<Record<string, any>[]>;
   /** Callback after import completes */
   onImportComplete: () => void | Promise<void>;
 }
@@ -90,7 +92,7 @@ export const transforms = {
   string: (val: string | number | undefined) => val ? String(val).trim() : '',
 };
 
-export function ImportDataButton({ table, label, columns, defaults, onImportComplete }: ImportDataButtonProps) {
+export function ImportDataButton({ table, label, columns, defaults, onPreProcess, onImportComplete }: ImportDataButtonProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
   const [preview, setPreview] = useState<{ total: number; data: Record<string, any>[]; headers: string[] } | null>(null);
@@ -157,11 +159,14 @@ export function ImportDataButton({ table, label, columns, defaults, onImportComp
         toInsert.push(record);
       }
 
+      // Pre-process rows if handler provided (e.g. client lookup)
+      const finalRows = onPreProcess ? await onPreProcess(toInsert) : toInsert;
+
       // Batch insert
       let inserted = 0;
       const chunkSize = 200;
-      for (let i = 0; i < toInsert.length; i += chunkSize) {
-        const chunk = toInsert.slice(i, i + chunkSize);
+      for (let i = 0; i < finalRows.length; i += chunkSize) {
+        const chunk = finalRows.slice(i, i + chunkSize);
         const { error } = await (supabase.from(table as any) as any).insert(chunk);
         if (error) {
           console.error(`Erro no lote ${Math.floor(i / chunkSize) + 1}:`, error);
