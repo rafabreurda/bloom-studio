@@ -3,6 +3,7 @@ import { Search, Plus, Package as PackageIcon, Trash2, Edit2, RefreshCw, CheckCi
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
+import { ImportDataButton, transforms } from '@/components/ui/ImportDataButton';
 import { PackageModal } from './PackageModal';
 import { Package } from '@/hooks/usePackages';
 
@@ -12,9 +13,10 @@ interface PackagesViewProps {
   onUpdate: (pkg: Package) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onUseSession: (id: string) => Promise<void>;
+  onRefetch?: () => void;
 }
 
-export function PackagesView({ packages, onAdd, onUpdate, onDelete, onUseSession }: PackagesViewProps) {
+export function PackagesView({ packages, onAdd, onUpdate, onDelete, onUseSession, onRefetch }: PackagesViewProps) {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
@@ -51,6 +53,19 @@ export function PackagesView({ packages, onAdd, onUpdate, onDelete, onUseSession
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
             <input type="text" placeholder="Buscar cliente..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-bronze pl-9 w-full text-sm" />
           </div>
+          <ImportDataButton
+            table="packages"
+            label="Pacotes"
+            columns={[
+              { candidates: ['cliente', 'nome', 'client', 'name'], dbColumn: 'client_name', fallback: 'Sem nome' },
+              { candidates: ['telefone', 'phone', 'celular'], dbColumn: 'client_phone', transform: transforms.phone },
+              { candidates: ['sessões', 'sessoes', 'total', 'sessions'], dbColumn: 'total_sessions', transform: transforms.number },
+              { candidates: ['usadas', 'used', 'utilizadas'], dbColumn: 'used_sessions', transform: transforms.number },
+              { candidates: ['valor', 'value', 'preço', 'total_value'], dbColumn: 'total_value', transform: transforms.number },
+              { candidates: ['observação', 'obs', 'notes', 'nota'], dbColumn: 'notes' },
+            ]}
+            onImportComplete={() => onRefetch?.()}
+          />
           <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => { setEditingPackage(null); setShowModal(true); }}>Novo</BronzeButton>
         </div>
       </div>

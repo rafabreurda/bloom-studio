@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, TrendingUp, CreditCard, Banknote, Handshake, DollarSign, FileText, TrendingDown, Sparkles, Receipt } from 'lucide-react';
 import { ExportButton } from '@/components/ui/ExportButton';
+import { ImportDataButton, transforms } from '@/components/ui/ImportDataButton';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { Finance, Appointment } from '@/types';
@@ -55,11 +56,12 @@ interface FinanceViewProps {
   onAddFinance: (finance: Omit<Finance, 'id'>) => void;
   onDeleteFinance: (id: string) => void;
   appointments: Appointment[];
+  onRefetch?: () => void;
 }
 
 type FinanceSubTab = 'resumo' | 'despesas';
 
-export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointments }: FinanceViewProps) {
+export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointments, onRefetch }: FinanceViewProps) {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showFinanceModal, setShowFinanceModal] = useState(false);
   const [subTab, setSubTab] = useState<FinanceSubTab>('resumo');
@@ -106,6 +108,19 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
               { key: 'paymentMethod', label: 'Pagamento' },
               { key: 'category', label: 'Categoria' },
             ]}
+          />
+          <ImportDataButton
+            table="finances"
+            label="Financeiro"
+            columns={[
+              { candidates: ['data', 'date'], dbColumn: 'date', transform: (v) => transforms.date(v) || new Date().toISOString().split('T')[0] },
+              { candidates: ['descrição', 'descricao', 'description'], dbColumn: 'description', fallback: 'Importado' },
+              { candidates: ['tipo', 'type'], dbColumn: 'type', transform: (v) => { const s = String(v || '').toLowerCase(); return s.includes('saída') || s.includes('out') || s.includes('despesa') ? 'out' : 'in'; } },
+              { candidates: ['valor', 'value', 'preço'], dbColumn: 'value', transform: transforms.number },
+              { candidates: ['pagamento', 'payment', 'método'], dbColumn: 'payment_method', fallback: 'Pix' },
+              { candidates: ['categoria', 'category'], dbColumn: 'category', fallback: 'session' },
+            ]}
+            onImportComplete={() => onRefetch?.()}
           />
           <BronzeButton variant="secondary" icon={FileText} size="sm" onClick={() => setShowReportModal(true)}>Relatório</BronzeButton>
           <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => setShowFinanceModal(true)}>Nova Entrada</BronzeButton>

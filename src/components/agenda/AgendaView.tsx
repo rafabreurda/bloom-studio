@@ -20,6 +20,7 @@ interface AgendaViewProps {
   onAppointmentClick: (appointment: Appointment) => void;
   onClearAll?: () => void;
   onClearByDate?: (date: string) => void;
+  onRefetch?: () => void;
   pixKey: string;
   whatsappTemplates: WhatsAppTemplate[];
 }
@@ -37,6 +38,7 @@ export function AgendaView({
   onAppointmentClick,
   onClearAll,
   onClearByDate,
+  onRefetch,
   pixKey,
   whatsappTemplates,
 }: AgendaViewProps) {
@@ -130,6 +132,7 @@ export function AgendaView({
         onAddClick={() => onAddClick('')}
         onClearAll={onClearAll}
         onClearByDate={onClearByDate}
+        onRefetch={onRefetch}
       />
 
       {/* Conditional View Rendering */}
