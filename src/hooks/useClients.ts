@@ -143,12 +143,29 @@ export function useClients() {
     }
   };
 
+  const deleteAllClients = async () => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // delete all
+      if (error) throw error;
+      setClients([]);
+      toast.success('Todos os clientes foram removidos!');
+    } catch (error) {
+      console.error('Erro ao remover todos os clientes:', error);
+      toast.error('Erro ao remover clientes');
+      throw error;
+    }
+  };
+
   return {
     clients,
     loading,
     addClient,
     updateClient,
     deleteClient,
+    deleteAllClients,
     refetch: fetchClients,
   };
 }
