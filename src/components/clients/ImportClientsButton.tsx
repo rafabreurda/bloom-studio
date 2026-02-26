@@ -3,6 +3,7 @@ import { Upload, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Json } from '@/integrations/supabase/types';
 import * as XLSX from 'xlsx';
 
 interface ImportClientsButtonProps {
@@ -57,21 +58,23 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
     const reader = new FileReader();
     reader.onload = (evt) => {
       try {
-        const wb = XLSX.read(evt.target?.result, { type: 'binary' });
+        const data_buf = new Uint8Array(evt.target?.result as ArrayBuffer);
+        const wb = XLSX.read(data_buf, { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const data = XLSX.utils.sheet_to_json<RawRow>(ws, { defval: '' });
+        console.log('XLSX parsed rows:', data.length, 'headers:', data.length > 0 ? Object.keys(data[0]) : []);
         if (data.length === 0) {
           toast.error('Planilha vazia');
           return;
         }
         const headers = Object.keys(data[0]);
         setPreview({ total: data.length, data, headers });
-      } catch {
+      } catch (err) {
+        console.error('Erro ao ler XLSX:', err);
         toast.error('Erro ao ler arquivo');
       }
     };
-    reader.readAsBinaryString(file);
-    // Reset input
+    reader.readAsArrayBuffer(file);
     e.target.value = '';
   };
 
@@ -108,8 +111,8 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
         notes?: string;
         tags: string[];
         is_vip: boolean;
-        history: string;
-        anamnesis_history: string;
+        history: Json;
+        anamnesis_history: Json;
       }> = [];
 
       let skipped = 0;
@@ -121,7 +124,7 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
         if (!name || !phone) { skipped++; continue; }
         if (existingPhones.has(phone)) { skipped++; continue; }
 
-        existingPhones.add(phone); // avoid duplicates within import
+        existingPhones.add(phone);
 
         toInsert.push({
           name,
@@ -133,8 +136,8 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
           notes: colNotes ? String(row[colNotes] || '').trim() || undefined : undefined,
           tags: [],
           is_vip: false,
-          history: '[]',
-          anamnesis_history: '[]',
+          history: [] as Json,
+          anamnesis_history: [] as Json,
         });
       }
 
