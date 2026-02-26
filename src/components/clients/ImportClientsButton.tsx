@@ -83,9 +83,6 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
     setImporting(true);
 
     try {
-      const { data: existingClients } = await supabase.from('clients').select('phone');
-      const existingPhones = new Set((existingClients || []).map(c => c.phone.replace(/\D/g, '')));
-
       const headers = preview.headers;
       const colName = findColumn(headers, 'nome', 'name', 'cliente');
       const colPhone = findColumn(headers, 'telefone', 'phone', 'celular', 'fone');
@@ -95,8 +92,8 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
       const colCpf = findColumn(headers, 'cpf');
       const colNotes = findColumn(headers, 'observação', 'observacao', 'referência', 'notes', 'obs');
 
-      if (!colName || !colPhone) {
-        toast.error('Colunas "Nome" e "Telefone" não encontradas na planilha');
+      if (!colName) {
+        toast.error('Coluna "Nome" não encontrada na planilha');
         setImporting(false);
         return;
       }
@@ -115,16 +112,9 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
         anamnesis_history: Json;
       }> = [];
 
-      let skipped = 0;
-
       for (const row of preview.data) {
-        const name = String(row[colName] || '').trim();
-        const phone = normalizePhone(row[colPhone]);
-        
-        if (!name || !phone) { skipped++; continue; }
-        if (existingPhones.has(phone)) { skipped++; continue; }
-
-        existingPhones.add(phone);
+        const name = String(row[colName] || '').trim() || 'Sem nome';
+        const phone = colPhone ? normalizePhone(row[colPhone]) : '';
 
         toInsert.push({
           name,
@@ -141,21 +131,21 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
         });
       }
 
-      // Batch insert in chunks of 500
+      // Batch insert in chunks of 200
       let inserted = 0;
-      const chunkSize = 500;
+      const chunkSize = 200;
       for (let i = 0; i < toInsert.length; i += chunkSize) {
         const chunk = toInsert.slice(i, i + chunkSize);
         const { error } = await supabase.from('clients').insert(chunk);
         if (error) {
           console.error('Erro no batch:', error);
-          toast.error(`Erro ao importar lote ${Math.floor(i / chunkSize) + 1}`);
+          toast.error(`Erro no lote ${Math.floor(i / chunkSize) + 1}: ${error.message}`);
         } else {
           inserted += chunk.length;
         }
       }
 
-      toast.success(`${inserted} clientes importados! ${skipped > 0 ? `(${skipped} ignorados por duplicata ou dados inválidos)` : ''}`);
+      toast.success(`${inserted} clientes importados com sucesso!`);
       setPreview(null);
       onImportComplete();
     } catch (err) {
@@ -187,7 +177,7 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
                 Colunas detectadas: {preview.headers.join(', ')}
               </p>
               <p className="text-xs text-muted-foreground">
-                Clientes com telefone duplicado serão ignorados.
+                Todos os registros serão importados sem restrições.
               </p>
             </div>
 
