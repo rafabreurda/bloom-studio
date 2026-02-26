@@ -35,20 +35,36 @@ function normalizePhone(phone: string | number | undefined): string {
   return String(phone).replace(/\D/g, '');
 }
 
-function normalizeDate(val: string | number | undefined): string | null {
+function normalizeDate(val: string | number | Date | undefined): string | null {
   if (!val) return null;
+  // Handle JS Date objects (XLSX cellDates mode)
+  if (val instanceof Date) {
+    if (!isNaN(val.getTime())) return val.toISOString().split('T')[0];
+    return null;
+  }
   const s = String(val).trim();
+  // dd/mm/yyyy
   const match = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (match) {
     const [, d, m, y] = match;
     return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
   }
+  // mm/dd/yyyy (fallback)
+  const match2 = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (match2) {
+    const [, d, m, y] = match2;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+  // Excel serial number
   if (/^\d{4,5}$/.test(s)) {
     const date = new Date((Number(s) - 25569) * 86400 * 1000);
     if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
   }
   // yyyy-mm-dd already
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // Try generic Date parse as last resort
+  const parsed = new Date(s);
+  if (!isNaN(parsed.getTime())) return parsed.toISOString().split('T')[0];
   return null;
 }
 
@@ -87,7 +103,7 @@ export function ImportDataButton({ table, label, columns, defaults, onImportComp
     reader.onload = (evt) => {
       try {
         const buf = new Uint8Array(evt.target?.result as ArrayBuffer);
-        const wb = XLSX.read(buf, { type: 'array' });
+        const wb = XLSX.read(buf, { type: 'array', cellDates: true });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const data = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: '' });
         if (data.length === 0) { toast.error('Planilha vazia'); return; }
