@@ -1,0 +1,2 @@
+-- Corrigir despesas que foram importadas com type='in' em vez de 'out'
+UPDATE finances SET type = 'out' WHERE category IN ('Administração e gerais', 'Compra de estoque', 'Cortesias', 'Custos de Serviço');
