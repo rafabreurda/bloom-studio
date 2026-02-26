@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { LoginScreen } from '@/components/auth/LoginScreen';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { AgendaView } from '@/components/agenda/AgendaView';
@@ -49,6 +51,24 @@ import { VoiceCommandButton } from '@/components/voice/VoiceCommandButton';
 import { Mic } from 'lucide-react';
 
 const Index = () => {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
+
+  return <MainApp />;
+};
+
+const MainApp = () => {
   // State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('agenda');
