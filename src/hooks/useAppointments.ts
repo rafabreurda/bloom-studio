@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Appointment, AppointmentProduct } from '@/types';
 import { toast } from 'sonner';
 import { Json } from '@/integrations/supabase/types';
@@ -10,28 +11,7 @@ export function useAppointments() {
 
   const fetchAppointments = useCallback(async () => {
     try {
-      // Fetch all appointments (Supabase limits to 1000 per query)
-      let allData: any[] = [];
-      let from = 0;
-      const pageSize = 1000;
-      let hasMore = true;
-
-      while (hasMore) {
-        const { data, error } = await supabase
-          .from('appointments')
-          .select('*')
-          .order('date', { ascending: false })
-          .range(from, from + pageSize - 1);
-
-        if (error) throw error;
-        if (data && data.length > 0) {
-          allData = allData.concat(data);
-          from += pageSize;
-          hasMore = data.length === pageSize;
-        } else {
-          hasMore = false;
-        }
-      }
+      const allData = await fetchAllFromTable('appointments', '*', { orderBy: 'date', ascending: false });
 
       setAppointments(allData?.map(a => {
         // Parse date manually to avoid timezone issues

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Block } from '@/types';
 import { toast } from 'sonner';
 
@@ -9,12 +10,7 @@ export function useBlocks() {
 
   const fetchBlocks = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('blocks')
-        .select('*')
-        .order('date', { ascending: false });
-
-      if (error) throw error;
+      const data = await fetchAllFromTable('blocks', '*', { orderBy: 'date', ascending: false });
 
       setBlocks(data?.map(b => ({
         id: b.id,

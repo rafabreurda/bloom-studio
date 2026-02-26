@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Partnership } from '@/types';
 import { toast } from 'sonner';
 
@@ -9,12 +10,7 @@ export function usePartnerships() {
 
   const fetchPartnerships = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('partnerships')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
+      const data = await fetchAllFromTable('partnerships', '*', { orderBy: 'name', ascending: true });
 
       setPartnerships(data?.map(p => ({
         id: p.id,

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { StockItem } from '@/types';
 import { toast } from 'sonner';
 
@@ -9,12 +10,7 @@ export function useStock() {
 
   const fetchStock = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('stock')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
+      const data = await fetchAllFromTable('stock', '*', { orderBy: 'name', ascending: true });
 
       setStock(data?.map(s => ({
         id: s.id,
