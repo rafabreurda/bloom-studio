@@ -15,6 +15,7 @@ interface AuthContextType {
   rememberAdmin: (adminId: string) => void;
   getRememberedAdminId: () => string | null;
   clearRememberedAdmin: () => void;
+  isAdminChefe: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,28 +30,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Load admins from Supabase
   const refreshAdmins = async () => {
     try {
-      // Fetch all profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*');
 
       if (profilesError) throw profilesError;
 
-      // Fetch all roles
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('*');
 
       if (rolesError) throw rolesError;
 
-      // Fetch all permissions
       const { data: permissions, error: permissionsError } = await supabase
         .from('admin_permissions')
         .select('*');
 
       if (permissionsError) throw permissionsError;
 
-      // Combine data
       const adminsWithRoles: AdminWithRole[] = (profiles || []).map(profile => {
         const userRole = roles?.find(r => r.user_id === profile.id);
         const userPermissions = permissions?.find(p => p.user_id === profile.id);
@@ -68,43 +65,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Single admin - always has full permission
   const hasPermission = (tabId: TabId): boolean => {
-    return !!currentAdmin;
+    if (!currentAdmin) return false;
+    // Admin chefe has full access
+    if (currentAdmin.role === 'admin_chefe') return true;
+    // Admin pleno: check permissions or grant all except config
+    if (currentAdmin.permissions) {
+      const permMap: Record<string, keyof AdminPermissions> = {
+        agenda: 'agenda',
+        clientes: 'clientes',
+        estoque: 'estoque',
+        'lista-espera': 'lista_espera',
+        financeiro: 'financeiro',
+        fornecedores: 'fornecedores',
+        parcerias: 'parcerias',
+        config: 'config',
+      };
+      const key = permMap[tabId];
+      if (key) return currentAdmin.permissions[key] as boolean;
+    }
+    // Default: pleno can access everything except config
+    return tabId !== 'config';
   };
 
-  // Switch to a different admin
+  // Switch to a different admin - always requires password
   const switchAdmin = async (adminId: string, password?: string): Promise<boolean> => {
     const admin = admins.find(a => a.id === adminId);
     if (!admin) return false;
 
-    // If admin is chefe and has password, verify it
-    if (admin.role === 'admin_chefe' && admin.password_hash) {
-      if (!password) return false;
+    if (!password) return false;
 
-      // Call the verify function
-      const { data, error } = await supabase.rpc('verify_admin_password', {
-        _user_id: adminId,
-        _password: password,
-      });
+    // Verify password
+    const { data, error } = await supabase.rpc('verify_admin_password', {
+      _user_id: adminId,
+      _password: password,
+    });
 
-      if (error || !data) {
-        console.error('Password verification failed:', error);
-        return false;
-      }
+    if (error || !data) {
+      console.error('Password verification failed:', error);
+      return false;
     }
 
     setCurrentAdmin(admin);
     return true;
   };
 
-  // Logout
   const logout = () => {
     setCurrentAdmin(null);
     clearRememberedAdmin();
   };
 
-  // Remember admin in localStorage
   const rememberAdmin = (adminId: string) => {
     localStorage.setItem(REMEMBERED_ADMIN_KEY, adminId);
   };
@@ -117,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(REMEMBERED_ADMIN_KEY);
   };
 
-  // Initialize and auto-login first admin
+  // Initialize - load admins only, no auto-login
   useEffect(() => {
     const init = async () => {
       setIsLoading(true);
@@ -127,13 +137,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     init();
   }, []);
-
-  // Auto-login first available admin
-  useEffect(() => {
-    if (!isLoading && admins.length > 0 && !currentAdmin) {
-      setCurrentAdmin(admins[0]);
-    }
-  }, [isLoading, admins, currentAdmin]);
 
   const value: AuthContextType = {
     currentAdmin,
@@ -147,6 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     rememberAdmin,
     getRememberedAdminId,
     clearRememberedAdmin,
+    isAdminChefe: currentAdmin?.role === 'admin_chefe',
   };
 
   return (
