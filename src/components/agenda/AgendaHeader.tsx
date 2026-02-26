@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Lock, Plus, Trash2 } from 'lucide-react';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { ImportDataButton, transforms } from '@/components/ui/ImportDataButton';
 import { ViewMode } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AgendaHeaderProps {
   selectedDate: Date;
@@ -201,13 +202,43 @@ export function AgendaHeader({
             label="Agendamentos"
             columns={[
               { candidates: ['cliente', 'nome', 'client', 'name'], dbColumn: 'client_name', fallback: 'Sem nome' },
-              { candidates: ['telefone', 'phone', 'celular'], dbColumn: 'phone', transform: (v) => transforms.phone(v) || '0' },
-              { candidates: ['data', 'date'], dbColumn: 'date', transform: (v) => transforms.date(v) || new Date().toISOString().split('T')[0] },
-              { candidates: ['hora', 'horário', 'time'], dbColumn: 'time', fallback: '10:00' },
-              { candidates: ['valor', 'value', 'preço'], dbColumn: 'value', transform: transforms.number },
+              { candidates: ['telefone', 'phone', 'celular', 'whatsapp', 'fone'], dbColumn: 'phone', transform: (v) => transforms.phone(v) || '0' },
+              { candidates: ['data', 'date', 'dia'], dbColumn: 'date', transform: (v) => transforms.date(v) || new Date().toISOString().split('T')[0] },
+              { candidates: ['hora', 'horário', 'horario', 'time', 'início', 'inicio'], dbColumn: 'time', fallback: '10:00' },
+              { candidates: ['valor', 'value', 'preço', 'preco', 'price', 'total'], dbColumn: 'value', transform: transforms.number },
+              { candidates: ['total', 'valor total', 'total_value'], dbColumn: 'total_value', transform: transforms.number },
+              { candidates: ['cobrado', 'charged', 'valor cobrado'], dbColumn: 'charged_value', transform: transforms.number },
+              { candidates: ['custo', 'cost', 'insumo'], dbColumn: 'cost', transform: transforms.number },
               { candidates: ['status'], dbColumn: 'status', fallback: 'Agendado' },
-              { candidates: ['pagamento', 'payment'], dbColumn: 'payment_method', fallback: 'Pix' },
+              { candidates: ['pagamento', 'payment', 'forma', 'método'], dbColumn: 'payment_method', fallback: 'Pix' },
+              { candidates: ['tipo', 'serviço', 'servico', 'atendimento', 'service', 'type'], dbColumn: 'tags', transform: (v) => v ? [String(v).trim()] : [] },
             ]}
+            onPreProcess={async (rows) => {
+              // Fetch all clients to match by name
+              const { data: clients } = await supabase.from('clients').select('name, phone');
+              const clientMap = new Map<string, string>();
+              if (clients) {
+                for (const c of clients) {
+                  clientMap.set(c.name.toLowerCase().trim(), c.phone);
+                }
+              }
+
+              return rows.map(row => {
+                // Look up client phone from database if missing or default
+                const name = (row.client_name || '').toLowerCase().trim();
+                if ((!row.phone || row.phone === '0') && clientMap.has(name)) {
+                  row.phone = clientMap.get(name)!;
+                }
+                // Ensure total_value and charged_value default to value if not set
+                if (!row.total_value) row.total_value = row.value || 0;
+                if (!row.charged_value) row.charged_value = row.value || 0;
+                // Ensure tags is an array
+                if (row.tags && !Array.isArray(row.tags)) {
+                  row.tags = [String(row.tags)];
+                }
+                return row;
+              });
+            }}
             onImportComplete={() => onRefetch?.()}
           />
           <BronzeButton variant="danger" icon={Lock} size="sm" onClick={onBlockClick}>
