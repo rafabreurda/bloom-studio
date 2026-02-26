@@ -66,7 +66,7 @@ const Index = () => {
   // Use persistence hooks
   const { config: systemConfig, updateConfig: handleConfigChange, uploadLogo, uploadBackground } = useSystemConfig();
   const { partnerships, addPartnership, updatePartnership, deletePartnership } = usePartnerships();
-  const { clients, addClient, updateClient, deleteClient, refetch: refetchClients } = useClients();
+  const { clients, addClient, updateClient, deleteClient, deleteAllClients, refetch: refetchClients } = useClients();
   const { stock, addStock, updateStock, deleteStock, adjustQuantity } = useStock();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier } = useSuppliers();
   const { appointments, addAppointment, updateAppointment, deleteAppointment, clearAllAppointments, clearAppointmentsByDate } = useAppointments();
@@ -264,6 +264,7 @@ const Index = () => {
               onAddClient={addClient}
               onEditClient={updateClient}
               onDeleteClient={deleteClient}
+              onDeleteAllClients={deleteAllClients}
               onRefetch={refetchClients}
             />
           )}

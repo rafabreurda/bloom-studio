@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from 'react';
-import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown, Crown } from 'lucide-react';
+import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown, Crown, AlertTriangle } from 'lucide-react';
 import { ExportButton } from '@/components/ui/ExportButton';
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
@@ -19,10 +19,11 @@ interface ClientsViewProps {
   onAddClient: (client: Omit<Client, 'id' | 'createdAt' | 'history'>) => void;
   onEditClient: (client: Client) => void;
   onDeleteClient: (id: string) => void;
+  onDeleteAllClients?: () => void;
   onRefetch?: () => void;
 }
 
-export function ClientsView({ clients, tags, partnerships, appointments, whatsappTemplates, onAddClient, onEditClient, onDeleteClient, onRefetch }: ClientsViewProps) {
+export function ClientsView({ clients, tags, partnerships, appointments, whatsappTemplates, onAddClient, onEditClient, onDeleteClient, onDeleteAllClients, onRefetch }: ClientsViewProps) {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -30,6 +31,8 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [subTab, setSubTab] = useState<'list' | 'analytics'>('list');
   const [inactivityDays, setInactivityDays] = useState(30);
+  const [showDeleteAll, setShowDeleteAll] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const tabsRef = useRef<HTMLDivElement>(null);
 
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -116,6 +119,7 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
               ]}
             />
             <ImportClientsButton onImportComplete={() => onRefetch?.()} />
+            <BronzeButton variant="danger" icon={Trash2} size="sm" onClick={() => setShowDeleteAll(true)}>Apagar Todos</BronzeButton>
             <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => { setEditingClient(null); setShowModal(true); }}>Novo</BronzeButton>
           </div>
         )}
@@ -240,6 +244,47 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
 
       {showModal && <div className="fixed inset-0 bg-black/80 z-[100] flex items-end md:items-center justify-center"><ClientModal client={editingClient} tags={tags} partnerships={partnerships} onClose={() => { setShowModal(false); setEditingClient(null); }} onSave={handleSave} /></div>}
       {viewingClient && <ClientHistoryModal client={viewingClient} tags={tags} onClose={() => setViewingClient(null)} />}
+      
+      {showDeleteAll && (
+        <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+          <div className="bg-card rounded-2xl p-6 max-w-md w-full space-y-4">
+            <div className="flex items-center gap-3 text-destructive">
+              <AlertTriangle size={28} />
+              <h3 className="font-black text-lg">Apagar TODOS os Clientes</h3>
+            </div>
+            <div className="bg-destructive/10 rounded-xl p-4 space-y-2">
+              <p className="text-sm font-bold">Esta ação é irreversível!</p>
+              <p className="text-sm">Todos os <strong>{clients.length}</strong> clientes serão removidos permanentemente.</p>
+              <p className="text-xs text-muted-foreground mt-2">Digite <strong>APAGAR</strong> para confirmar:</p>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Digite APAGAR"
+                className="input-bronze w-full text-sm mt-1"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <BronzeButton variant="outline" size="sm" onClick={() => { setShowDeleteAll(false); setDeleteConfirmText(''); }}>
+                Cancelar
+              </BronzeButton>
+              <BronzeButton
+                variant="danger"
+                icon={Trash2}
+                size="sm"
+                disabled={deleteConfirmText !== 'APAGAR'}
+                onClick={() => {
+                  onDeleteAllClients?.();
+                  setShowDeleteAll(false);
+                  setDeleteConfirmText('');
+                }}
+              >
+                Apagar Todos
+              </BronzeButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
