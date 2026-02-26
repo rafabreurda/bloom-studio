@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, TrendingUp, CreditCard, Banknote, Handshake, DollarSign, FileText, TrendingDown, Sparkles, Receipt } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Plus, TrendingUp, CreditCard, Banknote, Handshake, DollarSign, FileText, TrendingDown, Sparkles, Receipt, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { ExportButton } from '@/components/ui/ExportButton';
 import { ImportDataButton, transforms } from '@/components/ui/ImportDataButton';
 import { BronzeCard } from '@/components/ui/BronzeCard';
@@ -66,18 +66,83 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
   const [showFinanceModal, setShowFinanceModal] = useState(false);
   const [subTab, setSubTab] = useState<FinanceSubTab>('resumo');
 
-  const totalReceita = finances.filter(f => f.type === 'in' && !f.isPartnership).reduce((sum, f) => sum + f.value, 0);
-  const totalCartao = finances.filter(f => f.type === 'in' && !f.isPartnership && f.paymentMethod === 'Cartão').reduce((sum, f) => sum + f.value, 0);
-  const totalPix = finances.filter(f => f.type === 'in' && !f.isPartnership && f.paymentMethod === 'Pix').reduce((sum, f) => sum + f.value, 0);
-  const totalDinheiro = finances.filter(f => f.type === 'in' && !f.isPartnership && f.paymentMethod === 'Dinheiro').reduce((sum, f) => sum + f.value, 0);
-  const totalParcerias = appointments.filter(a => a.isPartnership).reduce((sum, a) => sum + a.value, 0);
-  const totalCustos = appointments.reduce((sum, a) => sum + (a.cost || 0), 0);
-  const totalDespesas = finances.filter(f => f.type === 'out').reduce((sum, f) => sum + f.value, 0);
+  // Month filter - defaults to current month
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth()); // 0-11
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
+  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+  const goToPrevMonth = () => {
+    if (selectedMonth === 0) { setSelectedMonth(11); setSelectedYear(y => y - 1); }
+    else setSelectedMonth(m => m - 1);
+  };
+  const goToNextMonth = () => {
+    if (selectedMonth === 11) { setSelectedMonth(0); setSelectedYear(y => y + 1); }
+    else setSelectedMonth(m => m + 1);
+  };
+
+  // Filter finances by selected month
+  const filteredFinances = useMemo(() => {
+    return finances.filter(f => {
+      const parts = f.date.split('/');
+      if (parts.length === 3) {
+        const month = parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+        return month === selectedMonth && year === selectedYear;
+      }
+      return false;
+    });
+  }, [finances, selectedMonth, selectedYear]);
+
+  // Filter appointments by selected month
+  const filteredAppointments = useMemo(() => {
+    return appointments.filter(a => {
+      // a.date can be DD/MM/YYYY or YYYY-MM-DD
+      let month: number, year: number;
+      if (a.date.includes('/')) {
+        const parts = a.date.split('/');
+        month = parseInt(parts[1], 10) - 1;
+        year = parseInt(parts[2], 10);
+      } else {
+        const parts = a.date.split('-');
+        month = parseInt(parts[1], 10) - 1;
+        year = parseInt(parts[0], 10);
+      }
+      return month === selectedMonth && year === selectedYear;
+    });
+  }, [appointments, selectedMonth, selectedYear]);
+
+  const totalReceita = filteredFinances.filter(f => f.type === 'in' && !f.isPartnership).reduce((sum, f) => sum + f.value, 0);
+  const totalCartao = filteredFinances.filter(f => f.type === 'in' && !f.isPartnership && f.paymentMethod === 'Cartão').reduce((sum, f) => sum + f.value, 0);
+  const totalPix = filteredFinances.filter(f => f.type === 'in' && !f.isPartnership && f.paymentMethod === 'Pix').reduce((sum, f) => sum + f.value, 0);
+  const totalDinheiro = filteredFinances.filter(f => f.type === 'in' && !f.isPartnership && f.paymentMethod === 'Dinheiro').reduce((sum, f) => sum + f.value, 0);
+  const totalParcerias = filteredAppointments.filter(a => a.isPartnership).reduce((sum, a) => sum + a.value, 0);
+  const totalCustos = filteredAppointments.reduce((sum, a) => sum + (a.cost || 0), 0);
+  const totalDespesas = filteredFinances.filter(f => f.type === 'out').reduce((sum, f) => sum + f.value, 0);
   const totalLucro = totalReceita - totalCustos - totalDespesas;
-  const evolutionData = [{ month: 'Ago', valor: 3200 }, { month: 'Set', valor: 4100 }, { month: 'Out', valor: 3800 }, { month: 'Nov', valor: 4500 }, { month: 'Dez', valor: 5200 }, { month: 'Jan', valor: totalReceita }];
+  const evolutionData = useMemo(() => {
+    // Show last 6 months ending at selected month
+    const data = [];
+    for (let i = 5; i >= 0; i--) {
+      let m = selectedMonth - i;
+      let y = selectedYear;
+      while (m < 0) { m += 12; y--; }
+      const monthFinances = finances.filter(f => {
+        const parts = f.date.split('/');
+        if (parts.length === 3) {
+          return parseInt(parts[1], 10) - 1 === m && parseInt(parts[2], 10) === y;
+        }
+        return false;
+      });
+      const valor = monthFinances.filter(f => f.type === 'in').reduce((s, f) => s + f.value, 0);
+      data.push({ month: monthNames[m].substring(0, 3), valor });
+    }
+    return data;
+  }, [finances, selectedMonth, selectedYear]);
   const paymentData = [{ name: 'Pix', value: totalPix, color: '#f59e0b' }, { name: 'Cartão', value: totalCartao, color: '#3b82f6' }, { name: 'Dinheiro', value: totalDinheiro, color: '#10b981' }].filter(d => d.value > 0);
-  const totalSessions = finances.filter(f => f.category === 'session').reduce((sum, f) => sum + f.value, 0);
-  const totalProducts = finances.filter(f => f.category === 'product').reduce((sum, f) => sum + f.value, 0);
+  const totalSessions = filteredFinances.filter(f => f.category === 'session').reduce((sum, f) => sum + f.value, 0);
+  const totalProducts = filteredFinances.filter(f => f.category === 'product').reduce((sum, f) => sum + f.value, 0);
   const categoryData = [{ name: 'Sessões', valor: totalSessions }, { name: 'Produtos', valor: totalProducts }];
   const summaryCards = [
     { label: 'Receita', value: totalReceita, icon: DollarSign, color: 'text-primary' },
@@ -93,7 +158,21 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
   return (
     <div className="space-y-6 h-full flex flex-col overflow-hidden">
       <div className="flex justify-between items-center shrink-0">
-        <h2 className="text-2xl font-black uppercase tracking-tight">Financeiro</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-black uppercase tracking-tight">Financeiro</h2>
+          <div className="flex items-center gap-1 bg-secondary/50 rounded-xl px-2 py-1">
+            <button onClick={goToPrevMonth} className="p-1 hover:bg-background rounded-lg transition-colors">
+              <ChevronLeft size={16} className="text-muted-foreground" />
+            </button>
+            <div className="flex items-center gap-1.5 px-2">
+              <CalendarDays size={14} className="text-primary" />
+              <span className="text-sm font-black">{monthNames[selectedMonth]} {selectedYear}</span>
+            </div>
+            <button onClick={goToNextMonth} className="p-1 hover:bg-background rounded-lg transition-colors">
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </button>
+          </div>
+        </div>
         <div className="flex gap-2">
           <ExportButton
             fileName="financeiro"
@@ -160,8 +239,8 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
              <BronzeCard className="bg-secondary/50 p-4"><h3 className="text-sm font-black uppercase text-muted-foreground mb-4">Evolução (6 meses)</h3><div className="h-[200px]"><ResponsiveContainer width="100%" height="100%"><LineChart data={evolutionData}><CartesianGrid strokeDasharray="3 3" stroke="#333" /><XAxis dataKey="month" stroke="#666" fontSize={10} /><YAxis stroke="#666" fontSize={10} /><Tooltip content={<CustomTooltip />} /><Line type="monotone" dataKey="valor" stroke="#f59e0b" strokeWidth={3} /></LineChart></ResponsiveContainer></div></BronzeCard>
             <BronzeCard className="bg-secondary/50 p-4"><h3 className="text-sm font-black uppercase text-muted-foreground mb-4">Pagamentos</h3><div className="h-[200px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={paymentData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>{paymentData.map((entry, i) => <Cell key={i} fill={entry.color} />)}</Pie><Tooltip content={<PieTooltip />} /></PieChart></ResponsiveContainer></div></BronzeCard>
           </div>
-          <BronzeCard className="bg-secondary/50 p-4"><h3 className="text-sm font-black uppercase text-muted-foreground mb-4">Sessões vs Produtos</h3><div className="h-[200px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={categoryData}><CartesianGrid strokeDasharray="3 3" stroke="#333" /><XAxis dataKey="name" stroke="#666" /><YAxis stroke="#666" fontSize={10} /><Tooltip content={<BarTooltipWithMethods finances={finances} />} /><Bar dataKey="valor" fill="#f59e0b" radius={[8, 8, 0, 0]} /></BarChart></ResponsiveContainer></div></BronzeCard>
-          <BronzeCard className="bg-secondary/50"><h3 className="text-sm font-black uppercase text-muted-foreground mb-4">Últimas Transações</h3><div className="space-y-2">{finances.slice(0, 10).map(f => (<div key={f.id} className={`flex items-center justify-between p-3 rounded-xl border ${f.type === 'in' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'}`}><div className="flex items-center gap-3"><div className={`w-2 h-2 rounded-full ${f.type === 'in' ? 'bg-emerald-500' : 'bg-red-500'}`} /><div><p className="text-sm font-bold">{f.description}</p><p className="text-xs text-muted-foreground">{f.date} • {f.paymentMethod}</p></div></div><span className={`font-black ${f.type === 'in' ? 'text-emerald-500' : 'text-red-500'}`}>{f.type === 'in' ? '+' : '-'}R$ {f.value}</span></div>))}</div></BronzeCard>
+          <BronzeCard className="bg-secondary/50 p-4"><h3 className="text-sm font-black uppercase text-muted-foreground mb-4">Sessões vs Produtos</h3><div className="h-[200px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={categoryData}><CartesianGrid strokeDasharray="3 3" stroke="#333" /><XAxis dataKey="name" stroke="#666" /><YAxis stroke="#666" fontSize={10} /><Tooltip content={<BarTooltipWithMethods finances={filteredFinances} />} /><Bar dataKey="valor" fill="#f59e0b" radius={[8, 8, 0, 0]} /></BarChart></ResponsiveContainer></div></BronzeCard>
+          <BronzeCard className="bg-secondary/50"><h3 className="text-sm font-black uppercase text-muted-foreground mb-4">Transações do Mês</h3><div className="space-y-2">{filteredFinances.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">Nenhuma transação neste mês</p>}{filteredFinances.map(f => (<div key={f.id} className={`flex items-center justify-between p-3 rounded-xl border ${f.type === 'in' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'}`}><div className="flex items-center gap-3"><div className={`w-2 h-2 rounded-full ${f.type === 'in' ? 'bg-emerald-500' : 'bg-red-500'}`} /><div><p className="text-sm font-bold">{f.description}</p><p className="text-xs text-muted-foreground">{f.date} • {f.paymentMethod}</p></div></div><span className={`font-black ${f.type === 'in' ? 'text-emerald-500' : 'text-red-500'}`}>{f.type === 'in' ? '+' : '-'}R$ {f.value}</span></div>))}</div></BronzeCard>
         </div>
       )}
 
