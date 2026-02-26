@@ -157,8 +157,8 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
 
   return (
     <div className="space-y-6 h-full flex flex-col overflow-hidden">
-      <div className="flex justify-between items-center shrink-0">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 shrink-0">
+        <div className="flex flex-wrap justify-between items-center gap-2">
           <h2 className="text-2xl font-black uppercase tracking-tight">Financeiro</h2>
           <div className="flex items-center gap-1 bg-secondary/50 rounded-xl px-2 py-1">
             <button onClick={goToPrevMonth} className="p-1 hover:bg-background rounded-lg transition-colors">
@@ -166,14 +166,14 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
             </button>
             <div className="flex items-center gap-1.5 px-2">
               <CalendarDays size={14} className="text-primary" />
-              <span className="text-sm font-black">{monthNames[selectedMonth]} {selectedYear}</span>
+              <span className="text-sm font-black whitespace-nowrap">{monthNames[selectedMonth]} {selectedYear}</span>
             </div>
             <button onClick={goToNextMonth} className="p-1 hover:bg-background rounded-lg transition-colors">
               <ChevronRight size={16} className="text-muted-foreground" />
             </button>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 justify-end">
           <ExportButton
             fileName="financeiro"
             title="Relatório Financeiro"
