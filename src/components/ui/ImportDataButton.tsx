@@ -27,7 +27,7 @@ interface ImportDataButtonProps {
   /** Extra default fields to add to every row */
   defaults?: Record<string, any>;
   /** Callback after import completes */
-  onImportComplete: () => void;
+  onImportComplete: () => void | Promise<void>;
 }
 
 function normalizePhone(phone: string | number | undefined): string {
@@ -157,7 +157,7 @@ export function ImportDataButton({ table, label, columns, defaults, onImportComp
 
       toast.success(`${inserted} registros importados com sucesso!`);
       setPreview(null);
-      onImportComplete();
+      await onImportComplete();
     } catch (err) {
       console.error(err);
       toast.error('Erro na importação');
