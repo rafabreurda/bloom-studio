@@ -4,6 +4,7 @@ import { ExportButton } from '@/components/ui/ExportButton';
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
+import { ImportClientsButton } from './ImportClientsButton';
 import { Client, ClientTag, Partnership, Appointment, WhatsAppTemplate } from '@/types';
 import { ClientModal } from './ClientModal';
 import { ClientHistoryModal } from './ClientHistoryModal';
@@ -18,9 +19,10 @@ interface ClientsViewProps {
   onAddClient: (client: Omit<Client, 'id' | 'createdAt' | 'history'>) => void;
   onEditClient: (client: Client) => void;
   onDeleteClient: (id: string) => void;
+  onRefetch?: () => void;
 }
 
-export function ClientsView({ clients, tags, partnerships, appointments, whatsappTemplates, onAddClient, onEditClient, onDeleteClient }: ClientsViewProps) {
+export function ClientsView({ clients, tags, partnerships, appointments, whatsappTemplates, onAddClient, onEditClient, onDeleteClient, onRefetch }: ClientsViewProps) {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -113,6 +115,7 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
                 { key: 'notes', label: 'Observações' },
               ]}
             />
+            <ImportClientsButton onImportComplete={() => onRefetch?.()} />
             <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => { setEditingClient(null); setShowModal(true); }}>Novo</BronzeButton>
           </div>
         )}

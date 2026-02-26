@@ -1,0 +1,204 @@
+import { useRef, useState } from 'react';
+import { Upload, FileSpreadsheet, Loader2 } from 'lucide-react';
+import { BronzeButton } from '@/components/ui/BronzeButton';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
+
+interface ImportClientsButtonProps {
+  onImportComplete: () => void;
+}
+
+interface RawRow {
+  [key: string]: string | number | undefined;
+}
+
+function normalizePhone(phone: string | number | undefined): string {
+  if (!phone) return '';
+  return String(phone).replace(/\D/g, '');
+}
+
+function normalizeDate(val: string | number | undefined): string | null {
+  if (!val) return null;
+  const s = String(val).trim();
+  // dd/mm/yyyy
+  const match = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (match) {
+    const [, d, m, y] = match;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+  // Excel serial number
+  if (/^\d{4,5}$/.test(s)) {
+    const date = new Date((Number(s) - 25569) * 86400 * 1000);
+    if (!isNaN(date.getTime())) {
+      return date.toISOString().split('T')[0];
+    }
+  }
+  return null;
+}
+
+function findColumn(headers: string[], ...candidates: string[]): string | null {
+  for (const c of candidates) {
+    const found = headers.find(h => h.toLowerCase().includes(c.toLowerCase()));
+    if (found) return found;
+  }
+  return null;
+}
+
+export function ImportClientsButton({ onImportComplete }: ImportClientsButtonProps) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+  const [preview, setPreview] = useState<{ total: number; data: RawRow[]; headers: string[] } | null>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const wb = XLSX.read(evt.target?.result, { type: 'binary' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json<RawRow>(ws, { defval: '' });
+        if (data.length === 0) {
+          toast.error('Planilha vazia');
+          return;
+        }
+        const headers = Object.keys(data[0]);
+        setPreview({ total: data.length, data, headers });
+      } catch {
+        toast.error('Erro ao ler arquivo');
+      }
+    };
+    reader.readAsBinaryString(file);
+    // Reset input
+    e.target.value = '';
+  };
+
+  const doImport = async () => {
+    if (!preview) return;
+    setImporting(true);
+
+    try {
+      const { data: existingClients } = await supabase.from('clients').select('phone');
+      const existingPhones = new Set((existingClients || []).map(c => c.phone.replace(/\D/g, '')));
+
+      const headers = preview.headers;
+      const colName = findColumn(headers, 'nome', 'name', 'cliente');
+      const colPhone = findColumn(headers, 'telefone', 'phone', 'celular', 'fone');
+      const colEmail = findColumn(headers, 'email', 'e-mail');
+      const colAddress = findColumn(headers, 'endereço', 'endereco', 'address');
+      const colBirthday = findColumn(headers, 'nascimento', 'aniversário', 'birthday', 'data nasc');
+      const colCpf = findColumn(headers, 'cpf');
+      const colNotes = findColumn(headers, 'observação', 'observacao', 'referência', 'notes', 'obs');
+
+      if (!colName || !colPhone) {
+        toast.error('Colunas "Nome" e "Telefone" não encontradas na planilha');
+        setImporting(false);
+        return;
+      }
+
+      const toInsert: Array<{
+        name: string;
+        phone: string;
+        email?: string;
+        address?: string;
+        birthday?: string;
+        cpf?: string;
+        notes?: string;
+        tags: string[];
+        is_vip: boolean;
+        history: string;
+        anamnesis_history: string;
+      }> = [];
+
+      let skipped = 0;
+
+      for (const row of preview.data) {
+        const name = String(row[colName] || '').trim();
+        const phone = normalizePhone(row[colPhone]);
+        
+        if (!name || !phone) { skipped++; continue; }
+        if (existingPhones.has(phone)) { skipped++; continue; }
+
+        existingPhones.add(phone); // avoid duplicates within import
+
+        toInsert.push({
+          name,
+          phone,
+          email: colEmail ? String(row[colEmail] || '').trim() || undefined : undefined,
+          address: colAddress ? String(row[colAddress] || '').trim() || undefined : undefined,
+          birthday: colBirthday ? normalizeDate(row[colBirthday]) || undefined : undefined,
+          cpf: colCpf ? String(row[colCpf] || '').trim() || undefined : undefined,
+          notes: colNotes ? String(row[colNotes] || '').trim() || undefined : undefined,
+          tags: [],
+          is_vip: false,
+          history: '[]',
+          anamnesis_history: '[]',
+        });
+      }
+
+      // Batch insert in chunks of 500
+      let inserted = 0;
+      const chunkSize = 500;
+      for (let i = 0; i < toInsert.length; i += chunkSize) {
+        const chunk = toInsert.slice(i, i + chunkSize);
+        const { error } = await supabase.from('clients').insert(chunk);
+        if (error) {
+          console.error('Erro no batch:', error);
+          toast.error(`Erro ao importar lote ${Math.floor(i / chunkSize) + 1}`);
+        } else {
+          inserted += chunk.length;
+        }
+      }
+
+      toast.success(`${inserted} clientes importados! ${skipped > 0 ? `(${skipped} ignorados por duplicata ou dados inválidos)` : ''}`);
+      setPreview(null);
+      onImportComplete();
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro na importação');
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  return (
+    <>
+      <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
+      <BronzeButton variant="outline" icon={Upload} size="sm" onClick={() => fileRef.current?.click()}>
+        Importar
+      </BronzeButton>
+
+      {preview && (
+        <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+          <div className="bg-card rounded-2xl p-6 max-w-md w-full space-y-4">
+            <div className="flex items-center gap-3">
+              <FileSpreadsheet size={24} className="text-primary" />
+              <h3 className="font-black text-lg">Importar Clientes</h3>
+            </div>
+            
+            <div className="bg-secondary rounded-xl p-4 space-y-2">
+              <p className="text-sm"><strong>{preview.total}</strong> registros encontrados</p>
+              <p className="text-xs text-muted-foreground">
+                Colunas detectadas: {preview.headers.join(', ')}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Clientes com telefone duplicado serão ignorados.
+              </p>
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <BronzeButton variant="outline" size="sm" onClick={() => setPreview(null)} disabled={importing}>
+                Cancelar
+              </BronzeButton>
+              <BronzeButton variant="gold" size="sm" onClick={doImport} disabled={importing} icon={importing ? Loader2 : Upload}>
+                {importing ? 'Importando...' : 'Confirmar Importação'}
+              </BronzeButton>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
