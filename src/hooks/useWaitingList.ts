@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { WaitingItem } from '@/types';
 import { toast } from 'sonner';
 
@@ -9,12 +10,7 @@ export function useWaitingList() {
 
   const fetchWaitingList = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('waiting_list')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await fetchAllFromTable('waiting_list', '*', { orderBy: 'created_at', ascending: false });
 
       setWaitingList(data?.map(w => ({
         id: w.id,

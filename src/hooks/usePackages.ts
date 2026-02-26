@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { toast } from 'sonner';
 
 export interface Package {
@@ -21,12 +22,7 @@ export function usePackages() {
 
   const fetchPackages = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('packages')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await fetchAllFromTable('packages', '*', { orderBy: 'created_at', ascending: false });
 
       setPackages(data?.map(p => ({
         id: p.id,

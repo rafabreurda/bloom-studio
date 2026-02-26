@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Supplier } from '@/types';
 import { toast } from 'sonner';
 
@@ -9,12 +10,7 @@ export function useSuppliers() {
 
   const fetchSuppliers = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('suppliers')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
+      const data = await fetchAllFromTable('suppliers', '*', { orderBy: 'name', ascending: true });
 
       setSuppliers(data?.map(s => ({
         id: s.id,

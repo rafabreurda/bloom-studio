@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Finance } from '@/types';
 import { toast } from 'sonner';
 
@@ -9,12 +10,7 @@ export function useFinances() {
 
   const fetchFinances = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('finances')
-        .select('*')
-        .order('date', { ascending: false });
-
-      if (error) throw error;
+      const data = await fetchAllFromTable('finances', '*', { orderBy: 'date', ascending: false });
 
       setFinances(data?.map(f => ({
         id: f.id,

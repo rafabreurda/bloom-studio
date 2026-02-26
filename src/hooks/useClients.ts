@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Client, AnamnesisRecord, ClientHistoryItem } from '@/types';
 import { toast } from 'sonner';
 import { Json } from '@/integrations/supabase/types';
@@ -10,12 +11,7 @@ export function useClients() {
 
   const fetchClients = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
+      const data = await fetchAllFromTable('clients', '*', { orderBy: 'name', ascending: true });
 
       setClients(data?.map(c => ({
         id: c.id,
