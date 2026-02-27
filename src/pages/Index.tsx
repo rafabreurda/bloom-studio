@@ -70,10 +70,20 @@ const Index = () => {
 };
 
 const MainApp = () => {
+  const { currentAdmin, isAdminChefe } = useAuth();
   // State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('agenda');
   const [currentRole, setCurrentRole] = useState<UserRole>('Admin Mestre');
+
+  // Reset active tab when user changes
+  useEffect(() => {
+    if (isAdminChefe) {
+      setActiveTab('config');
+    } else {
+      setActiveTab('agenda');
+    }
+  }, [currentAdmin?.id, isAdminChefe]);
   const [micTrigger, setMicTrigger] = useState(false);
   const [isMicListening, setIsMicListening] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);

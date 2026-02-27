@@ -39,12 +39,15 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
 
   useEffect(() => {
     if (currentAdmin?.id) {
+      setAdminPhoto(null); // Reset immediately to avoid showing previous user's photo
       supabase.from('profiles').select('photo_url').eq('id', currentAdmin.id).single().then(({ data }) => {
         if (data?.photo_url) setAdminPhoto(data.photo_url as string);
         else setAdminPhoto(null);
       });
+    } else {
+      setAdminPhoto(null);
     }
-  }, [currentAdmin]);
+  }, [currentAdmin?.id]);
 
   return (
     <>
