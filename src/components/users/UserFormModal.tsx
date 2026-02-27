@@ -50,32 +50,14 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
   const [phone, setPhone] = useState(editingAdmin?.phone || '');
   const [cpf, setCpf] = useState(extra.cpf || '');
   const [email, setEmail] = useState(extra.email || '');
-  const [birthday, setBirthday] = useState(extra.birthday || '');
-  // Display birthday as DD/MM/AAAA
-  const formatToDisplay = (iso: string) => {
-    if (!iso) return '';
-    const [y, m, d] = iso.split('-');
-    return `${d}/${m}/${y}`;
-  };
-  const [birthdayDisplay, setBirthdayDisplay] = useState(formatToDisplay(extra.birthday || ''));
+  const [birthdayDay, setBirthdayDay] = useState(extra.birthday ? String(extra.birthday).split('-')[2] || '' : '');
+  const [birthdayMonth, setBirthdayMonth] = useState(extra.birthday ? String(extra.birthday).split('-')[1] || '' : '');
+  const [birthdayYear, setBirthdayYear] = useState(extra.birthday ? String(extra.birthday).split('-')[0] || '' : '');
 
-  const handleBirthdayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let v = e.target.value.replace(/\D/g, '');
-    if (v.length > 8) v = v.slice(0, 8);
-    let display = v;
-    if (v.length > 2) display = v.slice(0, 2) + '/' + v.slice(2);
-    if (v.length > 4) display = v.slice(0, 2) + '/' + v.slice(2, 4) + '/' + v.slice(4);
-    setBirthdayDisplay(display);
-    // Convert to ISO when complete
-    if (v.length === 8) {
-      const day = v.slice(0, 2);
-      const month = v.slice(2, 4);
-      const year = v.slice(4, 8);
-      setBirthday(`${year}-${month}-${day}`);
-    } else {
-      setBirthday('');
-    }
-  };
+  const dayOptions = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const monthOptions = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: currentYear - 1899 }, (_, i) => String(currentYear - i));
 
   const [addressStreet, setAddressStreet] = useState(extra.address_street || '');
   const [addressNumber, setAddressNumber] = useState(extra.address_number || '');
@@ -91,6 +73,20 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    let birthday = '';
+    if (birthdayDay && birthdayMonth && birthdayYear) {
+      const parsed = new Date(Number(birthdayYear), Number(birthdayMonth) - 1, Number(birthdayDay));
+      const isValidDate =
+        parsed.getFullYear() === Number(birthdayYear) &&
+        parsed.getMonth() === Number(birthdayMonth) - 1 &&
+        parsed.getDate() === Number(birthdayDay);
+
+      if (isValidDate) {
+        birthday = `${birthdayYear}-${birthdayMonth}-${birthdayDay}`;
+      }
+    }
+
     await onSubmit({
       name, phone, cpf, email, birthday,
       address_street: addressStreet, address_number: addressNumber,
@@ -129,15 +125,20 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Data de Nascimento">
-              <input
-                type="text"
-                value={birthdayDisplay}
-                onChange={handleBirthdayChange}
-                className="input-bronze"
-                placeholder="DD/MM/AAAA"
-                maxLength={10}
-                inputMode="numeric"
-              />
+              <div className="grid grid-cols-3 gap-2">
+                <select value={birthdayDay} onChange={e => setBirthdayDay(e.target.value)} className="input-bronze">
+                  <option value="">Dia</option>
+                  {dayOptions.map(day => <option key={day} value={day}>{day}</option>)}
+                </select>
+                <select value={birthdayMonth} onChange={e => setBirthdayMonth(e.target.value)} className="input-bronze">
+                  <option value="">Mês</option>
+                  {monthOptions.map(month => <option key={month} value={month}>{month}</option>)}
+                </select>
+                <select value={birthdayYear} onChange={e => setBirthdayYear(e.target.value)} className="input-bronze">
+                  <option value="">Ano</option>
+                  {yearOptions.map(year => <option key={year} value={year}>{year}</option>)}
+                </select>
+              </div>
             </Field>
             <Field label="CPF / ID">
               <input type="text" value={cpf} onChange={e => setCpf(e.target.value)} className="input-bronze" placeholder="000.000.000-00" />
