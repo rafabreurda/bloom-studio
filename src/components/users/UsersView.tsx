@@ -56,15 +56,10 @@ export function UsersView() {
         toast.error('Senha é obrigatória');
         return;
       }
-      const success = await createAdmin({ name, phone, role: 'Admin Pleno' });
-      if (success) {
-        await refreshAdmins();
-        // Find newly created profile
-        const { data: profiles } = await supabase.from('profiles').select('id').eq('name', name).eq('phone', phone);
-        if (profiles && profiles.length > 0) {
-          await supabase.rpc('set_admin_password', { _user_id: profiles[0].id, _password: password });
-          await supabase.from('profiles').update({ password_display: password } as any).eq('id', profiles[0].id);
-        }
+      const newProfileId = await createAdmin({ name: name.trim(), phone: phone.trim(), role: 'Admin Pleno' });
+      if (newProfileId) {
+        await supabase.rpc('set_admin_password', { _user_id: newProfileId, _password: password });
+        await supabase.from('profiles').update({ password_display: password } as any).eq('id', newProfileId);
         await refreshAdmins();
         setShowModal(false);
       }

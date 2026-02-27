@@ -22,15 +22,15 @@ const reverseRoleMap: Record<AdminRoleType, string> = {
 export function useAdminsCRUD() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const createAdmin = useCallback(async (data: CreateAdminData): Promise<boolean> => {
+  const createAdmin = useCallback(async (data: CreateAdminData): Promise<string | null> => {
     setIsLoading(true);
     try {
       // 1. Create profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert({
-          name: data.name,
-          phone: data.phone,
+          name: data.name.trim(),
+          phone: data.phone?.trim() || '',
         })
         .select()
         .single();
@@ -49,11 +49,11 @@ export function useAdminsCRUD() {
       if (roleError) throw roleError;
 
       toast.success('Administrador cadastrado com sucesso!');
-      return true;
+      return profile.id;
     } catch (error) {
       console.error('Error creating admin:', error);
       toast.error('Erro ao cadastrar administrador');
-      return false;
+      return null;
     } finally {
       setIsLoading(false);
     }
