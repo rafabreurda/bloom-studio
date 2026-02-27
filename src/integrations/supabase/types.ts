@@ -418,50 +418,100 @@ export type Database = {
           },
         ]
       }
+      plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          address: string | null
           background_photo: string | null
+          cpf: string | null
           created_at: string
           email: string | null
           id: string
           name: string
           password_display: string | null
           password_hash: string | null
+          payment_notes: string | null
           phone: string | null
           photo_url: string | null
+          plan_id: string | null
           studio_logo: string | null
           studio_name: string | null
           updated_at: string
         }
         Insert: {
+          address?: string | null
           background_photo?: string | null
+          cpf?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name: string
           password_display?: string | null
           password_hash?: string | null
+          payment_notes?: string | null
           phone?: string | null
           photo_url?: string | null
+          plan_id?: string | null
           studio_logo?: string | null
           studio_name?: string | null
           updated_at?: string
         }
         Update: {
+          address?: string | null
           background_photo?: string | null
+          cpf?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name?: string
           password_display?: string | null
           password_hash?: string | null
+          payment_notes?: string | null
           phone?: string | null
           photo_url?: string | null
+          plan_id?: string | null
           studio_logo?: string | null
           studio_name?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stock: {
         Row: {
