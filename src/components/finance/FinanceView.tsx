@@ -97,21 +97,25 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
     });
   }, [finances, selectedMonth, selectedYear]);
 
-  // Filter appointments by selected month
+  // Filter appointments by selected month AND only up to today (past/current dates)
   const filteredAppointments = useMemo(() => {
+    const today = new Date();
+    const todayBr = today.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }); // YYYY-MM-DD
+
     return appointments.filter(a => {
-      // a.date can be DD/MM/YYYY or YYYY-MM-DD
-      let month: number, year: number;
+      let month: number, year: number, isoDate: string;
       if (a.date.includes('/')) {
         const parts = a.date.split('/');
         month = parseInt(parts[1], 10) - 1;
         year = parseInt(parts[2], 10);
+        isoDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
       } else {
         const parts = a.date.split('-');
         month = parseInt(parts[1], 10) - 1;
         year = parseInt(parts[0], 10);
+        isoDate = a.date;
       }
-      return month === selectedMonth && year === selectedYear;
+      return month === selectedMonth && year === selectedYear && isoDate <= todayBr;
     });
   }, [appointments, selectedMonth, selectedYear]);
 
