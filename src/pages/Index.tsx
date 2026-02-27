@@ -87,7 +87,7 @@ const MainApp = () => {
   // Use persistence hooks
   const { config: systemConfig, updateConfig: handleConfigChange, uploadLogo, uploadBackground } = useSystemConfig();
   const { partnerships, addPartnership, updatePartnership, deletePartnership, refetch: refetchPartnerships } = usePartnerships();
-  const { clients, addClient, updateClient, deleteClient, deleteAllClients, refetch: refetchClients } = useClients();
+  const { clients, addClient, updateClient, deleteClient, deleteAllClients, syncFromAppointments, refetch: refetchClients } = useClients();
   const { stock, addStock, updateStock, deleteStock, adjustQuantity, refetch: refetchStock } = useStock();
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, refetch: refetchSuppliers } = useSuppliers();
   const { appointments, addAppointment, updateAppointment, deleteAppointment, clearAllAppointments, clearAppointmentsByDate, refetch: refetchAppointments } = useAppointments();
@@ -287,6 +287,7 @@ const MainApp = () => {
               onEditClient={updateClient}
               onDeleteClient={deleteClient}
               onDeleteAllClients={deleteAllClients}
+              onSyncFromAppointments={syncFromAppointments}
               onRefetch={refetchClients}
             />
           )}
