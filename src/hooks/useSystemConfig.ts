@@ -3,20 +3,25 @@ import { supabase } from '@/integrations/supabase/client';
 import { SystemConfig } from '@/types';
 import { defaultConfig } from '@/data/mockData';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 const SUPABASE_URL = "https://iphluakvvklyvymwhfxh.supabase.co";
 
 export function useSystemConfig() {
   const [config, setConfig] = useState<SystemConfig>(defaultConfig);
   const [isLoading, setIsLoading] = useState(true);
+  const { currentAdmin } = useAuth();
 
-  // Load config from Supabase
+  // Load config from Supabase filtered by current user
   useEffect(() => {
+    if (!currentAdmin) return;
+
     const loadConfig = async () => {
       try {
         const { data, error } = await supabase
           .from('system_config')
-          .select('*');
+          .select('*')
+          .eq('owner_id', currentAdmin.id);
 
         if (error) throw error;
 
@@ -26,17 +31,20 @@ export function useSystemConfig() {
             configMap[row.key] = row.value;
           });
 
-          setConfig(prev => ({
-            ...prev,
-            name: (configMap['studio_name'] as string) || prev.name,
-            logo: (configMap['studio_logo'] as string) || prev.logo,
-            backgroundPhoto: (configMap['studio_background'] as string) || prev.backgroundPhoto,
-            pixKey: (configMap['pix_key'] as string) || prev.pixKey,
-            payLink: (configMap['pay_link'] as string) || prev.payLink,
-            clientTags: (configMap['client_tags'] as any[]) || prev.clientTags,
-            whatsappTemplates: (configMap['whatsapp_templates'] as any[]) || prev.whatsappTemplates,
-            serviceTypes: (configMap['service_types'] as any[]) || prev.serviceTypes,
-          }));
+          setConfig({
+            ...defaultConfig,
+            name: (configMap['studio_name'] as string) || defaultConfig.name,
+            logo: (configMap['studio_logo'] as string) || defaultConfig.logo,
+            backgroundPhoto: (configMap['studio_background'] as string) || defaultConfig.backgroundPhoto,
+            pixKey: (configMap['pix_key'] as string) || defaultConfig.pixKey,
+            payLink: (configMap['pay_link'] as string) || defaultConfig.payLink,
+            clientTags: (configMap['client_tags'] as any[]) || defaultConfig.clientTags,
+            whatsappTemplates: (configMap['whatsapp_templates'] as any[]) || defaultConfig.whatsappTemplates,
+            serviceTypes: (configMap['service_types'] as any[]) || defaultConfig.serviceTypes,
+          });
+        } else {
+          // No config for this user — start fresh with defaults
+          setConfig(defaultConfig);
         }
       } catch (error) {
         console.error('Error loading config:', error);
@@ -45,32 +53,48 @@ export function useSystemConfig() {
       }
     };
 
+    // Reset to defaults before loading to avoid stale data from previous user
+    setConfig(defaultConfig);
+    setIsLoading(true);
     loadConfig();
-  }, []);
+  }, [currentAdmin?.id]);
 
-  // Save a single config key to Supabase
+  // Save a single config key to Supabase with owner_id
   const saveConfigKey = async (key: string, value: any) => {
+    if (!currentAdmin) return;
     try {
-      const { error } = await supabase
+      // Try to update first
+      const { data: existing } = await supabase
         .from('system_config')
-        .upsert(
-          { key, value },
-          { onConflict: 'key' }
-        );
+        .select('id')
+        .eq('key', key)
+        .eq('owner_id', currentAdmin.id)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (existing) {
+        const { error } = await supabase
+          .from('system_config')
+          .update({ value, updated_at: new Date().toISOString() })
+          .eq('id', existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('system_config')
+          .insert({ key, value, owner_id: currentAdmin.id });
+        if (error) throw error;
+      }
     } catch (error) {
       console.error(`Error saving config key ${key}:`, error);
     }
   };
 
-  // Upload logo to Supabase Storage
+  // Upload logo to Supabase Storage (scoped by user id)
   const uploadLogo = async (file: File): Promise<string | null> => {
+    if (!currentAdmin) return null;
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `logo.${fileExt}`;
+      const fileName = `${currentAdmin.id}/logo.${fileExt}`;
 
-      // Remove old logo if exists
       await supabase.storage.from('studio-assets').remove([fileName]);
 
       const { error: uploadError } = await supabase.storage
@@ -88,11 +112,12 @@ export function useSystemConfig() {
     }
   };
 
-  // Upload background to Supabase Storage
+  // Upload background to Supabase Storage (scoped by user id)
   const uploadBackground = async (file: File): Promise<string | null> => {
+    if (!currentAdmin) return null;
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `background.${fileExt}`;
+      const fileName = `${currentAdmin.id}/background.${fileExt}`;
 
       await supabase.storage.from('studio-assets').remove([fileName]);
 
@@ -116,7 +141,6 @@ export function useSystemConfig() {
     const oldConfig = config;
     setConfig(newConfig);
 
-    // Persist changed fields
     if (newConfig.name !== oldConfig.name) {
       await saveConfigKey('studio_name', newConfig.name);
     }
@@ -141,7 +165,7 @@ export function useSystemConfig() {
     if (newConfig.serviceTypes !== oldConfig.serviceTypes) {
       await saveConfigKey('service_types', newConfig.serviceTypes);
     }
-  }, [config]);
+  }, [config, currentAdmin]);
 
   return {
     config,
