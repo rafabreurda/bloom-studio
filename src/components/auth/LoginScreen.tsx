@@ -18,9 +18,10 @@ export function LoginScreen() {
     setIsSubmitting(true);
     setError('');
 
-    // Find admin by phone or name (case insensitive)
+    // Find admin by phone or name (case insensitive, trimmed)
+    const trimmedLogin = login.trim().toLowerCase();
     const admin = admins.find(
-      a => a.phone === login || a.name.toLowerCase() === login.toLowerCase()
+      a => a.phone?.trim().toLowerCase() === trimmedLogin || a.name.trim().toLowerCase() === trimmedLogin
     );
 
     if (!admin) {
