@@ -61,11 +61,13 @@ export function AgendaView({
     localStorage.setItem('bronze_agenda_view_mode', mode);
   };
 
-  // Generate time slots from 8:00 to 22:00
+  // Generate time slots from 7:00 to 22:00 in 15-minute intervals
   const timeSlots: string[] = [];
-  for (let i = 8; i <= 22; i++) {
-    timeSlots.push(`${i.toString().padStart(2, '0')}:00`);
-    if (i < 22) timeSlots.push(`${i.toString().padStart(2, '0')}:30`);
+  for (let h = 7; h <= 22; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      if (h === 22 && m > 0) break;
+      timeSlots.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
+    }
   }
 
   const dateStr = selectedDate.toLocaleDateString('pt-BR');
