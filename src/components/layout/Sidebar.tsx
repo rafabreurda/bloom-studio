@@ -38,9 +38,12 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
     : baseMenuItems;
 
   useEffect(() => {
-    supabase.from('system_config').select('value').eq('key', 'admin_photo').then(({ data }) => {
-      if (data && data.length > 0) setAdminPhoto(data[0].value as string);
-    });
+    if (currentAdmin?.id) {
+      supabase.from('profiles').select('photo_url').eq('id', currentAdmin.id).single().then(({ data }) => {
+        if (data?.photo_url) setAdminPhoto(data.photo_url as string);
+        else setAdminPhoto(null);
+      });
+    }
   }, [currentAdmin]);
 
   return (
