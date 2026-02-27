@@ -156,17 +156,22 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
     }
   };
 
-  const sections = [
-    { id: 'estudio' as ConfigSection, icon: Building2, label: 'Estúdio' },
-    { id: 'servicos' as ConfigSection, icon: Sparkles, label: 'Serviços' },
-    { id: 'pagamentos' as ConfigSection, icon: CreditCard, label: 'Pagamentos' },
-    { id: 'tags' as ConfigSection, icon: Tag, label: 'Tags de Clientes' },
-    { id: 'mensagens' as ConfigSection, icon: MessageSquare, label: 'Mensagens' },
-    { id: 'recibo' as ConfigSection, icon: FileText, label: 'Recibo' },
-    { id: 'senha' as ConfigSection, icon: Lock, label: 'Minha Senha' },
-    { id: 'suporte' as ConfigSection, icon: Headphones, label: 'Suporte' },
-    ...(isAdminChefe ? [{ id: 'usuarios' as ConfigSection, icon: UsersRound, label: 'Usuários' }] : []),
-  ];
+  const sections = isAdminChefe
+    ? [
+        { id: 'estudio' as ConfigSection, icon: Building2, label: 'Visual' },
+        { id: 'usuarios' as ConfigSection, icon: UsersRound, label: 'Usuários' },
+        { id: 'suporte' as ConfigSection, icon: Headphones, label: 'Suporte' },
+      ]
+    : [
+        { id: 'estudio' as ConfigSection, icon: Building2, label: 'Estúdio' },
+        { id: 'servicos' as ConfigSection, icon: Sparkles, label: 'Serviços' },
+        { id: 'pagamentos' as ConfigSection, icon: CreditCard, label: 'Pagamentos' },
+        { id: 'tags' as ConfigSection, icon: Tag, label: 'Tags de Clientes' },
+        { id: 'mensagens' as ConfigSection, icon: MessageSquare, label: 'Mensagens' },
+        { id: 'recibo' as ConfigSection, icon: FileText, label: 'Recibo' },
+        { id: 'senha' as ConfigSection, icon: Lock, label: 'Minha Senha' },
+        { id: 'suporte' as ConfigSection, icon: Headphones, label: 'Suporte' },
+      ];
 
   return (
     <div className="space-y-6 h-full flex flex-col overflow-hidden">

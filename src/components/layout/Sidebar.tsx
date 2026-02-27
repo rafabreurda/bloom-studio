@@ -33,7 +33,9 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
   const [adminPhoto, setAdminPhoto] = useState<string | null>(null);
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
 
-  const menuItems = baseMenuItems;
+  const menuItems = isAdminChefe 
+    ? [{ id: 'config' as TabId, icon: Settings, label: 'Configurações', color: '#6b7280' }]
+    : baseMenuItems;
 
   useEffect(() => {
     if (currentAdmin?.id) {
