@@ -427,6 +427,7 @@ export type Database = {
           password_display: string | null
           password_hash: string | null
           phone: string | null
+          photo_url: string | null
           updated_at: string
         }
         Insert: {
@@ -437,6 +438,7 @@ export type Database = {
           password_display?: string | null
           password_hash?: string | null
           phone?: string | null
+          photo_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -447,6 +449,7 @@ export type Database = {
           password_display?: string | null
           password_hash?: string | null
           phone?: string | null
+          photo_url?: string | null
           updated_at?: string
         }
         Relationships: []

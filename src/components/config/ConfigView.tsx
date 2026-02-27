@@ -38,12 +38,15 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
   const [loginPhone, setLoginPhone] = useState(currentAdmin?.phone || '');
   const [loginEmail, setLoginEmail] = useState(currentAdmin?.email || '');
 
-  // Load admin photo from system_config
+  // Load admin photo from profiles table (per-user)
   useEffect(() => {
-    supabase.from('system_config').select('value').eq('key', 'admin_photo').then(({ data }) => {
-      if (data && data.length > 0) setAdminPhoto(data[0].value as string);
-    });
-  }, []);
+    if (currentAdmin?.id) {
+      supabase.from('profiles').select('photo_url').eq('id', currentAdmin.id).single().then(({ data }) => {
+        if (data?.photo_url) setAdminPhoto(data.photo_url as string);
+        else setAdminPhoto(null);
+      });
+    }
+  }, [currentAdmin?.id]);
 
   const handleSave = () => {
     toast.success('Configurações salvas!');
@@ -53,12 +56,10 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
     if (!currentAdmin) return;
     setIsSavingProfile(true);
     try {
-      // Update name in profiles table
-      await supabase.from('profiles').update({ name: adminName }).eq('id', currentAdmin.id);
-      // Save photo URL in system_config
-      if (adminPhoto) {
-        await supabase.from('system_config').upsert({ key: 'admin_photo', value: adminPhoto }, { onConflict: 'key' });
-      }
+      // Update name and photo in profiles table (per-user)
+      const updates: Record<string, any> = { name: adminName };
+      if (adminPhoto) updates.photo_url = adminPhoto;
+      await supabase.from('profiles').update(updates).eq('id', currentAdmin.id);
       await refreshAdmins();
       toast.success('Perfil atualizado!');
     } catch (error) {
@@ -73,7 +74,7 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
     if (!file) return;
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `admin-photo.${fileExt}`;
+      const fileName = `admin-photo-${currentAdmin?.id}.${fileExt}`;
       await supabase.storage.from('studio-assets').remove([fileName]);
       const { error } = await supabase.storage.from('studio-assets').upload(fileName, file, { upsert: true });
       if (error) throw error;
