@@ -4,7 +4,7 @@ import { BronzeButton } from '@/components/ui/BronzeButton';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function LoginScreen() {
-  const { admins, switchAdmin, rememberAdmin, isLoading } = useAuth();
+  const { admins, switchAdmin, isLoading } = useAuth();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -30,9 +30,7 @@ export function LoginScreen() {
     }
 
     const success = await switchAdmin(admin.id, password);
-    if (success) {
-      rememberAdmin(admin.id);
-    } else {
+    if (!success) {
       setError('Senha incorreta. Tente novamente.');
     }
     setIsSubmitting(false);

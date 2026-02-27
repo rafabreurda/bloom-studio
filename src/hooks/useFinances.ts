@@ -3,14 +3,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Finance } from '@/types';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useFinances() {
   const [finances, setFinances] = useState<Finance[]>([]);
   const [loading, setLoading] = useState(true);
+  const { currentAdmin, isAdminChefe } = useAuth();
 
   const fetchFinances = useCallback(async () => {
     try {
-      const data = await fetchAllFromTable('finances', '*', { orderBy: 'date', ascending: false });
+      const filters: Record<string, string> = {};
+      if (currentAdmin && !isAdminChefe) {
+        filters.owner_id = currentAdmin.id;
+      }
+
+      const data = await fetchAllFromTable('finances', '*', { orderBy: 'date', ascending: false, filters: Object.keys(filters).length > 0 ? filters : undefined });
 
       setFinances(data?.map(f => ({
         id: f.id,
@@ -27,15 +34,14 @@ export function useFinances() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentAdmin, isAdminChefe]);
 
   useEffect(() => {
-    fetchFinances();
-  }, [fetchFinances]);
+    if (currentAdmin) fetchFinances();
+  }, [fetchFinances, currentAdmin]);
 
   const addFinance = async (finance: Omit<Finance, 'id'>) => {
     try {
-      // Parse date from DD/MM/YYYY to YYYY-MM-DD if needed
       let isoDate = finance.date;
       if (finance.date.includes('/')) {
         const dateParts = finance.date.split('/');
@@ -52,6 +58,7 @@ export function useFinances() {
           payment_method: finance.paymentMethod,
           category: finance.category,
           is_partnership: finance.isPartnership,
+          owner_id: currentAdmin?.id,
         })
         .select()
         .single();

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Calendar, Users, DollarSign, ShoppingBag, Truck, Handshake, 
-  ClipboardList, Settings, UserCheck, X, Package, UsersRound 
+  ClipboardList, Settings, UserCheck, X, Package, UsersRound, LogOut, ChevronUp 
 } from 'lucide-react';
 import { TabId } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,17 +28,14 @@ const baseMenuItems = [
   { id: 'config' as TabId, icon: Settings, label: 'Configurações', color: '#6b7280' },
 ];
 
-
-
 export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, systemLogo }: SidebarProps) {
-  const { currentAdmin, isAdminChefe } = useAuth();
+  const { currentAdmin, isAdminChefe, logout } = useAuth();
   const [adminPhoto, setAdminPhoto] = useState<string | null>(null);
+  const [showLogoutMenu, setShowLogoutMenu] = useState(false);
 
   const menuItems = isAdminChefe 
     ? [...baseMenuItems, { id: 'usuarios' as TabId, icon: UsersRound, label: 'Usuários', color: '#8b5cf6' }]
     : baseMenuItems;
-
-
 
   useEffect(() => {
     supabase.from('system_config').select('value').eq('key', 'admin_photo').then(({ data }) => {
@@ -71,12 +68,10 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
         <div className="flex items-center justify-between mb-10 px-2 shrink-0">
           <div className="flex items-center gap-3">
             {systemLogo && !systemName ? (
-              // Logo only - larger, centered
               <div className="w-16 h-16 rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
                 <img src={systemLogo} alt="Logo" className="max-w-full max-h-full object-contain" />
               </div>
             ) : systemLogo ? (
-              // Logo + name
               <>
                 <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
                   <img src={systemLogo} alt="Logo" className="max-w-full max-h-full object-contain" />
@@ -89,7 +84,6 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
                 </h1>
               </>
             ) : (
-              // Name only (no logo)
               <>
                 <div 
                   className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
@@ -139,42 +133,72 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
           ))}
         </nav>
 
-        {/* Footer - Admin Info */}
-        <div 
-          className="mt-auto p-4 rounded-3xl shrink-0 w-full"
-          style={{ 
-            backgroundColor: 'hsl(var(--sidebar-accent))',
-            border: '1px solid hsl(var(--sidebar-border))'
-          }}
-        >
-          <div className="flex items-center gap-3">
-            {adminPhoto ? (
-              <div className="w-8 h-8 rounded-full overflow-hidden shrink-0"
-                style={{ border: '1px solid hsl(var(--sidebar-border))' }}
-              >
-                <img src={adminPhoto} alt="Foto" className="w-full h-full object-cover" />
-              </div>
-            ) : (
-              <div 
-                className="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs shrink-0"
-                style={{ 
-                  backgroundColor: 'hsl(var(--sidebar-primary))',
-                  color: 'hsl(var(--sidebar-primary-foreground))',
-                  border: '1px solid hsl(var(--sidebar-border))'
+        {/* Footer - Admin Info with Logout */}
+        <div className="mt-auto shrink-0 w-full relative">
+          {/* Logout popup */}
+          {showLogoutMenu && (
+            <div 
+              className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl p-2 shadow-lg"
+              style={{ 
+                backgroundColor: 'hsl(var(--sidebar-accent))',
+                border: '1px solid hsl(var(--sidebar-border))'
+              }}
+            >
+              <button
+                onClick={() => {
+                  logout();
+                  setShowLogoutMenu(false);
                 }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-destructive/10 text-destructive"
               >
-                <UserCheck size={14} />
-              </div>
-            )}
-            <div className="overflow-hidden flex-1">
-              <p 
-                className="text-xs font-bold truncate"
-                style={{ color: 'hsl(var(--sidebar-foreground))' }}
-              >
-                {currentAdmin ? `Olá, ${currentAdmin.name}` : 'Olá'}
-              </p>
+                <LogOut size={18} />
+                <span className="font-black text-xs uppercase">Sair</span>
+              </button>
             </div>
-          </div>
+          )}
+
+          <button
+            onClick={() => setShowLogoutMenu(!showLogoutMenu)}
+            className="w-full p-4 rounded-3xl transition-all hover:opacity-80"
+            style={{ 
+              backgroundColor: 'hsl(var(--sidebar-accent))',
+              border: '1px solid hsl(var(--sidebar-border))'
+            }}
+          >
+            <div className="flex items-center gap-3">
+              {adminPhoto ? (
+                <div className="w-8 h-8 rounded-full overflow-hidden shrink-0"
+                  style={{ border: '1px solid hsl(var(--sidebar-border))' }}
+                >
+                  <img src={adminPhoto} alt="Foto" className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs shrink-0"
+                  style={{ 
+                    backgroundColor: 'hsl(var(--sidebar-primary))',
+                    color: 'hsl(var(--sidebar-primary-foreground))',
+                    border: '1px solid hsl(var(--sidebar-border))'
+                  }}
+                >
+                  <UserCheck size={14} />
+                </div>
+              )}
+              <div className="overflow-hidden flex-1 text-left">
+                <p 
+                  className="text-xs font-bold truncate"
+                  style={{ color: 'hsl(var(--sidebar-foreground))' }}
+                >
+                  {currentAdmin ? `Olá, ${currentAdmin.name}` : 'Olá'}
+                </p>
+              </div>
+              <ChevronUp 
+                size={16} 
+                className={`transition-transform ${showLogoutMenu ? '' : 'rotate-180'}`}
+                style={{ color: 'hsl(var(--sidebar-accent-foreground))', opacity: 0.5 }}
+              />
+            </div>
+          </button>
         </div>
       </div>
     </>

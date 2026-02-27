@@ -77,6 +77,7 @@ export type Database = {
           id: string
           is_confirmed: boolean
           is_partnership: boolean
+          owner_id: string | null
           package_id: string | null
           partnership_discount: number | null
           partnership_id: string | null
@@ -101,6 +102,7 @@ export type Database = {
           id?: string
           is_confirmed?: boolean
           is_partnership?: boolean
+          owner_id?: string | null
           package_id?: string | null
           partnership_discount?: number | null
           partnership_id?: string | null
@@ -125,6 +127,7 @@ export type Database = {
           id?: string
           is_confirmed?: boolean
           is_partnership?: boolean
+          owner_id?: string | null
           package_id?: string | null
           partnership_discount?: number | null
           partnership_id?: string | null
@@ -141,6 +144,13 @@ export type Database = {
           value?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "appointments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appointments_package_id_fkey"
             columns: ["package_id"]
@@ -163,6 +173,7 @@ export type Database = {
           date: string
           end_date: string | null
           id: string
+          owner_id: string | null
           reason: string | null
           time: string | null
           type: string
@@ -172,6 +183,7 @@ export type Database = {
           date: string
           end_date?: string | null
           id?: string
+          owner_id?: string | null
           reason?: string | null
           time?: string | null
           type?: string
@@ -181,11 +193,20 @@ export type Database = {
           date?: string
           end_date?: string | null
           id?: string
+          owner_id?: string | null
           reason?: string | null
           time?: string | null
           type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "blocks_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       clients: {
         Row: {
@@ -200,6 +221,7 @@ export type Database = {
           is_vip: boolean
           name: string
           notes: string | null
+          owner_id: string | null
           partnership_id: string | null
           phone: string
           tags: string[] | null
@@ -217,6 +239,7 @@ export type Database = {
           is_vip?: boolean
           name: string
           notes?: string | null
+          owner_id?: string | null
           partnership_id?: string | null
           phone: string
           tags?: string[] | null
@@ -234,12 +257,20 @@ export type Database = {
           is_vip?: boolean
           name?: string
           notes?: string | null
+          owner_id?: string | null
           partnership_id?: string | null
           phone?: string
           tags?: string[] | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "clients_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "clients_partnership_id_fkey"
             columns: ["partnership_id"]
@@ -257,6 +288,7 @@ export type Database = {
           description: string
           id: string
           is_partnership: boolean | null
+          owner_id: string | null
           payment_method: string | null
           type: string
           value: number
@@ -268,6 +300,7 @@ export type Database = {
           description: string
           id?: string
           is_partnership?: boolean | null
+          owner_id?: string | null
           payment_method?: string | null
           type: string
           value: number
@@ -279,11 +312,20 @@ export type Database = {
           description?: string
           id?: string
           is_partnership?: boolean | null
+          owner_id?: string | null
           payment_method?: string | null
           type?: string
           value?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "finances_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       packages: {
         Row: {
@@ -292,6 +334,7 @@ export type Database = {
           created_at: string
           id: string
           notes: string | null
+          owner_id: string | null
           session_value: number | null
           status: string
           total_sessions: number
@@ -305,6 +348,7 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          owner_id?: string | null
           session_value?: number | null
           status?: string
           total_sessions?: number
@@ -318,6 +362,7 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          owner_id?: string | null
           session_value?: number | null
           status?: string
           total_sessions?: number
@@ -325,7 +370,15 @@ export type Database = {
           updated_at?: string
           used_sessions?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "packages_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partnerships: {
         Row: {
@@ -334,6 +387,7 @@ export type Database = {
           discount: number
           id: string
           name: string
+          owner_id: string | null
           updated_at: string
         }
         Insert: {
@@ -342,6 +396,7 @@ export type Database = {
           discount?: number
           id?: string
           name: string
+          owner_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -350,9 +405,18 @@ export type Database = {
           discount?: number
           id?: string
           name?: string
+          owner_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "partnerships_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -393,6 +457,7 @@ export type Database = {
           id: string
           min_stock: number
           name: string
+          owner_id: string | null
           price: number
           quantity: number
           updated_at: string
@@ -402,6 +467,7 @@ export type Database = {
           id?: string
           min_stock?: number
           name: string
+          owner_id?: string | null
           price?: number
           quantity?: number
           updated_at?: string
@@ -411,11 +477,20 @@ export type Database = {
           id?: string
           min_stock?: number
           name?: string
+          owner_id?: string | null
           price?: number
           quantity?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "stock_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       suppliers: {
         Row: {
@@ -423,6 +498,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          owner_id: string | null
           products: string | null
           updated_at: string
         }
@@ -431,6 +507,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          owner_id?: string | null
           products?: string | null
           updated_at?: string
         }
@@ -439,10 +516,19 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          owner_id?: string | null
           products?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_config: {
         Row: {
@@ -500,6 +586,7 @@ export type Database = {
           desired_date: string
           id: string
           name: string
+          owner_id: string | null
           phone: string
           status: string
         }
@@ -508,6 +595,7 @@ export type Database = {
           desired_date: string
           id?: string
           name: string
+          owner_id?: string | null
           phone: string
           status?: string
         }
@@ -516,10 +604,19 @@ export type Database = {
           desired_date?: string
           id?: string
           name?: string
+          owner_id?: string | null
           phone?: string
           status?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "waiting_list_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

@@ -3,14 +3,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { StockItem } from '@/types';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useStock() {
   const [stock, setStock] = useState<StockItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { currentAdmin, isAdminChefe } = useAuth();
 
   const fetchStock = useCallback(async () => {
     try {
-      const data = await fetchAllFromTable('stock', '*', { orderBy: 'name', ascending: true });
+      const filters: Record<string, string> = {};
+      if (currentAdmin && !isAdminChefe) {
+        filters.owner_id = currentAdmin.id;
+      }
+
+      const data = await fetchAllFromTable('stock', '*', { orderBy: 'name', ascending: true, filters: Object.keys(filters).length > 0 ? filters : undefined });
 
       setStock(data?.map(s => ({
         id: s.id,
@@ -24,11 +31,11 @@ export function useStock() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentAdmin, isAdminChefe]);
 
   useEffect(() => {
-    fetchStock();
-  }, [fetchStock]);
+    if (currentAdmin) fetchStock();
+  }, [fetchStock, currentAdmin]);
 
   const addStock = async (item: Omit<StockItem, 'id'>) => {
     try {
@@ -39,6 +46,7 @@ export function useStock() {
           quantity: item.quantity,
           price: item.price,
           min_stock: item.minStock,
+          owner_id: currentAdmin?.id,
         })
         .select()
         .single();

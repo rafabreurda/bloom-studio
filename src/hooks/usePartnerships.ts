@@ -3,14 +3,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Partnership } from '@/types';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function usePartnerships() {
   const [partnerships, setPartnerships] = useState<Partnership[]>([]);
   const [loading, setLoading] = useState(true);
+  const { currentAdmin, isAdminChefe } = useAuth();
 
   const fetchPartnerships = useCallback(async () => {
     try {
-      const data = await fetchAllFromTable('partnerships', '*', { orderBy: 'name', ascending: true });
+      const filters: Record<string, string> = {};
+      if (currentAdmin && !isAdminChefe) {
+        filters.owner_id = currentAdmin.id;
+      }
+
+      const data = await fetchAllFromTable('partnerships', '*', { orderBy: 'name', ascending: true, filters: Object.keys(filters).length > 0 ? filters : undefined });
 
       setPartnerships(data?.map(p => ({
         id: p.id,
@@ -23,11 +30,11 @@ export function usePartnerships() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentAdmin, isAdminChefe]);
 
   useEffect(() => {
-    fetchPartnerships();
-  }, [fetchPartnerships]);
+    if (currentAdmin) fetchPartnerships();
+  }, [fetchPartnerships, currentAdmin]);
 
   const addPartnership = async (partnership: Omit<Partnership, 'id'>) => {
     try {
@@ -37,6 +44,7 @@ export function usePartnerships() {
           name: partnership.name,
           discount: partnership.discount,
           contact: partnership.contact,
+          owner_id: currentAdmin?.id,
         })
         .select()
         .single();

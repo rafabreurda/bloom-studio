@@ -12,7 +12,7 @@ interface AdminSwitchModalProps {
 }
 
 export function AdminSwitchModal({ isOpen, onClose }: AdminSwitchModalProps) {
-  const { admins, switchAdmin, rememberAdmin, currentAdmin } = useAuth();
+  const { admins, switchAdmin, currentAdmin } = useAuth();
   const [selectedAdmin, setSelectedAdmin] = useState<AdminWithRole | null>(null);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -43,9 +43,6 @@ export function AdminSwitchModal({ isOpen, onClose }: AdminSwitchModalProps) {
     const success = await switchAdmin(adminId, pwd);
 
     if (success) {
-      if (rememberMe) {
-        rememberAdmin(adminId);
-      }
       onClose();
     } else {
       setError('Senha incorreta');
