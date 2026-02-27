@@ -32,6 +32,8 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
   const { currentAdmin, isAdminChefe, logout } = useAuth();
   const [adminPhoto, setAdminPhoto] = useState<string | null>(null);
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
+  const [userLogo, setUserLogo] = useState<string | undefined>(undefined);
+  const [userName, setUserName] = useState<string>(systemName);
 
   const menuItems = isAdminChefe 
     ? [{ id: 'config' as TabId, icon: Settings, label: 'Configurações', color: '#6b7280' }]
@@ -39,15 +41,21 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
 
   useEffect(() => {
     if (currentAdmin?.id) {
-      setAdminPhoto(null); // Reset immediately to avoid showing previous user's photo
-      supabase.from('profiles').select('photo_url').eq('id', currentAdmin.id).single().then(({ data }) => {
+      setAdminPhoto(null);
+      setUserLogo(undefined);
+      setUserName(systemName);
+      supabase.from('profiles').select('photo_url, studio_logo, studio_name, background_photo').eq('id', currentAdmin.id).single().then(({ data }) => {
         if (data?.photo_url) setAdminPhoto(data.photo_url as string);
         else setAdminPhoto(null);
+        if (data?.studio_logo) setUserLogo(data.studio_logo as string);
+        if (data?.studio_name) setUserName(data.studio_name as string);
       });
     } else {
       setAdminPhoto(null);
+      setUserLogo(undefined);
+      setUserName(systemName);
     }
-  }, [currentAdmin?.id]);
+  }, [currentAdmin?.id, systemName]);
 
   return (
     <>
@@ -73,20 +81,20 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
         {/* Header */}
         <div className="flex items-center justify-between mb-10 px-2 shrink-0">
           <div className="flex items-center gap-3">
-            {systemLogo && !systemName ? (
+            {(userLogo || systemLogo) && !userName ? (
               <div className="w-16 h-16 rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
-                <img src={systemLogo} alt="Logo" className="max-w-full max-h-full object-contain" />
+                <img src={userLogo || systemLogo} alt="Logo" className="max-w-full max-h-full object-contain" />
               </div>
-            ) : systemLogo ? (
+            ) : (userLogo || systemLogo) ? (
               <>
                 <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg flex items-center justify-center">
-                  <img src={systemLogo} alt="Logo" className="max-w-full max-h-full object-contain" />
+                  <img src={userLogo || systemLogo} alt="Logo" className="max-w-full max-h-full object-contain" />
                 </div>
                 <h1 
                   className="font-black text-lg uppercase truncate max-w-[120px]"
                   style={{ color: 'hsl(var(--sidebar-primary))' }}
                 >
-                  {systemName}
+                  {userName}
                 </h1>
               </>
             ) : (
@@ -104,7 +112,7 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
                   className="font-black text-lg uppercase truncate max-w-[120px]"
                   style={{ color: 'hsl(var(--sidebar-primary))' }}
                 >
-                  {systemName}
+                  {userName}
                 </h1>
               </>
             )}

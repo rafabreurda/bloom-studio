@@ -39,12 +39,20 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
   const [loginPhone, setLoginPhone] = useState(currentAdmin?.phone || '');
   const [loginEmail, setLoginEmail] = useState(currentAdmin?.email || '');
 
-  // Load admin photo from profiles table (per-user)
+  // Per-user visual settings
+  const [userStudioName, setUserStudioName] = useState('');
+  const [userStudioLogo, setUserStudioLogo] = useState<string | null>(null);
+  const [userBackgroundPhoto, setUserBackgroundPhoto] = useState<string | null>(null);
+
+  // Load admin photo and per-user visual settings from profiles table
   useEffect(() => {
     if (currentAdmin?.id) {
-      supabase.from('profiles').select('photo_url').eq('id', currentAdmin.id).single().then(({ data }) => {
+      supabase.from('profiles').select('photo_url, studio_name, studio_logo, background_photo').eq('id', currentAdmin.id).single().then(({ data }) => {
         if (data?.photo_url) setAdminPhoto(data.photo_url as string);
         else setAdminPhoto(null);
+        setUserStudioName((data?.studio_name as string) || config.name || '');
+        setUserStudioLogo((data?.studio_logo as string) || null);
+        setUserBackgroundPhoto((data?.background_photo as string) || null);
       });
     }
   }, [currentAdmin?.id]);
@@ -89,23 +97,37 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && onUploadLogo) {
-      const url = await onUploadLogo(file);
-      if (url) {
-        onConfigChange({ ...config, logo: url });
-        toast.success('Logo atualizado!');
-      }
+    if (!file || !currentAdmin?.id) return;
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `studio-logo-${currentAdmin.id}.${fileExt}`;
+      await supabase.storage.from('studio-assets').remove([fileName]);
+      const { error } = await supabase.storage.from('studio-assets').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const url = `${SUPABASE_URL}/storage/v1/object/public/studio-assets/${fileName}`;
+      setUserStudioLogo(url);
+      await supabase.from('profiles').update({ studio_logo: url }).eq('id', currentAdmin.id);
+      toast.success('Logo atualizado!');
+    } catch {
+      toast.error('Erro ao enviar logo');
     }
   };
 
   const handleBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && onUploadBackground) {
-      const url = await onUploadBackground(file);
-      if (url) {
-        onConfigChange({ ...config, backgroundPhoto: url });
-        toast.success('Foto de fundo atualizada!');
-      }
+    if (!file || !currentAdmin?.id) return;
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `studio-bg-${currentAdmin.id}.${fileExt}`;
+      await supabase.storage.from('studio-assets').remove([fileName]);
+      const { error } = await supabase.storage.from('studio-assets').upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const url = `${SUPABASE_URL}/storage/v1/object/public/studio-assets/${fileName}`;
+      setUserBackgroundPhoto(url);
+      await supabase.from('profiles').update({ background_photo: url }).eq('id', currentAdmin.id);
+      toast.success('Foto de fundo atualizada!');
+    } catch {
+      toast.error('Erro ao enviar foto de fundo');
     }
   };
 
@@ -222,9 +244,9 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
                 Logo do Estúdio
               </label>
               <div className="flex items-center gap-4">
-                {config.logo ? (
+                {userStudioLogo ? (
                   <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-primary/30 flex items-center justify-center">
-                    <img src={config.logo} alt="Logo" className="max-w-full max-h-full object-contain" />
+                    <img src={userStudioLogo} alt="Logo" className="max-w-full max-h-full object-contain" />
                   </div>
                 ) : (
                   <div className="w-20 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
@@ -235,12 +257,17 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
                   <label className="cursor-pointer">
                     <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
                     <span className="px-4 py-2 bg-secondary border border-border rounded-xl text-xs font-black uppercase hover:bg-secondary/80 transition-all inline-block">
-                      {config.logo ? 'Alterar Logo' : 'Enviar Logo'}
+                      {userStudioLogo ? 'Alterar Logo' : 'Enviar Logo'}
                     </span>
                   </label>
-                  {config.logo && (
+                  {userStudioLogo && (
                     <button
-                      onClick={() => onConfigChange({ ...config, logo: undefined })}
+                      onClick={async () => {
+                        setUserStudioLogo(null);
+                        if (currentAdmin?.id) {
+                          await supabase.from('profiles').update({ studio_logo: null }).eq('id', currentAdmin.id);
+                        }
+                      }}
                       className="px-4 py-2 bg-destructive/10 text-destructive border border-destructive/30 rounded-xl text-xs font-black uppercase hover:bg-destructive/20 transition-all"
                     >
                       Remover Logo
@@ -253,12 +280,17 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
             {/* Studio Name - shown as alternative */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                {config.logo ? 'Nome do Estúdio (usado como fallback)' : 'Nome do Estúdio (exibido na sidebar)'}
+                {userStudioLogo ? 'Nome do Estúdio (usado como fallback)' : 'Nome do Estúdio (exibido na sidebar)'}
               </label>
               <input
                 type="text"
-                value={config.name}
-                onChange={(e) => onConfigChange({ ...config, name: e.target.value.toUpperCase() })}
+                value={userStudioName}
+                onChange={(e) => setUserStudioName(e.target.value.toUpperCase())}
+                onBlur={async () => {
+                  if (currentAdmin?.id) {
+                    await supabase.from('profiles').update({ studio_name: userStudioName }).eq('id', currentAdmin.id);
+                  }
+                }}
                 className="input-bronze"
                 placeholder="Nome do seu estúdio"
               />
@@ -270,9 +302,9 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
                 Foto de Fundo
               </label>
               <div className="flex items-center gap-4">
-                {config.backgroundPhoto ? (
+                {userBackgroundPhoto ? (
                   <div className="w-32 h-20 rounded-xl overflow-hidden border-2 border-primary/30">
-                    <img src={config.backgroundPhoto} alt="Background" className="w-full h-full object-cover" />
+                    <img src={userBackgroundPhoto} alt="Background" className="w-full h-full object-cover" />
                   </div>
                 ) : (
                   <div className="w-32 h-20 rounded-xl border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
@@ -282,7 +314,7 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
                 <label className="cursor-pointer">
                   <input type="file" accept="image/*" onChange={handleBackgroundUpload} className="hidden" />
                   <span className="px-4 py-2 bg-secondary border border-border rounded-xl text-xs font-black uppercase hover:bg-secondary/80 transition-all">
-                    {config.backgroundPhoto ? 'Alterar Fundo' : 'Enviar Fundo'}
+                    {userBackgroundPhoto ? 'Alterar Fundo' : 'Enviar Fundo'}
                   </span>
                 </label>
               </div>
