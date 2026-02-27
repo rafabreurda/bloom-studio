@@ -25,9 +25,9 @@ export default defineConfig(({ mode }) => ({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
       manifest: {
-        name: "NeuroFlux",
-        short_name: "NeuroFlux",
-        description: "Sistema de gestão NeuroFlux",
+        name: "Neuro Flux Systems",
+        short_name: "Neuro Flux",
+        description: "Sistema de gestão Neuro Flux Systems",
         theme_color: "#000000",
         background_color: "#000000",
         display: "standalone",

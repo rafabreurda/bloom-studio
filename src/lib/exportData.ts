@@ -84,7 +84,7 @@ function exportPDF(options: ExportOptions) {
             ${rows.map(r => `<tr>${headers.map(h => `<td>${r[h] || ''}</td>`).join('')}</tr>`).join('')}
           </tbody>
         </table>
-        <div class="footer">Documento gerado automaticamente pelo sistema NeuroFlux</div>
+        <div class="footer">Documento gerado automaticamente pelo sistema Neuro Flux Systems</div>
       </body>
     </html>
   `;

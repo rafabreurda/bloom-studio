@@ -52,7 +52,7 @@ export function LoginScreen() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-black uppercase tracking-tight text-foreground">
-            NeuroFlix Systems
+            Neuro Flux Systems
           </h1>
           <p className="text-sm text-muted-foreground">
             Faça login para continuar

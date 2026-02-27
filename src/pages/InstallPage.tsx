@@ -87,7 +87,7 @@ export default function InstallPage() {
 
           {/* App Info */}
           <div className="space-y-2">
-            <h1 className="text-2xl font-black tracking-tight">NeuroFlux</h1>
+            <h1 className="text-2xl font-black tracking-tight">Neuro Flux</h1>
             <p className="text-sm text-muted-foreground">
               Sistema de gestão completo
             </p>

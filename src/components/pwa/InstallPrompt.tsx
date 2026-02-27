@@ -72,7 +72,7 @@ export function InstallPrompt() {
             <Download size={20} />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-sm">Instalar NeuroFlux</h3>
+            <h3 className="font-bold text-sm">Instalar Neuro Flux</h3>
             <p className="text-xs text-muted-foreground">Acesse mais rápido pela tela inicial</p>
           </div>
           <a
