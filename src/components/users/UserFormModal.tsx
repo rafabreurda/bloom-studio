@@ -51,6 +51,32 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
   const [cpf, setCpf] = useState(extra.cpf || '');
   const [email, setEmail] = useState(extra.email || '');
   const [birthday, setBirthday] = useState(extra.birthday || '');
+  // Display birthday as DD/MM/AAAA
+  const formatToDisplay = (iso: string) => {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  };
+  const [birthdayDisplay, setBirthdayDisplay] = useState(formatToDisplay(extra.birthday || ''));
+
+  const handleBirthdayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let v = e.target.value.replace(/\D/g, '');
+    if (v.length > 8) v = v.slice(0, 8);
+    let display = v;
+    if (v.length > 2) display = v.slice(0, 2) + '/' + v.slice(2);
+    if (v.length > 4) display = v.slice(0, 2) + '/' + v.slice(2, 4) + '/' + v.slice(4);
+    setBirthdayDisplay(display);
+    // Convert to ISO when complete
+    if (v.length === 8) {
+      const day = v.slice(0, 2);
+      const month = v.slice(2, 4);
+      const year = v.slice(4, 8);
+      setBirthday(`${year}-${month}-${day}`);
+    } else {
+      setBirthday('');
+    }
+  };
+
   const [addressStreet, setAddressStreet] = useState(extra.address_street || '');
   const [addressNumber, setAddressNumber] = useState(extra.address_number || '');
   const [addressNeighborhood, setAddressNeighborhood] = useState(extra.address_neighborhood || '');
@@ -103,7 +129,15 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Data de Nascimento">
-              <input type="date" value={birthday} onChange={e => setBirthday(e.target.value)} className="input-bronze" />
+              <input
+                type="text"
+                value={birthdayDisplay}
+                onChange={handleBirthdayChange}
+                className="input-bronze"
+                placeholder="DD/MM/AAAA"
+                maxLength={10}
+                inputMode="numeric"
+              />
             </Field>
             <Field label="CPF / ID">
               <input type="text" value={cpf} onChange={e => setCpf(e.target.value)} className="input-bronze" placeholder="000.000.000-00" />
