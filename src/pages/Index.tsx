@@ -374,9 +374,7 @@ const MainApp = () => {
             />
           )}
 
-          {activeTab === 'usuarios' && (
-            <UsersView />
-          )}
+          {/* Users tab removed - now inside ConfigView */}
         </div>
       </main>
 
