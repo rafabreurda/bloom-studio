@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface Package {
   id: string;
@@ -19,10 +20,16 @@ export interface Package {
 export function usePackages() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
+  const { currentAdmin, isAdminChefe } = useAuth();
 
   const fetchPackages = useCallback(async () => {
     try {
-      const data = await fetchAllFromTable('packages', '*', { orderBy: 'created_at', ascending: false });
+      const filters: Record<string, string> = {};
+      if (currentAdmin && !isAdminChefe) {
+        filters.owner_id = currentAdmin.id;
+      }
+
+      const data = await fetchAllFromTable('packages', '*', { orderBy: 'created_at', ascending: false, filters: Object.keys(filters).length > 0 ? filters : undefined });
 
       setPackages(data?.map(p => ({
         id: p.id,
@@ -41,11 +48,11 @@ export function usePackages() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentAdmin, isAdminChefe]);
 
   useEffect(() => {
-    fetchPackages();
-  }, [fetchPackages]);
+    if (currentAdmin) fetchPackages();
+  }, [fetchPackages, currentAdmin]);
 
   const addPackage = async (pkg: Omit<Package, 'id' | 'createdAt' | 'sessionValue'>) => {
     try {
@@ -59,6 +66,7 @@ export function usePackages() {
           total_value: pkg.totalValue,
           status: pkg.status,
           notes: pkg.notes,
+          owner_id: currentAdmin?.id,
         })
         .select()
         .single();
@@ -121,7 +129,7 @@ export function usePackages() {
       await fetchPackages();
 
       if (isComplete) {
-        toast.info(`📦 Pacote de ${pkg.clientName} finalizado! Todas as ${pkg.totalSessions} sessões foram usadas. Deseja renovar?`);
+        toast.info(`📦 Pacote de ${pkg.clientName} finalizado! Todas as ${pkg.totalSessions} sessões foram usadas.`);
       } else {
         toast.success(`Sessão ${newUsed}/${pkg.totalSessions} usada do pacote de ${pkg.clientName}`);
       }

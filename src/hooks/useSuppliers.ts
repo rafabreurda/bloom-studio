@@ -3,14 +3,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Supplier } from '@/types';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useSuppliers() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
+  const { currentAdmin, isAdminChefe } = useAuth();
 
   const fetchSuppliers = useCallback(async () => {
     try {
-      const data = await fetchAllFromTable('suppliers', '*', { orderBy: 'name', ascending: true });
+      const filters: Record<string, string> = {};
+      if (currentAdmin && !isAdminChefe) {
+        filters.owner_id = currentAdmin.id;
+      }
+
+      const data = await fetchAllFromTable('suppliers', '*', { orderBy: 'name', ascending: true, filters: Object.keys(filters).length > 0 ? filters : undefined });
 
       setSuppliers(data?.map(s => ({
         id: s.id,
@@ -23,11 +30,11 @@ export function useSuppliers() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentAdmin, isAdminChefe]);
 
   useEffect(() => {
-    fetchSuppliers();
-  }, [fetchSuppliers]);
+    if (currentAdmin) fetchSuppliers();
+  }, [fetchSuppliers, currentAdmin]);
 
   const addSupplier = async (supplier: Omit<Supplier, 'id'>) => {
     try {
@@ -37,6 +44,7 @@ export function useSuppliers() {
           name: supplier.name,
           contact: supplier.contact,
           products: supplier.products,
+          owner_id: currentAdmin?.id,
         })
         .select()
         .single();

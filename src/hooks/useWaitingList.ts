@@ -3,14 +3,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { WaitingItem } from '@/types';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useWaitingList() {
   const [waitingList, setWaitingList] = useState<WaitingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { currentAdmin, isAdminChefe } = useAuth();
 
   const fetchWaitingList = useCallback(async () => {
     try {
-      const data = await fetchAllFromTable('waiting_list', '*', { orderBy: 'created_at', ascending: false });
+      const filters: Record<string, string> = {};
+      if (currentAdmin && !isAdminChefe) {
+        filters.owner_id = currentAdmin.id;
+      }
+
+      const data = await fetchAllFromTable('waiting_list', '*', { orderBy: 'created_at', ascending: false, filters: Object.keys(filters).length > 0 ? filters : undefined });
 
       setWaitingList(data?.map(w => ({
         id: w.id,
@@ -25,15 +32,14 @@ export function useWaitingList() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentAdmin, isAdminChefe]);
 
   useEffect(() => {
-    fetchWaitingList();
-  }, [fetchWaitingList]);
+    if (currentAdmin) fetchWaitingList();
+  }, [fetchWaitingList, currentAdmin]);
 
   const addWaiting = async (item: Omit<WaitingItem, 'id' | 'createdAt'>) => {
     try {
-      // Parse date from DD/MM/YYYY to YYYY-MM-DD
       const dateParts = item.desiredDate.split('/');
       const isoDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
 
@@ -44,6 +50,7 @@ export function useWaitingList() {
           phone: item.phone,
           desired_date: isoDate,
           status: item.status,
+          owner_id: currentAdmin?.id,
         })
         .select()
         .single();

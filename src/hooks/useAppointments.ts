@@ -4,18 +4,23 @@ import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Appointment, AppointmentProduct } from '@/types';
 import { toast } from 'sonner';
 import { Json } from '@/integrations/supabase/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const { currentAdmin, isAdminChefe } = useAuth();
 
   const fetchAppointments = useCallback(async () => {
     try {
-      const allData = await fetchAllFromTable('appointments', '*', { orderBy: 'date', ascending: false });
+      const filters: Record<string, string> = {};
+      if (currentAdmin && !isAdminChefe) {
+        filters.owner_id = currentAdmin.id;
+      }
+
+      const allData = await fetchAllFromTable('appointments', '*', { orderBy: 'date', ascending: false, filters: Object.keys(filters).length > 0 ? filters : undefined });
 
       setAppointments(allData?.map(a => {
-        // Parse date manually to avoid timezone issues
-        // Database stores as YYYY-MM-DD
         const [year, month, day] = a.date.split('-');
         const dateStr = `${day}/${month}/${year}`;
         
@@ -47,15 +52,14 @@ export function useAppointments() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentAdmin, isAdminChefe]);
 
   useEffect(() => {
-    fetchAppointments();
-  }, [fetchAppointments]);
+    if (currentAdmin) fetchAppointments();
+  }, [fetchAppointments, currentAdmin]);
 
   const addAppointment = async (appointment: Omit<Appointment, 'id' | 'createdAt'>) => {
     try {
-      // Parse date from DD/MM/YYYY to YYYY-MM-DD
       const dateParts = appointment.date.split('/');
       const isoDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
 
@@ -80,13 +84,13 @@ export function useAppointments() {
           partnership_discount: appointment.partnershipDiscount,
           products: (appointment.products || []) as unknown as Json,
           cost: appointment.cost || 0,
+          owner_id: currentAdmin?.id,
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      // Parse date manually to avoid timezone issues
       const [year, month, day] = data.date.split('-');
       const dateStr = `${day}/${month}/${year}`;
 
@@ -183,11 +187,13 @@ export function useAppointments() {
 
   const clearAllAppointments = async () => {
     try {
-      const { error } = await supabase
-        .from('appointments')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
-
+      let query = supabase.from('appointments').delete();
+      if (currentAdmin && !isAdminChefe) {
+        query = query.eq('owner_id', currentAdmin.id);
+      } else {
+        query = query.neq('id', '00000000-0000-0000-0000-000000000000');
+      }
+      const { error } = await query;
       if (error) throw error;
 
       setAppointments([]);
@@ -201,15 +207,13 @@ export function useAppointments() {
 
   const clearAppointmentsByDate = async (dateStr: string) => {
     try {
-      // dateStr comes as YYYY-MM-DD
-      const { error } = await supabase
-        .from('appointments')
-        .delete()
-        .eq('date', dateStr);
-
+      let query = supabase.from('appointments').delete().eq('date', dateStr);
+      if (currentAdmin && !isAdminChefe) {
+        query = query.eq('owner_id', currentAdmin.id);
+      }
+      const { error } = await query;
       if (error) throw error;
 
-      // Remove from local state - convert YYYY-MM-DD to DD/MM/YYYY for comparison
       const [year, month, day] = dateStr.split('-');
       const localDate = `${day}/${month}/${year}`;
       setAppointments(prev => prev.filter(a => a.date !== localDate));

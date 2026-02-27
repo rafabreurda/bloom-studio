@@ -10,17 +10,14 @@ interface AuthContextType {
   isAuthenticated: boolean;
   switchAdmin: (adminId: string, password?: string) => Promise<boolean>;
   logout: () => void;
-  refreshAdmins: () => Promise<void>;
+  refreshAdmins: () => Promise<AdminWithRole[] | void>;
   hasPermission: (tabId: TabId) => boolean;
-  rememberAdmin: (adminId: string) => void;
-  getRememberedAdminId: () => string | null;
-  clearRememberedAdmin: () => void;
   isAdminChefe: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const REMEMBERED_ADMIN_KEY = 'bronze_remembered_admin';
+const SESSION_KEY = 'neuroflix_session_admin_id';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentAdmin, setCurrentAdmin] = useState<AdminWithRole | null>(null);
@@ -54,23 +51,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         return {
           ...profile,
-          password_display: (profile as any).password_display || null,
+          password_display: profile.password_display || null,
           role: (userRole?.role || 'admin_pleno') as AdminRoleType,
           permissions: userPermissions as AdminPermissions | undefined,
         };
       });
 
       setAdmins(adminsWithRoles);
+      return adminsWithRoles;
     } catch (error) {
       console.error('Error loading admins:', error);
+      return [];
     }
   };
 
   const hasPermission = (tabId: TabId): boolean => {
     if (!currentAdmin) return false;
-    // Admin chefe has full access
     if (currentAdmin.role === 'admin_chefe') return true;
-    // Admin pleno: check permissions or grant all except config
     if (currentAdmin.permissions) {
       const permMap: Record<string, keyof AdminPermissions> = {
         agenda: 'agenda',
@@ -85,18 +82,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const key = permMap[tabId];
       if (key) return currentAdmin.permissions[key] as boolean;
     }
-    // Default: pleno can access everything except config
     return tabId !== 'config';
   };
 
-  // Switch to a different admin - always requires password
   const switchAdmin = async (adminId: string, password?: string): Promise<boolean> => {
     const admin = admins.find(a => a.id === adminId);
     if (!admin) return false;
-
     if (!password) return false;
 
-    // Verify password
     const { data, error } = await supabase.rpc('verify_admin_password', {
       _user_id: adminId,
       _password: password,
@@ -108,31 +101,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     setCurrentAdmin(admin);
+    // Persist session
+    localStorage.setItem(SESSION_KEY, adminId);
     return true;
   };
 
   const logout = () => {
     setCurrentAdmin(null);
-    clearRememberedAdmin();
+    localStorage.removeItem(SESSION_KEY);
   };
 
-  const rememberAdmin = (adminId: string) => {
-    localStorage.setItem(REMEMBERED_ADMIN_KEY, adminId);
-  };
-
-  const getRememberedAdminId = (): string | null => {
-    return localStorage.getItem(REMEMBERED_ADMIN_KEY);
-  };
-
-  const clearRememberedAdmin = () => {
-    localStorage.removeItem(REMEMBERED_ADMIN_KEY);
-  };
-
-  // Initialize - load admins only, no auto-login
+  // Initialize - load admins and restore session
   useEffect(() => {
     const init = async () => {
       setIsLoading(true);
-      await refreshAdmins();
+      const loadedAdmins = await refreshAdmins();
+      
+      // Restore session from localStorage
+      const savedAdminId = localStorage.getItem(SESSION_KEY);
+      if (savedAdminId && loadedAdmins.length > 0) {
+        const savedAdmin = loadedAdmins.find(a => a.id === savedAdminId);
+        if (savedAdmin) {
+          setCurrentAdmin(savedAdmin);
+        }
+      }
+      
       setIsLoading(false);
     };
 
@@ -148,9 +141,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     refreshAdmins,
     hasPermission,
-    rememberAdmin,
-    getRememberedAdminId,
-    clearRememberedAdmin,
     isAdminChefe: currentAdmin?.role === 'admin_chefe',
   };
 

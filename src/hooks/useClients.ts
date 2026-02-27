@@ -4,14 +4,21 @@ import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Client, AnamnesisRecord, ClientHistoryItem } from '@/types';
 import { toast } from 'sonner';
 import { Json } from '@/integrations/supabase/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useClients() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const { currentAdmin, isAdminChefe } = useAuth();
 
   const fetchClients = useCallback(async () => {
     try {
-      const data = await fetchAllFromTable('clients', '*', { orderBy: 'name', ascending: true });
+      const filters: Record<string, string> = {};
+      if (currentAdmin && !isAdminChefe) {
+        filters.owner_id = currentAdmin.id;
+      }
+
+      const data = await fetchAllFromTable('clients', '*', { orderBy: 'name', ascending: true, filters: Object.keys(filters).length > 0 ? filters : undefined });
 
       setClients(data?.map(c => ({
         id: c.id,
@@ -34,11 +41,11 @@ export function useClients() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentAdmin, isAdminChefe]);
 
   useEffect(() => {
-    fetchClients();
-  }, [fetchClients]);
+    if (currentAdmin) fetchClients();
+  }, [fetchClients, currentAdmin]);
 
   const addClient = async (client: Omit<Client, 'id' | 'createdAt' | 'history'>) => {
     try {
@@ -57,6 +64,7 @@ export function useClients() {
           partnership_id: client.partnershipId,
           anamnesis_history: (client.anamnesisHistory || []) as unknown as Json,
           history: [] as unknown as Json,
+          owner_id: currentAdmin?.id,
         })
         .select()
         .single();
@@ -141,10 +149,13 @@ export function useClients() {
 
   const deleteAllClients = async () => {
     try {
-      const { error } = await supabase
-        .from('clients')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // delete all
+      let query = supabase.from('clients').delete();
+      if (currentAdmin && !isAdminChefe) {
+        query = query.eq('owner_id', currentAdmin.id);
+      } else {
+        query = query.neq('id', '00000000-0000-0000-0000-000000000000');
+      }
+      const { error } = await query;
       if (error) throw error;
       setClients([]);
       toast.success('Todos os clientes foram removidos!');

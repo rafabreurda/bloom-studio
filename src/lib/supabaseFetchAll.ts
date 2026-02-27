@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 /**
  * Fetch all rows from a Supabase table, bypassing the 1000-row default limit.
  * Uses pagination with .range() to retrieve data in batches.
+ * Supports optional filtering (e.g., owner_id for data isolation).
  */
 export async function fetchAllFromTable(
   table: string,
@@ -10,6 +11,7 @@ export async function fetchAllFromTable(
   options?: {
     orderBy?: string;
     ascending?: boolean;
+    filters?: Record<string, string>;
   }
 ): Promise<any[]> {
   const allData: any[] = [];
@@ -21,6 +23,13 @@ export async function fetchAllFromTable(
     let query = (supabase.from(table as any) as any)
       .select(select)
       .range(offset, offset + batchSize - 1);
+
+    // Apply filters
+    if (options?.filters) {
+      for (const [key, value] of Object.entries(options.filters)) {
+        query = query.eq(key, value);
+      }
+    }
 
     if (options?.orderBy) {
       query = query.order(options.orderBy, { ascending: options.ascending ?? true });

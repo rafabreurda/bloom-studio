@@ -3,14 +3,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Block } from '@/types';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useBlocks() {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
+  const { currentAdmin, isAdminChefe } = useAuth();
 
   const fetchBlocks = useCallback(async () => {
     try {
-      const data = await fetchAllFromTable('blocks', '*', { orderBy: 'date', ascending: false });
+      const filters: Record<string, string> = {};
+      if (currentAdmin && !isAdminChefe) {
+        filters.owner_id = currentAdmin.id;
+      }
+
+      const data = await fetchAllFromTable('blocks', '*', { orderBy: 'date', ascending: false, filters: Object.keys(filters).length > 0 ? filters : undefined });
 
       setBlocks(data?.map(b => ({
         id: b.id,
@@ -26,15 +33,14 @@ export function useBlocks() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentAdmin, isAdminChefe]);
 
   useEffect(() => {
-    fetchBlocks();
-  }, [fetchBlocks]);
+    if (currentAdmin) fetchBlocks();
+  }, [fetchBlocks, currentAdmin]);
 
   const addBlock = async (block: Omit<Block, 'id' | 'createdAt'>) => {
     try {
-      // Parse date from DD/MM/YYYY to YYYY-MM-DD
       const dateParts = block.date.split('/');
       const isoDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
 
@@ -52,6 +58,7 @@ export function useBlocks() {
           time: block.time,
           type: block.type,
           reason: block.reason,
+          owner_id: currentAdmin?.id,
         })
         .select()
         .single();
