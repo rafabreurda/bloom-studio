@@ -33,9 +33,7 @@ export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, s
   const [adminPhoto, setAdminPhoto] = useState<string | null>(null);
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
 
-  const menuItems = isAdminChefe 
-    ? [...baseMenuItems, { id: 'usuarios' as TabId, icon: UsersRound, label: 'Usuários', color: '#8b5cf6' }]
-    : baseMenuItems;
+  const menuItems = baseMenuItems;
 
   useEffect(() => {
     if (currentAdmin?.id) {

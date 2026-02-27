@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles, UserCircle, Headphones, FileText, Lock, Eye, EyeOff, LogOut } from 'lucide-react';
+import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles, UserCircle, Headphones, FileText, Lock, Eye, EyeOff, LogOut, UsersRound } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { SystemConfig, ClientTag, WhatsAppTemplate, ServiceType } from '@/types';
@@ -11,6 +11,7 @@ import { MessagesSection } from './MessagesSection';
 import { ServicesSection } from './ServicesSection';
 import { ReceiptSection } from './ReceiptSection';
 import { SupportSection } from './SupportSection';
+import { UsersView } from '@/components/users/UsersView';
 import { toast } from 'sonner';
 
 const SUPABASE_URL = "https://iphluakvvklyvymwhfxh.supabase.co";
@@ -23,11 +24,11 @@ interface ConfigViewProps {
   onUploadBackground?: (file: File) => Promise<string | null>;
 }
 
-type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens' | 'recibo' | 'suporte' | 'senha';
+type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens' | 'recibo' | 'suporte' | 'senha' | 'usuarios';
 
 export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLogo, onUploadBackground }: ConfigViewProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('estudio');
-  const { currentAdmin, refreshAdmins, logout } = useAuth();
+  const { currentAdmin, refreshAdmins, logout, isAdminChefe } = useAuth();
   const [adminName, setAdminName] = useState(currentAdmin?.name || '');
   const [adminPhoto, setAdminPhoto] = useState<string | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -164,6 +165,7 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
     { id: 'recibo' as ConfigSection, icon: FileText, label: 'Recibo' },
     { id: 'senha' as ConfigSection, icon: Lock, label: 'Minha Senha' },
     { id: 'suporte' as ConfigSection, icon: Headphones, label: 'Suporte' },
+    ...(isAdminChefe ? [{ id: 'usuarios' as ConfigSection, icon: UsersRound, label: 'Usuários' }] : []),
   ];
 
   return (
@@ -493,6 +495,10 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
               </BronzeButton>
             </div>
           </BronzeCard>
+        )}
+
+        {activeSection === 'usuarios' && isAdminChefe && (
+          <UsersView />
         )}
 
       </div>
