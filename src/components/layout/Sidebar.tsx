@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Calendar, Users, DollarSign, ShoppingBag, Truck, Handshake, 
-  ClipboardList, Settings, UserCheck, X, Package 
+  ClipboardList, Settings, UserCheck, X, Package, UsersRound 
 } from 'lucide-react';
 import { TabId } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,7 +16,7 @@ interface SidebarProps {
   systemLogo?: string;
 }
 
-const menuItems = [
+const baseMenuItems = [
   { id: 'agenda' as TabId, icon: Calendar, label: 'Agenda', color: '#f97316' },
   { id: 'clientes' as TabId, icon: Users, label: 'Clientes', color: '#3b82f6' },
   { id: 'financeiro' as TabId, icon: DollarSign, label: 'Financeiro', color: '#22c55e' },
@@ -31,8 +31,12 @@ const menuItems = [
 
 
 export function Sidebar({ isOpen, onClose, activeTab, onTabChange, systemName, systemLogo }: SidebarProps) {
-  const { currentAdmin } = useAuth();
+  const { currentAdmin, isAdminChefe } = useAuth();
   const [adminPhoto, setAdminPhoto] = useState<string | null>(null);
+
+  const menuItems = isAdminChefe 
+    ? [...baseMenuItems, { id: 'usuarios' as TabId, icon: UsersRound, label: 'Usuários', color: '#8b5cf6' }]
+    : baseMenuItems;
 
 
 

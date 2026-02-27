@@ -66,7 +66,7 @@ export const defaultServiceTypes = [
 ];
 
 export const defaultConfig: SystemConfig = {
-  name: 'BRONZE PRO',
+  name: 'NEUROFLIX SYSTEMS',
   pixKey: 'pix@bronzepro.com.br',
   payLink: 'https://pay.bronzepro.com.br',
   lowStockThreshold: 5,

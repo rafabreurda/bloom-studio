@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles, UserCircle, Headphones, FileText } from 'lucide-react';
+import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles, UserCircle, Headphones, FileText, Lock, Eye, EyeOff, LogOut } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { SystemConfig, ClientTag, WhatsAppTemplate, ServiceType } from '@/types';
@@ -23,14 +23,18 @@ interface ConfigViewProps {
   onUploadBackground?: (file: File) => Promise<string | null>;
 }
 
-type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens' | 'recibo' | 'suporte';
+type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens' | 'recibo' | 'suporte' | 'senha';
 
 export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLogo, onUploadBackground }: ConfigViewProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('estudio');
-  const { currentAdmin, refreshAdmins } = useAuth();
+  const { currentAdmin, refreshAdmins, logout } = useAuth();
   const [adminName, setAdminName] = useState(currentAdmin?.name || '');
   const [adminPhoto, setAdminPhoto] = useState<string | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
 
   // Load admin photo from system_config
   useEffect(() => {
@@ -115,6 +119,30 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
     onConfigChange({ ...config, serviceTypes: services });
   };
 
+  const handleChangePassword = async () => {
+    if (!currentAdmin) return;
+    if (!newPassword) {
+      toast.error('Digite a nova senha');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('As senhas não conferem');
+      return;
+    }
+    setIsSavingPassword(true);
+    try {
+      await supabase.rpc('set_admin_password', { _user_id: currentAdmin.id, _password: newPassword });
+      await supabase.from('profiles').update({ password_display: newPassword } as any).eq('id', currentAdmin.id);
+      toast.success('Senha alterada com sucesso!');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch {
+      toast.error('Erro ao alterar senha');
+    } finally {
+      setIsSavingPassword(false);
+    }
+  };
+
   const sections = [
     { id: 'estudio' as ConfigSection, icon: Building2, label: 'Estúdio' },
     { id: 'servicos' as ConfigSection, icon: Sparkles, label: 'Serviços' },
@@ -122,6 +150,7 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
     { id: 'tags' as ConfigSection, icon: Tag, label: 'Tags de Clientes' },
     { id: 'mensagens' as ConfigSection, icon: MessageSquare, label: 'Mensagens' },
     { id: 'recibo' as ConfigSection, icon: FileText, label: 'Recibo' },
+    { id: 'senha' as ConfigSection, icon: Lock, label: 'Minha Senha' },
     { id: 'suporte' as ConfigSection, icon: Headphones, label: 'Suporte' },
   ];
 
@@ -130,9 +159,14 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
       {/* Header */}
       <div className="flex justify-between items-center shrink-0">
         <h2 className="text-2xl font-black uppercase tracking-tight">Configurações</h2>
-        <BronzeButton variant="gold" icon={Save} size="sm" onClick={handleSave}>
-          Salvar Tudo
-        </BronzeButton>
+        <div className="flex gap-2">
+          <BronzeButton variant="secondary" icon={LogOut} size="sm" onClick={logout}>
+            Sair
+          </BronzeButton>
+          <BronzeButton variant="gold" icon={Save} size="sm" onClick={handleSave}>
+            Salvar Tudo
+          </BronzeButton>
+        </div>
       </div>
 
       {/* Section Tabs */}
@@ -355,6 +389,62 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
 
         {activeSection === 'suporte' && (
           <SupportSection />
+        )}
+
+        {activeSection === 'senha' && (
+          <BronzeCard className="bg-secondary/50 space-y-6">
+            <div className="flex items-center gap-2">
+              <Lock size={20} className="text-primary" />
+              <h3 className="text-lg font-black uppercase text-primary">Alterar Minha Senha</h3>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                  Nova Senha
+                </label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="input-bronze pr-12"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  >
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                  Confirmar Senha
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="input-bronze"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <BronzeButton
+                variant="gold"
+                icon={Save}
+                size="sm"
+                onClick={handleChangePassword}
+                disabled={isSavingPassword || !newPassword}
+              >
+                {isSavingPassword ? 'Salvando...' : 'Alterar Senha'}
+              </BronzeButton>
+            </div>
+          </BronzeCard>
         )}
 
       </div>

@@ -54,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         return {
           ...profile,
+          password_display: (profile as any).password_display || null,
           role: (userRole?.role || 'admin_pleno') as AdminRoleType,
           permissions: userPermissions as AdminPermissions | undefined,
         };

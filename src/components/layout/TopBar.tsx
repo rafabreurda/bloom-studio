@@ -18,6 +18,7 @@ export function TopBar({ onMenuClick, activeTab }: TopBarProps) {
       'parcerias': 'Parcerias',
       'lista-espera': 'Lista de Espera',
       'config': 'Configurações',
+      'usuarios': 'Usuários',
     };
     return labels[tab];
   };
