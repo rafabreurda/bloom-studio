@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export function LoginScreen() {
   const { admins, switchAdmin, rememberAdmin, isLoading } = useAuth();
-  const [selectedAdminId, setSelectedAdminId] = useState('');
+  const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -13,14 +13,25 @@ export function LoginScreen() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedAdminId || !password) return;
+    if (!login || !password) return;
 
     setIsSubmitting(true);
     setError('');
 
-    const success = await switchAdmin(selectedAdminId, password);
+    // Find admin by phone or name (case insensitive)
+    const admin = admins.find(
+      a => a.phone === login || a.name.toLowerCase() === login.toLowerCase()
+    );
+
+    if (!admin) {
+      setError('Usuário não encontrado.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const success = await switchAdmin(admin.id, password);
     if (success) {
-      rememberAdmin(selectedAdminId);
+      rememberAdmin(admin.id);
     } else {
       setError('Senha incorreta. Tente novamente.');
     }
@@ -38,38 +49,32 @@ export function LoginScreen() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-8">
-        {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-black uppercase tracking-tight text-foreground">
-            Bronze Pro
+            NeuroFlix Systems
           </h1>
           <p className="text-sm text-muted-foreground">
             Faça login para continuar
           </p>
         </div>
 
-        {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-5 bg-card p-6 rounded-3xl border border-border shadow-lg">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
               Usuário
             </label>
-            <select
-              value={selectedAdminId}
+            <input
+              type="text"
+              value={login}
               onChange={(e) => {
-                setSelectedAdminId(e.target.value);
+                setLogin(e.target.value);
                 setError('');
               }}
               className="input-bronze w-full"
+              placeholder="Nome ou telefone"
               required
-            >
-              <option value="">Selecione o usuário</option>
-              {admins.map(admin => (
-                <option key={admin.id} value={admin.id}>
-                  {admin.name} {admin.phone ? `(${admin.phone})` : ''}
-                </option>
-              ))}
-            </select>
+              autoFocus
+            />
           </div>
 
           <div className="space-y-2">
@@ -107,7 +112,7 @@ export function LoginScreen() {
             variant="gold"
             icon={LogIn}
             className="w-full h-[56px]"
-            disabled={isSubmitting || !selectedAdminId || !password}
+            disabled={isSubmitting || !login || !password}
           >
             {isSubmitting ? 'Entrando...' : 'Entrar'}
           </BronzeButton>

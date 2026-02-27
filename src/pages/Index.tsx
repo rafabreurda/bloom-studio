@@ -15,6 +15,7 @@ import { SuppliersView } from '@/components/suppliers/SuppliersView';
 import { SupplierModal } from '@/components/suppliers/SupplierModal';
 import { PartnershipsView } from '@/components/partnerships/PartnershipsView';
 import { PackagesView } from '@/components/packages/PackagesView';
+import { UsersView } from '@/components/users/UsersView';
 
 import { PartnershipModal } from '@/components/partnerships/PartnershipModal';
 import { AddAppointmentModal } from '@/components/modals/AddAppointmentModal';
@@ -370,6 +371,10 @@ const MainApp = () => {
               onUploadLogo={uploadLogo}
               onUploadBackground={uploadBackground}
             />
+          )}
+
+          {activeTab === 'usuarios' && (
+            <UsersView />
           )}
         </div>
       </main>

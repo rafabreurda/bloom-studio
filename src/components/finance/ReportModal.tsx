@@ -159,7 +159,7 @@ export function ReportModal({ finances, onClose }: ReportModalProps) {
           </table>
 
           <div class="footer">
-            <p>Documento gerado automaticamente pelo sistema BRONZE PRO</p>
+            <p>Documento gerado automaticamente pelo sistema NEUROFLIX SYSTEMS</p>
           </div>
         </body>
       </html>

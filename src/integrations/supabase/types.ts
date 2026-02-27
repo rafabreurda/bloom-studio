@@ -360,6 +360,7 @@ export type Database = {
           email: string | null
           id: string
           name: string
+          password_display: string | null
           password_hash: string | null
           phone: string | null
           updated_at: string
@@ -369,6 +370,7 @@ export type Database = {
           email?: string | null
           id?: string
           name: string
+          password_display?: string | null
           password_hash?: string | null
           phone?: string | null
           updated_at?: string
@@ -378,6 +380,7 @@ export type Database = {
           email?: string | null
           id?: string
           name?: string
+          password_display?: string | null
           password_hash?: string | null
           phone?: string | null
           updated_at?: string
