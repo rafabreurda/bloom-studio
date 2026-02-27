@@ -420,6 +420,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          background_photo: string | null
           created_at: string
           email: string | null
           id: string
@@ -428,9 +429,12 @@ export type Database = {
           password_hash: string | null
           phone: string | null
           photo_url: string | null
+          studio_logo: string | null
+          studio_name: string | null
           updated_at: string
         }
         Insert: {
+          background_photo?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -439,9 +443,12 @@ export type Database = {
           password_hash?: string | null
           phone?: string | null
           photo_url?: string | null
+          studio_logo?: string | null
+          studio_name?: string | null
           updated_at?: string
         }
         Update: {
+          background_photo?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -450,6 +457,8 @@ export type Database = {
           password_hash?: string | null
           phone?: string | null
           photo_url?: string | null
+          studio_logo?: string | null
+          studio_name?: string | null
           updated_at?: string
         }
         Relationships: []
