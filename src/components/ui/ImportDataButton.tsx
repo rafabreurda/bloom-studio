@@ -3,32 +3,23 @@ import { Upload, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Json } from '@/integrations/supabase/types';
+import { Progress } from '@/components/ui/progress';
+import { useAuth } from '@/contexts/AuthContext';
 import * as XLSX from 'xlsx';
 
 interface ColumnMapping {
-  /** Column name candidates to search in headers (case-insensitive partial match) */
   candidates: string[];
-  /** Target database column name */
   dbColumn: string;
-  /** Whether to require this field (rows without it get a fallback) */
   fallback?: string;
-  /** Transform function */
   transform?: (val: string | number | undefined) => any;
 }
 
 interface ImportDataButtonProps {
-  /** Supabase table name */
   table: string;
-  /** Label for the button context */
   label: string;
-  /** Column mappings */
   columns: ColumnMapping[];
-  /** Extra default fields to add to every row */
   defaults?: Record<string, any>;
-  /** Optional async function to enrich/transform rows before insert (e.g. client lookup) */
   onPreProcess?: (rows: Record<string, any>[]) => Promise<Record<string, any>[]>;
-  /** Callback after import completes */
   onImportComplete: () => void | Promise<void>;
 }
 
@@ -39,32 +30,26 @@ function normalizePhone(phone: string | number | undefined): string {
 
 function normalizeDate(val: string | number | Date | undefined): string | null {
   if (!val) return null;
-  // Handle JS Date objects (XLSX cellDates mode)
   if (val instanceof Date) {
     if (!isNaN(val.getTime())) return val.toISOString().split('T')[0];
     return null;
   }
   const s = String(val).trim();
-  // dd/mm/yyyy
   const match = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (match) {
     const [, d, m, y] = match;
     return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
   }
-  // mm/dd/yyyy (fallback)
   const match2 = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
   if (match2) {
     const [, d, m, y] = match2;
     return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
   }
-  // Excel serial number
   if (/^\d{4,5}$/.test(s)) {
     const date = new Date((Number(s) - 25569) * 86400 * 1000);
     if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
   }
-  // yyyy-mm-dd already
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  // Try generic Date parse as last resort
   const parsed = new Date(s);
   if (!isNaN(parsed.getTime())) return parsed.toISOString().split('T')[0];
   return null;
@@ -84,7 +69,6 @@ function findColumn(headers: string[], ...candidates: string[]): string | null {
   return null;
 }
 
-// Export transforms for use in column mappings
 export const transforms = {
   phone: normalizePhone,
   date: normalizeDate,
@@ -95,7 +79,9 @@ export const transforms = {
 export function ImportDataButton({ table, label, columns, defaults, onPreProcess, onImportComplete }: ImportDataButtonProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [preview, setPreview] = useState<{ total: number; data: Record<string, any>[]; headers: string[] } | null>(null);
+  const { currentAdmin } = useAuth();
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -121,11 +107,11 @@ export function ImportDataButton({ table, label, columns, defaults, onPreProcess
   const doImport = async () => {
     if (!preview) return;
     setImporting(true);
+    setProgress(0);
 
     try {
       const headers = preview.headers;
 
-      // Build column map
       const colMap: Record<string, string | null> = {};
       for (const col of columns) {
         colMap[col.dbColumn] = findColumn(headers, ...col.candidates);
@@ -134,7 +120,7 @@ export function ImportDataButton({ table, label, columns, defaults, onPreProcess
       const toInsert: Record<string, any>[] = [];
 
       for (const row of preview.data) {
-        const record: Record<string, any> = { ...(defaults || {}) };
+        const record: Record<string, any> = { ...(defaults || {}), owner_id: currentAdmin?.id };
 
         for (const col of columns) {
           const headerKey = colMap[col.dbColumn];
@@ -146,7 +132,6 @@ export function ImportDataButton({ table, label, columns, defaults, onPreProcess
             value = value ? String(value).trim() : undefined;
           }
 
-          // Use fallback if no value
           if ((value === undefined || value === null || value === '') && col.fallback !== undefined) {
             value = col.fallback;
           }
@@ -159,10 +144,8 @@ export function ImportDataButton({ table, label, columns, defaults, onPreProcess
         toInsert.push(record);
       }
 
-      // Pre-process rows if handler provided (e.g. client lookup)
       const finalRows = onPreProcess ? await onPreProcess(toInsert) : toInsert;
 
-      // Batch insert
       let inserted = 0;
       const chunkSize = 200;
       for (let i = 0; i < finalRows.length; i += chunkSize) {
@@ -174,6 +157,8 @@ export function ImportDataButton({ table, label, columns, defaults, onPreProcess
         } else {
           inserted += chunk.length;
         }
+        setProgress(Math.round((Math.min(i + chunkSize, finalRows.length) / finalRows.length) * 100));
+        await new Promise(r => setTimeout(r, 50));
       }
 
       toast.success(`${inserted} registros importados com sucesso!`);
@@ -184,6 +169,7 @@ export function ImportDataButton({ table, label, columns, defaults, onPreProcess
       toast.error('Erro na importação');
     } finally {
       setImporting(false);
+      setProgress(0);
     }
   };
 
@@ -207,10 +193,14 @@ export function ImportDataButton({ table, label, columns, defaults, onPreProcess
               <p className="text-xs text-muted-foreground">
                 Colunas detectadas: {preview.headers.join(', ')}
               </p>
-              <p className="text-xs text-muted-foreground">
-                Todos os registros serão importados sem restrições.
-              </p>
             </div>
+
+            {importing && (
+              <div className="space-y-2">
+                <Progress value={progress} className="h-3" />
+                <p className="text-xs text-center text-muted-foreground font-bold">{progress}% concluído</p>
+              </div>
+            )}
 
             <div className="flex gap-2 justify-end">
               <BronzeButton variant="outline" size="sm" onClick={() => setPreview(null)} disabled={importing}>

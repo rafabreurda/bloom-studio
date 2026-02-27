@@ -4,6 +4,8 @@ import { BronzeButton } from '@/components/ui/BronzeButton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Json } from '@/integrations/supabase/types';
+import { Progress } from '@/components/ui/progress';
+import { useAuth } from '@/contexts/AuthContext';
 import * as XLSX from 'xlsx';
 
 interface ImportClientsButtonProps {
@@ -22,18 +24,14 @@ function normalizePhone(phone: string | number | undefined): string {
 function normalizeDate(val: string | number | undefined): string | null {
   if (!val) return null;
   const s = String(val).trim();
-  // dd/mm/yyyy
   const match = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (match) {
     const [, d, m, y] = match;
     return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
   }
-  // Excel serial number
   if (/^\d{4,5}$/.test(s)) {
     const date = new Date((Number(s) - 25569) * 86400 * 1000);
-    if (!isNaN(date.getTime())) {
-      return date.toISOString().split('T')[0];
-    }
+    if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
   }
   return null;
 }
@@ -49,7 +47,9 @@ function findColumn(headers: string[], ...candidates: string[]): string | null {
 export function ImportClientsButton({ onImportComplete }: ImportClientsButtonProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [preview, setPreview] = useState<{ total: number; data: RawRow[]; headers: string[] } | null>(null);
+  const { currentAdmin } = useAuth();
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -62,13 +62,8 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
         const wb = XLSX.read(data_buf, { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const data = XLSX.utils.sheet_to_json<RawRow>(ws, { defval: '' });
-        console.log('XLSX parsed rows:', data.length, 'headers:', data.length > 0 ? Object.keys(data[0]) : []);
-        if (data.length === 0) {
-          toast.error('Planilha vazia');
-          return;
-        }
-        const headers = Object.keys(data[0]);
-        setPreview({ total: data.length, data, headers });
+        if (data.length === 0) { toast.error('Planilha vazia'); return; }
+        setPreview({ total: data.length, data, headers: Object.keys(data[0]) });
       } catch (err) {
         console.error('Erro ao ler XLSX:', err);
         toast.error('Erro ao ler arquivo');
@@ -81,6 +76,7 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
   const doImport = async () => {
     if (!preview) return;
     setImporting(true);
+    setProgress(0);
 
     try {
       const headers = preview.headers;
@@ -98,19 +94,7 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
         return;
       }
 
-      const toInsert: Array<{
-        name: string;
-        phone: string;
-        email?: string;
-        address?: string;
-        birthday?: string;
-        cpf?: string;
-        notes?: string;
-        tags: string[];
-        is_vip: boolean;
-        history: Json;
-        anamnesis_history: Json;
-      }> = [];
+      const toInsert: any[] = [];
 
       for (const row of preview.data) {
         const name = String(row[colName] || '').trim() || 'Sem nome';
@@ -128,10 +112,10 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
           is_vip: false,
           history: [] as Json,
           anamnesis_history: [] as Json,
+          owner_id: currentAdmin?.id,
         });
       }
 
-      // Batch insert in chunks of 200
       let inserted = 0;
       const chunkSize = 200;
       for (let i = 0; i < toInsert.length; i += chunkSize) {
@@ -143,6 +127,8 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
         } else {
           inserted += chunk.length;
         }
+        setProgress(Math.round((Math.min(i + chunkSize, toInsert.length) / toInsert.length) * 100));
+        await new Promise(r => setTimeout(r, 50));
       }
 
       toast.success(`${inserted} clientes importados com sucesso!`);
@@ -153,6 +139,7 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
       toast.error('Erro na importação');
     } finally {
       setImporting(false);
+      setProgress(0);
     }
   };
 
@@ -176,10 +163,14 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
               <p className="text-xs text-muted-foreground">
                 Colunas detectadas: {preview.headers.join(', ')}
               </p>
-              <p className="text-xs text-muted-foreground">
-                Todos os registros serão importados sem restrições.
-              </p>
             </div>
+
+            {importing && (
+              <div className="space-y-2">
+                <Progress value={progress} className="h-3" />
+                <p className="text-xs text-center text-muted-foreground font-bold">{progress}% concluído</p>
+              </div>
+            )}
 
             <div className="flex gap-2 justify-end">
               <BronzeButton variant="outline" size="sm" onClick={() => setPreview(null)} disabled={importing}>
