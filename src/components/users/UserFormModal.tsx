@@ -43,6 +43,13 @@ const STATES = [
   'PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'
 ];
 
+const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="space-y-1">
+    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{label}</label>
+    {children}
+  </div>
+);
+
 export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onClose, isLoading }: UserFormModalProps) {
   const extra = editingAdmin ? (adminExtras[editingAdmin.id] || {}) : {};
 
@@ -96,12 +103,6 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
     });
   };
 
-  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div className="space-y-1">
-      <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{label}</label>
-      {children}
-    </div>
-  );
 
   return (
     <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
