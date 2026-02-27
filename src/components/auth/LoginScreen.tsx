@@ -3,6 +3,7 @@ import { Eye, EyeOff, LogIn, KeyRound } from 'lucide-react';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
+import neurofluxLogo from '@/assets/neuroflux-logo.png';
 
 export function LoginScreen() {
   const { admins, switchAdmin, isLoading } = useAuth();
@@ -49,11 +50,13 @@ export function LoginScreen() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-sm space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-black uppercase tracking-tight text-foreground">
-            Neuro Flux Systems
-          </h1>
+      <div className="w-full max-w-sm space-y-6">
+        <div className="flex flex-col items-center space-y-3">
+          <img 
+            src={neurofluxLogo} 
+            alt="Neuro Flux Systems" 
+            className="w-48 h-48 object-contain"
+          />
           <p className="text-sm text-muted-foreground">
             Faça login para continuar
           </p>
