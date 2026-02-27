@@ -107,6 +107,31 @@ const MainApp = () => {
   const { finances, addFinance, deleteFinance, refetch: refetchFinances } = useFinances();
   const { packages, addPackage, updatePackage, deletePackage, useSession, refetch: refetchPackages } = usePackages();
 
+  // Birthday alert for users
+  useEffect(() => {
+    const checkBirthdays = async () => {
+      const { data: profiles } = await (await import('@/integrations/supabase/client')).supabase
+        .from('profiles')
+        .select('name, birthday');
+      if (!profiles) return;
+
+      const today = new Date();
+      const todayDay = today.getDate();
+      const todayMonth = today.getMonth() + 1;
+
+      const birthdayUsers = profiles.filter(p => {
+        if (!p.birthday) return false;
+        const [year, month, day] = p.birthday.split('-').map(Number);
+        return day === todayDay && month === todayMonth;
+      });
+
+      birthdayUsers.forEach(u => {
+        toast.success(`🎂 Hoje é aniversário de ${u.name}! Parabéns! 🎉`, { duration: 10000 });
+      });
+    };
+    checkBirthdays();
+  }, []);
+
   // Auto-close appointments when next appointment time arrives
   useAutoClose({
     appointments,
