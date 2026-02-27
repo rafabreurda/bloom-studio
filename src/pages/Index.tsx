@@ -107,8 +107,9 @@ const MainApp = () => {
   const { finances, addFinance, deleteFinance, refetch: refetchFinances } = useFinances();
   const { packages, addPackage, updatePackage, deletePackage, useSession, refetch: refetchPackages } = usePackages();
 
-  // Birthday alert for users
+  // Birthday alert - only for Admin Chefe
   useEffect(() => {
+    if (!isAdminChefe) return;
     const checkBirthdays = async () => {
       const { data: profiles } = await (await import('@/integrations/supabase/client')).supabase
         .from('profiles')
@@ -121,7 +122,7 @@ const MainApp = () => {
 
       const birthdayUsers = profiles.filter(p => {
         if (!p.birthday) return false;
-        const [year, month, day] = p.birthday.split('-').map(Number);
+        const [, month, day] = p.birthday.split('-').map(Number);
         return day === todayDay && month === todayMonth;
       });
 
@@ -130,7 +131,7 @@ const MainApp = () => {
       });
     };
     checkBirthdays();
-  }, []);
+  }, [isAdminChefe]);
 
   // Auto-close appointments when next appointment time arrives
   useAutoClose({
