@@ -58,6 +58,31 @@ export function useAppointments() {
     if (currentAdmin) fetchAppointments();
   }, [fetchAppointments, currentAdmin]);
 
+  // Auto-sync: ensure client exists in clients table
+  const ensureClientExists = async (name: string, phone: string, isVIP: boolean, tags: string[]) => {
+    if (!name || !currentAdmin) return;
+    try {
+      // Check if client already exists by name+phone for this owner
+      let query = supabase.from('clients').select('id').eq('name', name);
+      if (!isAdminChefe) {
+        query = query.eq('owner_id', currentAdmin.id);
+      }
+      const { data: existing } = await query.limit(1);
+      
+      if (!existing || existing.length === 0) {
+        await supabase.from('clients').insert({
+          name,
+          phone: phone || '',
+          is_vip: isVIP,
+          tags: tags.filter(t => t !== 'Cliente Nova'),
+          owner_id: currentAdmin.id,
+        });
+      }
+    } catch (err) {
+      console.warn('Auto-sync cliente falhou:', err);
+    }
+  };
+
   const addAppointment = async (appointment: Omit<Appointment, 'id' | 'createdAt'>) => {
     try {
       const dateParts = appointment.date.split('/');
@@ -90,6 +115,14 @@ export function useAppointments() {
         .single();
 
       if (error) throw error;
+
+      // Auto-sync client to clients table
+      await ensureClientExists(
+        appointment.clientName,
+        appointment.phone,
+        appointment.tags?.includes('VIP') || false,
+        appointment.tags || []
+      );
 
       const [year, month, day] = data.date.split('-');
       const dateStr = `${day}/${month}/${year}`;

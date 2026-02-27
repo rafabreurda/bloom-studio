@@ -166,6 +166,66 @@ export function useClients() {
     }
   };
 
+  // Sync all clients from appointments that don't exist in clients table
+  const syncFromAppointments = async () => {
+    if (!currentAdmin) return;
+    try {
+      // Fetch all appointments for this owner
+      const apptFilters: Record<string, string> = {};
+      if (!isAdminChefe) apptFilters.owner_id = currentAdmin.id;
+      
+      const allAppts = await fetchAllFromTable('appointments', 'client_name,phone,tags', { 
+        filters: Object.keys(apptFilters).length > 0 ? apptFilters : undefined 
+      });
+      
+      if (!allAppts || allAppts.length === 0) return 0;
+
+      // Get unique clients from appointments
+      const uniqueMap = new Map<string, { name: string; phone: string; isVIP: boolean }>();
+      for (const a of allAppts) {
+        const key = a.client_name?.toLowerCase();
+        if (key && !uniqueMap.has(key)) {
+          uniqueMap.set(key, {
+            name: a.client_name,
+            phone: a.phone || '',
+            isVIP: (a.tags as string[])?.includes('VIP') || false,
+          });
+        }
+      }
+
+      // Get existing client names
+      const existingNames = new Set(clients.map(c => c.name.toLowerCase()));
+
+      // Filter only new clients
+      const newClients = Array.from(uniqueMap.values()).filter(c => !existingNames.has(c.name.toLowerCase()));
+
+      if (newClients.length === 0) {
+        toast.info('Todos os clientes da agenda já estão cadastrados!');
+        return 0;
+      }
+
+      // Batch insert
+      const CHUNK = 200;
+      for (let i = 0; i < newClients.length; i += CHUNK) {
+        const chunk = newClients.slice(i, i + CHUNK).map(c => ({
+          name: c.name,
+          phone: c.phone,
+          is_vip: c.isVIP,
+          owner_id: currentAdmin.id,
+        }));
+        await supabase.from('clients').insert(chunk);
+      }
+
+      toast.success(`${newClients.length} clientes importados da agenda!`);
+      await fetchClients();
+      return newClients.length;
+    } catch (error) {
+      console.error('Erro ao sincronizar clientes:', error);
+      toast.error('Erro ao sincronizar clientes da agenda');
+      return 0;
+    }
+  };
+
   return {
     clients,
     loading,
@@ -173,6 +233,7 @@ export function useClients() {
     updateClient,
     deleteClient,
     deleteAllClients,
+    syncFromAppointments,
     refetch: fetchClients,
   };
 }

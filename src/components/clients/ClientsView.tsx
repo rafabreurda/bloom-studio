@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from 'react';
-import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown, Crown, AlertTriangle } from 'lucide-react';
+import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown, Crown, AlertTriangle, RefreshCw } from 'lucide-react';
 import { ExportButton } from '@/components/ui/ExportButton';
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
@@ -20,10 +20,11 @@ interface ClientsViewProps {
   onEditClient: (client: Client) => void;
   onDeleteClient: (id: string) => void;
   onDeleteAllClients?: () => void;
+  onSyncFromAppointments?: () => Promise<number | undefined>;
   onRefetch?: () => void;
 }
 
-export function ClientsView({ clients, tags, partnerships, appointments, whatsappTemplates, onAddClient, onEditClient, onDeleteClient, onDeleteAllClients, onRefetch }: ClientsViewProps) {
+export function ClientsView({ clients, tags, partnerships, appointments, whatsappTemplates, onAddClient, onEditClient, onDeleteClient, onDeleteAllClients, onSyncFromAppointments, onRefetch }: ClientsViewProps) {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -119,6 +120,7 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
               ]}
             />
             <ImportClientsButton onImportComplete={() => onRefetch?.()} />
+            <BronzeButton variant="outline" icon={RefreshCw} size="sm" onClick={() => onSyncFromAppointments?.()}>Sincronizar Agenda</BronzeButton>
             <BronzeButton variant="danger" icon={Trash2} size="sm" onClick={() => setShowDeleteAll(true)}>Apagar Todos</BronzeButton>
             <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => { setEditingClient(null); setShowModal(true); }}>Novo</BronzeButton>
           </div>
