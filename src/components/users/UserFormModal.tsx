@@ -56,8 +56,8 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
 
   const dayOptions = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
   const monthOptions = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
-  const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: currentYear - 1899 }, (_, i) => String(currentYear - i));
+  const maxYear = 2050;
+  const yearOptions = Array.from({ length: maxYear - 1899 }, (_, i) => String(maxYear - i));
 
   const [addressStreet, setAddressStreet] = useState(extra.address_street || '');
   const [addressNumber, setAddressNumber] = useState(extra.address_number || '');
