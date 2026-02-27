@@ -35,6 +35,8 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [loginPhone, setLoginPhone] = useState(currentAdmin?.phone || '');
+  const [loginEmail, setLoginEmail] = useState(currentAdmin?.email || '');
 
   // Load admin photo from system_config
   useEffect(() => {
@@ -121,23 +123,32 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
 
   const handleChangePassword = async () => {
     if (!currentAdmin) return;
-    if (!newPassword) {
-      toast.error('Digite a nova senha');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
+    if (newPassword && newPassword !== confirmPassword) {
       toast.error('As senhas não conferem');
       return;
     }
     setIsSavingPassword(true);
     try {
-      await supabase.rpc('set_admin_password', { _user_id: currentAdmin.id, _password: newPassword });
-      await supabase.from('profiles').update({ password_display: newPassword } as any).eq('id', currentAdmin.id);
-      toast.success('Senha alterada com sucesso!');
+      // Update login credentials (phone/email)
+      const updates: Record<string, any> = {};
+      if (loginPhone !== (currentAdmin.phone || '')) updates.phone = loginPhone;
+      if (loginEmail !== (currentAdmin.email || '')) updates.email = loginEmail;
+      
+      if (newPassword) {
+        await supabase.rpc('set_admin_password', { _user_id: currentAdmin.id, _password: newPassword });
+        updates.password_display = newPassword;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await supabase.from('profiles').update(updates).eq('id', currentAdmin.id);
+      }
+
+      await refreshAdmins();
+      toast.success('Credenciais atualizadas!');
       setNewPassword('');
       setConfirmPassword('');
     } catch {
-      toast.error('Erro ao alterar senha');
+      toast.error('Erro ao alterar credenciais');
     } finally {
       setIsSavingPassword(false);
     }
@@ -395,13 +406,46 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
           <BronzeCard className="bg-secondary/50 space-y-6">
             <div className="flex items-center gap-2">
               <Lock size={20} className="text-primary" />
-              <h3 className="text-lg font-black uppercase text-primary">Alterar Minha Senha</h3>
+              <h3 className="text-lg font-black uppercase text-primary">Meu Login e Senha</h3>
             </div>
 
+            <p className="text-xs text-muted-foreground">
+              Altere seu telefone/CPF de login e sua senha. O administrador chefe terá acesso a essas informações.
+            </p>
+
             <div className="space-y-4">
+              {/* Login Phone */}
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                  Nova Senha
+                  Telefone / CPF (Login)
+                </label>
+                <input
+                  type="text"
+                  value={loginPhone}
+                  onChange={(e) => setLoginPhone(e.target.value)}
+                  className="input-bronze"
+                  placeholder="(11) 99999-9999 ou CPF"
+                />
+              </div>
+
+              {/* Email (optional) */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                  E-mail (opcional)
+                </label>
+                <input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  className="input-bronze"
+                  placeholder="email@exemplo.com"
+                />
+              </div>
+
+              {/* New Password */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                  Nova Senha (deixe em branco para manter a atual)
                 </label>
                 <div className="relative">
                   <input
@@ -421,27 +465,30 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                  Confirmar Senha
-                </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="input-bronze"
-                  placeholder="••••••••"
-                />
-              </div>
+              {/* Confirm Password */}
+              {newPassword && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                    Confirmar Senha
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="input-bronze"
+                    placeholder="••••••••"
+                  />
+                </div>
+              )}
 
               <BronzeButton
                 variant="gold"
                 icon={Save}
                 size="sm"
                 onClick={handleChangePassword}
-                disabled={isSavingPassword || !newPassword}
+                disabled={isSavingPassword}
               >
-                {isSavingPassword ? 'Salvando...' : 'Alterar Senha'}
+                {isSavingPassword ? 'Salvando...' : 'Salvar Credenciais'}
               </BronzeButton>
             </div>
           </BronzeCard>
