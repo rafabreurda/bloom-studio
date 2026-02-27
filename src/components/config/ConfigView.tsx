@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles, UserCircle, Headphones, FileText, Lock, Eye, EyeOff, LogOut, UsersRound } from 'lucide-react';
+import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles, UserCircle, Headphones, FileText, Lock, Eye, EyeOff, LogOut, UsersRound, Layers } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { SystemConfig, ClientTag, WhatsAppTemplate, ServiceType } from '@/types';
@@ -12,6 +12,7 @@ import { ServicesSection } from './ServicesSection';
 import { ReceiptSection } from './ReceiptSection';
 import { SupportSection } from './SupportSection';
 import { UsersView } from '@/components/users/UsersView';
+import { PlansSection } from './PlansSection';
 import { toast } from 'sonner';
 
 const SUPABASE_URL = "https://iphluakvvklyvymwhfxh.supabase.co";
@@ -24,7 +25,7 @@ interface ConfigViewProps {
   onUploadBackground?: (file: File) => Promise<string | null>;
 }
 
-type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens' | 'recibo' | 'suporte' | 'senha' | 'usuarios';
+type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens' | 'recibo' | 'suporte' | 'senha' | 'usuarios' | 'planos';
 
 export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLogo, onUploadBackground }: ConfigViewProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('estudio');
@@ -182,6 +183,7 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
     ? [
         { id: 'estudio' as ConfigSection, icon: Building2, label: 'Visual' },
         { id: 'usuarios' as ConfigSection, icon: UsersRound, label: 'Usuários' },
+        { id: 'planos' as ConfigSection, icon: Layers, label: 'Planos' },
         { id: 'suporte' as ConfigSection, icon: Headphones, label: 'Suporte' },
       ]
     : [
@@ -536,6 +538,10 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
 
         {activeSection === 'usuarios' && isAdminChefe && (
           <UsersView />
+        )}
+
+        {activeSection === 'planos' && isAdminChefe && (
+          <PlansSection />
         )}
 
       </div>

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { Eye, EyeOff, LogIn, KeyRound } from 'lucide-react';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { useAuth } from '@/contexts/AuthContext';
+import { ForgotPasswordModal } from './ForgotPasswordModal';
 
 export function LoginScreen() {
   const { admins, switchAdmin, isLoading } = useAuth();
@@ -10,6 +11,7 @@ export function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,10 +20,10 @@ export function LoginScreen() {
     setIsSubmitting(true);
     setError('');
 
-    // Find admin by phone or name (case insensitive, trimmed)
+    // Find admin by name (case insensitive, trimmed)
     const trimmedLogin = login.trim().toLowerCase();
     const admin = admins.find(
-      a => a.phone?.trim().toLowerCase() === trimmedLogin || a.name.trim().toLowerCase() === trimmedLogin
+      a => a.name.trim().toLowerCase() === trimmedLogin
     );
 
     if (!admin) {
@@ -60,17 +62,14 @@ export function LoginScreen() {
         <form onSubmit={handleSubmit} className="space-y-5 bg-card p-6 rounded-3xl border border-border shadow-lg">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-              Usuário
+              Nome
             </label>
             <input
               type="text"
               value={login}
-              onChange={(e) => {
-                setLogin(e.target.value);
-                setError('');
-              }}
+              onChange={(e) => { setLogin(e.target.value); setError(''); }}
               className="input-bronze w-full"
-              placeholder="Nome ou telefone"
+              placeholder="Seu nome"
               required
               autoFocus
             />
@@ -84,10 +83,7 @@ export function LoginScreen() {
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setError('');
-                }}
+                onChange={(e) => { setPassword(e.target.value); setError(''); }}
                 className="input-bronze w-full pr-12"
                 placeholder="••••••••"
                 required
@@ -115,8 +111,19 @@ export function LoginScreen() {
           >
             {isSubmitting ? 'Entrando...' : 'Entrar'}
           </BronzeButton>
+
+          <button
+            type="button"
+            onClick={() => setShowForgot(true)}
+            className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors py-2"
+          >
+            <KeyRound size={14} />
+            Esqueci minha senha
+          </button>
         </form>
       </div>
+
+      {showForgot && <ForgotPasswordModal onClose={() => setShowForgot(false)} />}
     </div>
   );
 }

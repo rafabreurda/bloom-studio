@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LoginScreen } from '@/components/auth/LoginScreen';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
+import { MobileBottomBar } from '@/components/layout/MobileBottomBar';
 import { AgendaView } from '@/components/agenda/AgendaView';
 import { FinanceView } from '@/components/finance/FinanceView';
 import { WaitingListView } from '@/components/waitinglist/WaitingListView';
@@ -265,7 +266,13 @@ const MainApp = () => {
           activeTab={activeTab} 
         />
 
-        <div className="flex-1 p-4 md:p-10 overflow-y-auto custom-scrollbar">
+        <MobileBottomBar
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+        />
+
+        <div className="flex-1 p-4 md:p-10 pb-24 md:pb-10 overflow-y-auto custom-scrollbar">
           {activeTab === 'agenda' && (
             <AgendaView
               appointments={appointments}
