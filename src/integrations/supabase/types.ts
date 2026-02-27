@@ -451,7 +451,14 @@ export type Database = {
       profiles: {
         Row: {
           address: string | null
+          address_city: string | null
+          address_neighborhood: string | null
+          address_number: string | null
+          address_state: string | null
+          address_street: string | null
+          address_zip: string | null
           background_photo: string | null
+          birthday: string | null
           cpf: string | null
           created_at: string
           email: string | null
@@ -466,10 +473,18 @@ export type Database = {
           studio_logo: string | null
           studio_name: string | null
           updated_at: string
+          username: string | null
         }
         Insert: {
           address?: string | null
+          address_city?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
           background_photo?: string | null
+          birthday?: string | null
           cpf?: string | null
           created_at?: string
           email?: string | null
@@ -484,10 +499,18 @@ export type Database = {
           studio_logo?: string | null
           studio_name?: string | null
           updated_at?: string
+          username?: string | null
         }
         Update: {
           address?: string | null
+          address_city?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
           background_photo?: string | null
+          birthday?: string | null
           cpf?: string | null
           created_at?: string
           email?: string | null
@@ -502,6 +525,7 @@ export type Database = {
           studio_logo?: string | null
           studio_name?: string | null
           updated_at?: string
+          username?: string | null
         }
         Relationships: [
           {

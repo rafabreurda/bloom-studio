@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Edit2, Trash2, X, CheckCircle2, Eye, EyeOff, Crown, User } from 'lucide-react';
+import { UserPlus, Edit2, Trash2, X, CheckCircle2, Eye, EyeOff, Crown, User, ChevronDown, ChevronUp } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,6 +7,7 @@ import { useAdminsCRUD } from '@/hooks/useAdminsCRUD';
 import { AdminWithRole, getDisplayRole } from '@/types/admin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { UserFormModal } from './UserFormModal';
 
 interface Plan {
   id: string;
@@ -20,15 +21,8 @@ export function UsersView() {
   const { createAdmin, updateAdmin, deleteAdmin, isLoading } = useAdminsCRUD();
   const [showModal, setShowModal] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<AdminWithRole | null>(null);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [cpf, setCpf] = useState('');
-  const [address, setAddress] = useState('');
-  const [planId, setPlanId] = useState('');
-  const [paymentNotes, setPaymentNotes] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
+  const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [adminExtras, setAdminExtras] = useState<Record<string, any>>({});
 
@@ -36,8 +30,7 @@ export function UsersView() {
     supabase.from('plans').select('*').eq('is_active', true).order('name').then(({ data }) => {
       if (data) setPlans(data as Plan[]);
     });
-    // Load extra fields for all admins
-    supabase.from('profiles').select('id, cpf, address, plan_id, payment_notes').then(({ data }) => {
+    supabase.from('profiles').select('*').then(({ data }) => {
       if (data) {
         const extras: Record<string, any> = {};
         data.forEach(p => { extras[p.id] = p; });
@@ -48,58 +41,61 @@ export function UsersView() {
 
   const openAddModal = () => {
     setEditingAdmin(null);
-    setName(''); setPhone(''); setCpf(''); setAddress('');
-    setPlanId(''); setPaymentNotes(''); setPassword('');
-    setShowPassword(false);
     setShowModal(true);
   };
 
   const openEditModal = (admin: AdminWithRole) => {
     setEditingAdmin(admin);
-    setName(admin.name);
-    setPhone(admin.phone || '');
-    const extra = adminExtras[admin.id] || {};
-    setCpf(extra.cpf || '');
-    setAddress(extra.address || '');
-    setPlanId(extra.plan_id || '');
-    setPaymentNotes(extra.payment_notes || '');
-    setPassword('');
-    setShowPassword(false);
     setShowModal(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async (formData: any) => {
     if (editingAdmin) {
-      const success = await updateAdmin(editingAdmin.id, { name, phone, role: 'Admin Pleno' });
+      const success = await updateAdmin(editingAdmin.id, { name: formData.name, phone: formData.phone, role: 'Admin Pleno' });
       if (success) {
-        // Update extra fields
         await supabase.from('profiles').update({
-          cpf: cpf || null, address: address || null,
-          plan_id: planId || null, payment_notes: paymentNotes || null,
+          cpf: formData.cpf || null,
+          email: formData.email || null,
+          birthday: formData.birthday || null,
+          address_street: formData.address_street || null,
+          address_number: formData.address_number || null,
+          address_neighborhood: formData.address_neighborhood || null,
+          address_city: formData.address_city || null,
+          address_zip: formData.address_zip || null,
+          address_state: formData.address_state || null,
+          username: formData.username || null,
+          plan_id: formData.plan_id || null,
+          payment_notes: formData.payment_notes || null,
         } as any).eq('id', editingAdmin.id);
 
-        if (password) {
-          await supabase.rpc('set_admin_password', { _user_id: editingAdmin.id, _password: password });
-          await supabase.from('profiles').update({ password_display: password } as any).eq('id', editingAdmin.id);
-          toast.success('Senha alterada!');
+        if (formData.password) {
+          await supabase.rpc('set_admin_password', { _user_id: editingAdmin.id, _password: formData.password });
+          await supabase.from('profiles').update({ password_display: formData.password } as any).eq('id', editingAdmin.id);
         }
         await refreshAdmins();
         setShowModal(false);
       }
     } else {
-      if (!password) { toast.error('Senha é obrigatória'); return; }
-      const newProfileId = await createAdmin({ name: name.trim(), phone: phone.trim(), role: 'Admin Pleno' });
+      if (!formData.password) { toast.error('Senha é obrigatória'); return; }
+      const newProfileId = await createAdmin({ name: formData.name.trim(), phone: formData.phone.trim(), role: 'Admin Pleno' });
       if (newProfileId) {
-        // Set extra fields
         await supabase.from('profiles').update({
-          cpf: cpf || null, address: address || null,
-          plan_id: planId || null, payment_notes: paymentNotes || null,
+          cpf: formData.cpf || null,
+          email: formData.email || null,
+          birthday: formData.birthday || null,
+          address_street: formData.address_street || null,
+          address_number: formData.address_number || null,
+          address_neighborhood: formData.address_neighborhood || null,
+          address_city: formData.address_city || null,
+          address_zip: formData.address_zip || null,
+          address_state: formData.address_state || null,
+          username: formData.username || null,
+          plan_id: formData.plan_id || null,
+          payment_notes: formData.payment_notes || null,
         } as any).eq('id', newProfileId);
 
-        await supabase.rpc('set_admin_password', { _user_id: newProfileId, _password: password });
-        await supabase.from('profiles').update({ password_display: password } as any).eq('id', newProfileId);
+        await supabase.rpc('set_admin_password', { _user_id: newProfileId, _password: formData.password });
+        await supabase.from('profiles').update({ password_display: formData.password } as any).eq('id', newProfileId);
         await refreshAdmins();
         setShowModal(false);
       }
@@ -114,6 +110,10 @@ export function UsersView() {
 
   const toggleShowPassword = (id: string) => {
     setShowPasswords(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const toggleExpand = (id: string) => {
+    setExpandedUser(prev => prev === id ? null : id);
   };
 
   const getPlanName = (pId: string | null) => {
@@ -134,34 +134,42 @@ export function UsersView() {
         {admins.map(admin => {
           const extra = adminExtras[admin.id] || {};
           const planName = getPlanName(extra.plan_id);
+          const isExpanded = expandedUser === admin.id;
+
           return (
             <BronzeCard key={admin.id} className="bg-secondary/50 p-4">
+              {/* Compact view: Name, Phone, Password */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                <div
+                  className="flex items-center gap-4 flex-1 cursor-pointer"
+                  onClick={() => toggleExpand(admin.id)}
+                >
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
                     admin.role === 'admin_chefe' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'
                   }`}>
                     {admin.role === 'admin_chefe' ? <Crown size={20} /> : <User size={20} />}
                   </div>
-                  <div>
-                    <p className="font-bold">{admin.name}</p>
-                    <p className="text-xs text-muted-foreground">{getDisplayRole(admin.role)}</p>
+                  <div className="min-w-0">
+                    <p className="font-bold truncate">{admin.name}</p>
                     <p className="text-xs text-muted-foreground">📱 {admin.phone || 'Sem telefone'}</p>
-                    {extra.cpf && <p className="text-xs text-muted-foreground">📋 CPF: {extra.cpf}</p>}
-                    {planName && <p className="text-xs text-muted-foreground">📦 Plano: {planName}</p>}
-                    {extra.payment_notes && <p className="text-xs text-muted-foreground">💳 {extra.payment_notes}</p>}
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-muted-foreground">🔑 Senha:</span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-muted-foreground">🔑</span>
                       <span className="text-xs font-mono font-bold">
                         {showPasswords[admin.id] ? ((admin as any).password_display || '••••••') : '••••••'}
                       </span>
-                      <button onClick={() => toggleShowPassword(admin.id)} className="text-muted-foreground hover:text-foreground">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleShowPassword(admin.id); }}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
                         {showPasswords[admin.id] ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-1">
+                  <button onClick={() => toggleExpand(admin.id)} className="p-2 text-muted-foreground hover:text-foreground">
+                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
                   <button onClick={() => openEditModal(admin)} className="p-2 text-muted-foreground hover:text-primary">
                     <Edit2 size={16} />
                   </button>
@@ -172,85 +180,54 @@ export function UsersView() {
                   )}
                 </div>
               </div>
+
+              {/* Expanded view: full details */}
+              {isExpanded && (
+                <div className="mt-4 pt-4 border-t border-border space-y-2 text-sm">
+                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mb-2">
+                    {getDisplayRole(admin.role)}
+                  </p>
+                  {extra.email && <p><span className="text-muted-foreground">📧 E-mail:</span> {extra.email}</p>}
+                  {extra.cpf && <p><span className="text-muted-foreground">📋 CPF:</span> {extra.cpf}</p>}
+                  {extra.birthday && <p><span className="text-muted-foreground">🎂 Nascimento:</span> {new Date(extra.birthday + 'T12:00:00').toLocaleDateString('pt-BR')}</p>}
+                  {extra.username && <p><span className="text-muted-foreground">👤 Usuário:</span> {extra.username}</p>}
+                  
+                  {(extra.address_street || extra.address || extra.address_city) && (
+                    <div>
+                      <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest mt-3 mb-1">Endereço</p>
+                      {extra.address_street && <p>{extra.address_street}{extra.address_number ? `, ${extra.address_number}` : ''}</p>}
+                      {extra.address_neighborhood && <p>{extra.address_neighborhood}</p>}
+                      {(extra.address_city || extra.address_state) && (
+                        <p>{[extra.address_city, extra.address_state].filter(Boolean).join(' - ')}</p>
+                      )}
+                      {extra.address_zip && <p>CEP: {extra.address_zip}</p>}
+                      {!extra.address_street && extra.address && <p>{extra.address}</p>}
+                    </div>
+                  )}
+
+                  {planName && (
+                    <div className="mt-3">
+                      <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest mb-1">Plano & Pagamento</p>
+                      <p>📦 {planName}</p>
+                      {extra.payment_notes && <p>💳 {extra.payment_notes}</p>}
+                    </div>
+                  )}
+                </div>
+              )}
             </BronzeCard>
           );
         })}
       </div>
 
-      {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
-          <BronzeCard className="w-full max-w-md bg-card border-primary/30 rounded-3xl p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6 border-b border-border pb-4">
-              <h3 className="text-xl font-black uppercase">
-                {editingAdmin ? `Editar: ${editingAdmin.name}` : 'Novo Usuário'}
-              </h3>
-              <button onClick={() => setShowModal(false)} className="p-2 text-muted-foreground hover:text-foreground">
-                <X size={24} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Nome *</label>
-                <input type="text" value={name} onChange={e => setName(e.target.value)} className="input-bronze" required />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">CPF</label>
-                <input type="text" value={cpf} onChange={e => setCpf(e.target.value)} className="input-bronze" placeholder="000.000.000-00" />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Endereço</label>
-                <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="input-bronze" placeholder="Rua, número, bairro..." />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Telefone</label>
-                <input type="text" value={phone} onChange={e => setPhone(e.target.value)} className="input-bronze" placeholder="(11) 99999-9999" />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Plano</label>
-                <select value={planId} onChange={e => setPlanId(e.target.value)} className="input-bronze">
-                  <option value="">Sem plano</option>
-                  {plans.map(p => (
-                    <option key={p.id} value={p.id}>{p.name} - R$ {p.price.toFixed(2)}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Observações de Cobrança</label>
-                <textarea value={paymentNotes} onChange={e => setPaymentNotes(e.target.value)} className="input-bronze min-h-[80px]" placeholder="Pix, cartão de crédito, etc." />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                  {editingAdmin ? 'Nova Senha (deixe vazio para manter)' : 'Senha *'}
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="input-bronze pr-12"
-                    placeholder="••••••••"
-                    required={!editingAdmin}
-                  />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              <BronzeButton type="submit" variant="gold" icon={CheckCircle2} className="w-full h-[60px]">
-                {editingAdmin ? 'Salvar Alterações' : 'Adicionar Usuário'}
-              </BronzeButton>
-            </form>
-          </BronzeCard>
-        </div>
+        <UserFormModal
+          editingAdmin={editingAdmin}
+          adminExtras={adminExtras}
+          plans={plans}
+          onSubmit={handleSubmit}
+          onClose={() => setShowModal(false)}
+          isLoading={isLoading}
+        />
       )}
     </div>
   );
