@@ -112,52 +112,61 @@ export function FinanceCharts({
         </div>
       </div>
 
-      {/* Payment Distribution */}
+      {/* Revenue last 3 months pie */}
       <div className="rounded-2xl border border-border bg-card p-4">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Métodos de Pagamento</h3>
-        {paymentData.length > 0 ? (
-          <>
-            <div className="h-[160px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={paymentData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={45}
-                    outerRadius={70}
-                    dataKey="value"
-                    strokeWidth={2}
-                    stroke="hsl(var(--card))"
-                  >
-                    {paymentData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<PieTooltipContent />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="space-y-2 mt-2">
-              {paymentData.map((item) => (
-                <div key={item.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="text-xs font-bold text-muted-foreground">{item.name}</span>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Faturamento 3 Meses</h3>
+        {(() => {
+          const last3 = evolutionData.slice(-3);
+          const pieData = last3.filter(d => d.receita > 0).map((d, i) => ({
+            name: d.month,
+            value: d.receita,
+            color: ['#10b981', '#3b82f6', '#f59e0b'][i],
+          }));
+          const total3 = pieData.reduce((s, d) => s + d.value, 0);
+          return pieData.length > 0 ? (
+            <>
+              <div className="h-[160px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={70}
+                      dataKey="value"
+                      strokeWidth={2}
+                      stroke="hsl(var(--card))"
+                    >
+                      {pieData.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<PieTooltipContent />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-2 mt-2">
+                {pieData.map((item) => (
+                  <div key={item.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span className="text-xs font-bold text-muted-foreground">{item.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black">R$ {item.value.toLocaleString('pt-BR')}</span>
+                      <span className="text-[10px] text-muted-foreground font-bold">
+                        {total3 > 0 ? ((item.value / total3) * 100).toFixed(0) : 0}%
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black">R$ {item.value.toLocaleString('pt-BR')}</span>
-                    <span className="text-[10px] text-muted-foreground font-bold">
-                      {paymentTotal > 0 ? ((item.value / paymentTotal) * 100).toFixed(0) : 0}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        ) : (
-          <p className="text-center text-muted-foreground text-sm py-12">Sem dados</p>
-        )}
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="text-center text-muted-foreground text-sm py-12">Sem dados</p>
+          );
+        })()}
       </div>
 
       {/* Categories */}
