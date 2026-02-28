@@ -12,7 +12,7 @@ interface ReceiptModalProps {
 
 interface ReceiptConfig {
   studioName: string;
-  cnpj: string;
+  cpfCnpj: string;
   address: string;
   whatsapp: string;
   email: string;
@@ -23,7 +23,7 @@ interface ReceiptConfig {
 export function ReceiptModal({ appointment, onClose }: ReceiptModalProps) {
   const [config, setConfig] = useState<ReceiptConfig>({
     studioName: 'Sole Mio Bronzeamento Saudável',
-    cnpj: '',
+    cpfCnpj: '',
     address: '',
     whatsapp: '',
     email: '',
@@ -99,7 +99,7 @@ export function ReceiptModal({ appointment, onClose }: ReceiptModalProps) {
           <div className="text-center space-y-1">
             {logo && <img src={logo} alt="Logo" className="h-16 mx-auto mb-2 object-contain" />}
             <p className="font-black text-lg">{config.studioName}</p>
-            {config.cnpj && <p className="text-[11px] text-gray-500">CNPJ {config.cnpj}</p>}
+            {config.cpfCnpj && <p className="text-[11px] text-gray-500">CPF/CNPJ {config.cpfCnpj}</p>}
             {config.address && <p className="text-[11px] text-gray-500">{config.address}</p>}
             <div className="flex justify-center gap-4 text-[11px] text-gray-400">
               {config.whatsapp && <span>WhatsApp {config.whatsapp}</span>}

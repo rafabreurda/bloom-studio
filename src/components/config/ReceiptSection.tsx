@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface ReceiptConfig {
   studioName: string;
-  cnpj: string;
+  cpfCnpj: string;
   address: string;
   whatsapp: string;
   email: string;
@@ -18,7 +18,7 @@ interface ReceiptConfig {
 
 const defaultReceiptConfig: ReceiptConfig = {
   studioName: '',
-  cnpj: '',
+  cpfCnpj: '',
   address: '',
   whatsapp: '',
   email: '',
@@ -83,8 +83,8 @@ export function ReceiptSection() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">CNPJ</label>
-          <input type="text" value={config.cnpj} onChange={e => setConfig({ ...config, cnpj: e.target.value })} className="input-bronze" placeholder="00.000.000/0001-00" />
+          <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">CPF/CNPJ</label>
+          <input type="text" value={config.cpfCnpj} onChange={e => setConfig({ ...config, cpfCnpj: e.target.value })} className="input-bronze" placeholder="000.000.000-00 ou 00.000.000/0001-00" />
         </div>
 
         <div className="space-y-2">
@@ -117,7 +117,7 @@ export function ReceiptSection() {
       {/* Preview */}
       <div className="p-4 bg-white rounded-2xl border border-border text-black space-y-3 text-center">
         <p className="font-black text-lg">{config.studioName}</p>
-        {config.cnpj && <p className="text-[10px] text-gray-500">CNPJ {config.cnpj}</p>}
+        {config.cpfCnpj && <p className="text-[10px] text-gray-500">CPF/CNPJ {config.cpfCnpj}</p>}
         {config.address && <p className="text-[10px] text-gray-500">{config.address}</p>}
         <div className="flex justify-center gap-4 text-[10px] text-gray-400">
           {config.whatsapp && <span>WhatsApp {config.whatsapp}</span>}
