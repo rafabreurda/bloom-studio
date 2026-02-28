@@ -32,14 +32,10 @@ interface FinanceChartsProps {
   selectedMonth: number;
   selectedYear: number;
   monthNames: string[];
-  totalPix: number;
-  totalCartao: number;
-  totalDinheiro: number;
 }
 
 export function FinanceCharts({
   finances, filteredFinances, selectedMonth, selectedYear, monthNames,
-  totalPix, totalCartao, totalDinheiro,
 }: FinanceChartsProps) {
   // Revenue evolution (6 months)
   const evolutionData = useMemo(() => {
