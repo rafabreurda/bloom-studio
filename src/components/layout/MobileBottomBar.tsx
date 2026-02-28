@@ -1,6 +1,6 @@
 import { 
   Calendar, Users, DollarSign, ShoppingBag, Truck, Handshake, 
-  ClipboardList, Settings, Package, Menu
+  ClipboardList, Settings, Package, Menu, LogOut, UserCheck
 } from 'lucide-react';
 import { TabId } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,7 +25,7 @@ const menuItems = [
 ];
 
 export function MobileBottomBar({ activeTab, onTabChange, onOpenSidebar }: MobileBottomBarProps) {
-  const { isAdminChefe } = useAuth();
+  const { isAdminChefe, currentAdmin, logout } = useAuth();
   const [showMore, setShowMore] = useState(false);
 
   // Admin chefe only sees config
@@ -33,9 +33,9 @@ export function MobileBottomBar({ activeTab, onTabChange, onOpenSidebar }: Mobil
     return null;
   }
 
-  // Show first 4 items + "more" button
-  const visibleItems = menuItems.slice(0, 4);
-  const moreItems = menuItems.slice(4);
+  // Show first 3 items + "more" button + user button
+  const visibleItems = menuItems.slice(0, 3);
+  const moreItems = menuItems.slice(3);
   const isMoreActive = moreItems.some(item => item.id === activeTab);
 
   return (
@@ -93,6 +93,16 @@ export function MobileBottomBar({ activeTab, onTabChange, onOpenSidebar }: Mobil
           >
             <Menu size={20} />
             <span className="text-[9px] font-black uppercase leading-none">Mais</span>
+          </button>
+          {/* User + Logout */}
+          <button
+            onClick={logout}
+            className="flex flex-col items-center justify-center gap-1 px-3 py-1 rounded-xl transition-all min-w-[56px] text-muted-foreground"
+          >
+            <LogOut size={20} className="text-destructive" />
+            <span className="text-[9px] font-black uppercase leading-none truncate max-w-[56px]">
+              {currentAdmin?.name?.split(' ')[0] || 'Sair'}
+            </span>
           </button>
         </div>
       </div>
