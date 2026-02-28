@@ -48,6 +48,26 @@ export function useAdminsCRUD() {
 
       if (roleError) throw roleError;
 
+      // 3. Copy default whatsapp_templates from the first existing user that has them
+      try {
+        const { data: templateSource } = await supabase
+          .from('system_config')
+          .select('value')
+          .eq('key', 'whatsapp_templates')
+          .limit(1)
+          .single();
+
+        if (templateSource?.value) {
+          await supabase.from('system_config').insert({
+            key: 'whatsapp_templates',
+            value: templateSource.value,
+            owner_id: profile.id,
+          });
+        }
+      } catch (e) {
+        console.warn('Could not copy default templates:', e);
+      }
+
       toast.success('Administrador cadastrado com sucesso!');
       return profile.id;
     } catch (error) {
