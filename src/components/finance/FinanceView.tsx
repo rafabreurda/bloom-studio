@@ -193,9 +193,6 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
             monthNames={monthNames}
-            totalPix={totalPix}
-            totalCartao={totalCartao}
-            totalDinheiro={totalDinheiro}
           />
 
           <FinanceTransactionList finances={filteredFinances} />
