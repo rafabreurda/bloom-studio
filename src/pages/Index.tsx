@@ -49,8 +49,6 @@ import { useWaitingList } from '@/hooks/useWaitingList';
 import { useFinances } from '@/hooks/useFinances';
 import { usePackages } from '@/hooks/usePackages';
 import { useAutoClose } from '@/hooks/useAutoClose';
-import { VoiceCommandButton } from '@/components/voice/VoiceCommandButton';
-import { Mic } from 'lucide-react';
 
 const Index = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -85,15 +83,6 @@ const MainApp = () => {
       setActiveTab('agenda');
     }
   }, [currentAdmin?.id, isAdminChefe]);
-  const [micTrigger, setMicTrigger] = useState(false);
-  const [isMicListening, setIsMicListening] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
-
-  useEffect(() => {
-    const standalone = window.matchMedia('(display-mode: standalone)').matches
-      || (navigator as any).standalone === true;
-    setIsStandalone(standalone);
-  }, []);
   
   // Use persistence hooks
   const { config: systemConfig, updateConfig: handleConfigChange, uploadLogo, uploadBackground } = useSystemConfig();
@@ -573,32 +562,6 @@ const MainApp = () => {
         </div>
       )}
 
-      {/* Voice Command */}
-      <VoiceCommandButton
-        onAddFinance={addFinance}
-        onAddAppointment={addAppointment}
-        externalTrigger={micTrigger}
-        onStateChange={setIsMicListening}
-      />
-
-      {/* Floating Mic FAB - only in standalone/installed mode, responsive sizing */}
-      {isStandalone && (
-        <button
-          onClick={() => setMicTrigger(prev => !prev)}
-          className={`fixed z-[80] rounded-full flex items-center justify-center shadow-2xl transition-all duration-300
-            bottom-4 right-4 w-12 h-12
-            sm:bottom-5 sm:right-5 sm:w-13 sm:h-13
-            md:bottom-6 md:right-6 md:w-14 md:h-14
-            lg:bottom-8 lg:right-8 lg:w-16 lg:h-16 ${
-            isMicListening
-              ? 'bg-red-500 animate-pulse'
-              : 'bg-primary text-primary-foreground'
-          }`}
-          style={isMicListening ? { color: 'white' } : undefined}
-        >
-          <Mic className="w-5 h-5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 lg:w-7 lg:h-7" />
-        </button>
-      )}
     </div>
   );
 };
