@@ -78,7 +78,7 @@ export function ReceiptSection() {
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Nome do Estúdio</label>
+          <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Empresa</label>
           <input type="text" value={config.studioName} onChange={e => setConfig({ ...config, studioName: e.target.value })} className="input-bronze" />
         </div>
 
