@@ -86,6 +86,36 @@ export function useFinances() {
     }
   };
 
+  const updateFinance = async (finance: Finance) => {
+    try {
+      let isoDate = finance.date;
+      if (finance.date.includes('/')) {
+        const dateParts = finance.date.split('/');
+        isoDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+      }
+
+      const { error } = await supabase
+        .from('finances')
+        .update({
+          date: isoDate,
+          description: finance.description,
+          value: finance.value,
+          payment_method: finance.paymentMethod,
+          category: finance.category,
+        })
+        .eq('id', finance.id);
+
+      if (error) throw error;
+
+      setFinances(prev => prev.map(f => f.id === finance.id ? finance : f));
+      toast.success('Transação atualizada!');
+    } catch (error) {
+      console.error('Erro ao atualizar transação:', error);
+      toast.error('Erro ao atualizar transação');
+      throw error;
+    }
+  };
+
   const deleteFinance = async (id: string) => {
     try {
       const { error } = await supabase
@@ -108,6 +138,7 @@ export function useFinances() {
     finances,
     loading,
     addFinance,
+    updateFinance,
     deleteFinance,
     refetch: fetchFinances,
   };

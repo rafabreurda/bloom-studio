@@ -93,7 +93,7 @@ const MainApp = () => {
   const { appointments, addAppointment, updateAppointment, deleteAppointment, clearAllAppointments, clearAppointmentsByDate, refetch: refetchAppointments } = useAppointments();
   const { blocks, addBlock, deleteBlock } = useBlocks();
   const { waitingList, addWaiting, completeWaiting } = useWaitingList();
-  const { finances, addFinance, deleteFinance, refetch: refetchFinances } = useFinances();
+  const { finances, addFinance, updateFinance, deleteFinance, refetch: refetchFinances } = useFinances();
   const { packages, addPackage, updatePackage, deletePackage, useSession, refetch: refetchPackages } = usePackages();
 
   // Birthday alert - only for Admin Chefe
@@ -340,6 +340,7 @@ const MainApp = () => {
             <FinanceView
               finances={finances}
               onAddFinance={addFinance}
+              onUpdateFinance={updateFinance}
               onDeleteFinance={deleteFinance}
               appointments={appointments}
               onRefetch={refetchFinances}

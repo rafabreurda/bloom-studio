@@ -21,11 +21,15 @@ const BarTooltip = ({ active, payload, label }: any) => {
 interface ExpensesViewProps {
   finances: Finance[];
   onAddFinance: (finance: Omit<Finance, 'id'>) => void;
+  onUpdateFinance: (finance: Finance) => void;
   onDeleteFinance: (id: string) => void;
 }
 
-export function ExpensesView({ finances, onAddFinance, onDeleteFinance }: ExpensesViewProps) {
+export function ExpensesView({ finances, onAddFinance, onUpdateFinance, onDeleteFinance }: ExpensesViewProps) {
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<number>(0);
+  const [editDescription, setEditDescription] = useState('');
   const [search, setSearch] = useState('');
   const [filterMonth, setFilterMonth] = useState('');
 
@@ -197,25 +201,72 @@ export function ExpensesView({ finances, onAddFinance, onDeleteFinance }: Expens
             )}
             {expenses.map(f => (
               <div key={f.id} className="flex items-center justify-between p-3 rounded-xl border bg-red-500/5 border-red-500/20 group">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-red-500" />
-                  <div>
-                    <p className="text-sm font-bold">{f.description}</p>
-                    <p className="text-xs text-muted-foreground">{f.date} • {f.paymentMethod}</p>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+                  {editingId === f.id ? (
+                    <div className="flex-1 flex flex-col gap-2">
+                      <input
+                        type="text"
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        className="input-bronze text-sm"
+                        autoFocus
+                      />
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          value={editValue}
+                          onChange={(e) => setEditValue(Number(e.target.value))}
+                          className="input-bronze text-sm w-32"
+                          min="0"
+                          step="0.01"
+                        />
+                        <BronzeButton
+                          size="sm"
+                          variant="gold"
+                          onClick={() => {
+                            onUpdateFinance({ ...f, value: editValue, description: editDescription });
+                            setEditingId(null);
+                          }}
+                        >
+                          Salvar
+                        </BronzeButton>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="text-xs text-muted-foreground hover:text-foreground"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className="cursor-pointer flex-1 min-w-0"
+                      onClick={() => {
+                        setEditingId(f.id);
+                        setEditValue(f.value);
+                        setEditDescription(f.description);
+                      }}
+                    >
+                      <p className="text-sm font-bold truncate">{f.description}</p>
+                      <p className="text-xs text-muted-foreground">{f.date} • {f.paymentMethod}</p>
+                    </div>
+                  )}
+                </div>
+                {editingId !== f.id && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="font-black text-red-500">-R$ {f.value.toLocaleString('pt-BR')}</span>
+                    <ConfirmDeleteDialog
+                      description="Tem certeza que deseja excluir esta despesa?"
+                      onConfirm={() => onDeleteFinance(f.id)}
+                      trigger={
+                        <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-red-500">
+                          <Trash2 size={14} />
+                        </button>
+                      }
+                    />
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-black text-red-500">-R$ {f.value.toLocaleString('pt-BR')}</span>
-                  <ConfirmDeleteDialog
-                    description="Tem certeza que deseja excluir esta despesa?"
-                    onConfirm={() => onDeleteFinance(f.id)}
-                    trigger={
-                      <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-red-500">
-                        <Trash2 size={14} />
-                      </button>
-                    }
-                  />
-                </div>
+                )}
               </div>
             ))}
           </div>
