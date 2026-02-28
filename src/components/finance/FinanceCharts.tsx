@@ -59,17 +59,9 @@ export function FinanceCharts({
     return data;
   }, [finances, selectedMonth, selectedYear, monthNames]);
 
-  const paymentData = [
-    { name: 'Pix', value: totalPix, color: '#f59e0b' },
-    { name: 'Cartão', value: totalCartao, color: '#3b82f6' },
-    { name: 'Dinheiro', value: totalDinheiro, color: '#10b981' },
-  ].filter(d => d.value > 0);
-
   const totalSessions = filteredFinances.filter(f => f.category === 'session' && f.type === 'in').reduce((s, f) => s + f.value, 0);
   const totalProducts = filteredFinances.filter(f => f.category === 'product' && f.type === 'in').reduce((s, f) => s + f.value, 0);
   const categoryData = [{ name: 'Sessões', valor: totalSessions }, { name: 'Produtos', valor: totalProducts }];
-
-  const paymentTotal = totalPix + totalCartao + totalDinheiro;
 
   return (
     <div className="grid md:grid-cols-2 gap-4">
