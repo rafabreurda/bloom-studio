@@ -189,7 +189,6 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
 
           <FinanceCharts
             finances={finances}
-            filteredFinances={filteredFinances}
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
             monthNames={monthNames}

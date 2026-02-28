@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Area, AreaChart } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { Finance } from '@/types';
 
 const ChartTooltip = ({ active, payload, label }: any) => {
@@ -16,28 +16,16 @@ const ChartTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const PieTooltipContent = ({ active, payload }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="bg-card border border-border rounded-xl p-3 shadow-xl">
-      <p className="text-[10px] font-bold uppercase text-muted-foreground">{payload[0].name}</p>
-      <p className="text-sm font-black">R$ {Number(payload[0].value).toLocaleString('pt-BR')}</p>
-    </div>
-  );
-};
-
 interface FinanceChartsProps {
   finances: Finance[];
-  filteredFinances: Finance[];
   selectedMonth: number;
   selectedYear: number;
   monthNames: string[];
 }
 
 export function FinanceCharts({
-  finances, filteredFinances, selectedMonth, selectedYear, monthNames,
+  finances, selectedMonth, selectedYear, monthNames,
 }: FinanceChartsProps) {
-  // Revenue evolution (6 months)
   const evolutionData = useMemo(() => {
     const data = [];
     for (let i = 5; i >= 0; i--) {
@@ -55,135 +43,42 @@ export function FinanceCharts({
     return data;
   }, [finances, selectedMonth, selectedYear, monthNames]);
 
-  const totalSessions = filteredFinances.filter(f => f.category === 'session' && f.type === 'in').reduce((s, f) => s + f.value, 0);
-  const totalProducts = filteredFinances.filter(f => f.category === 'product' && f.type === 'in').reduce((s, f) => s + f.value, 0);
-  const categoryData = [{ name: 'Sessões', valor: totalSessions }, { name: 'Produtos', valor: totalProducts }];
-
   return (
-    <div className="grid md:grid-cols-2 gap-4">
-      {/* Revenue vs Expenses Evolution */}
-      <div className="rounded-2xl border border-border bg-card p-4 md:col-span-2">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Evolução Financeira</h3>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              <span className="text-[10px] font-bold text-muted-foreground">Receita</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-              <span className="text-[10px] font-bold text-muted-foreground">Despesa</span>
-            </div>
-          </div>
-        </div>
-        <div className="h-[200px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={evolutionData}>
-              <defs>
-                <linearGradient id="gradReceita" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="gradDespesa" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f87171" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#f87171" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
-              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} />
-              <Tooltip content={<ChartTooltip />} />
-              <Area type="monotone" dataKey="receita" stroke="#10b981" strokeWidth={2.5} fill="url(#gradReceita)" />
-              <Area type="monotone" dataKey="despesa" stroke="#f87171" strokeWidth={2} fill="url(#gradDespesa)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Revenue last 3 months pie */}
-      <div className="rounded-2xl border border-border bg-card p-4">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Faturamento 3 Meses</h3>
-        {(() => {
-          const last3 = evolutionData.slice(-3);
-          const pieData = last3.filter(d => d.receita > 0).map((d, i) => ({
-            name: d.month,
-            value: d.receita,
-            color: ['#10b981', '#3b82f6', '#f59e0b'][i],
-          }));
-          const total3 = pieData.reduce((s, d) => s + d.value, 0);
-          return pieData.length > 0 ? (
-            <>
-              <div className="h-[160px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={45}
-                      outerRadius={70}
-                      dataKey="value"
-                      strokeWidth={2}
-                      stroke="hsl(var(--card))"
-                    >
-                      {pieData.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<PieTooltipContent />} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="space-y-2 mt-2">
-                {pieData.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="text-xs font-bold text-muted-foreground">{item.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-black">R$ {item.value.toLocaleString('pt-BR')}</span>
-                      <span className="text-[10px] text-muted-foreground font-bold">
-                        {total3 > 0 ? ((item.value / total3) * 100).toFixed(0) : 0}%
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <p className="text-center text-muted-foreground text-sm py-12">Sem dados</p>
-          );
-        })()}
-      </div>
-
-      {/* Categories */}
-      <div className="rounded-2xl border border-border bg-card p-4">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Sessões vs Produtos</h3>
-        <div className="h-[160px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={categoryData} barCategoryGap="30%">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} />
-              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-              <Tooltip content={<ChartTooltip />} />
-              <Bar dataKey="valor" radius={[8, 8, 0, 0]}>
-                <Cell fill="#f59e0b" />
-                <Cell fill="#8b5cf6" />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="flex items-center justify-center gap-4 mt-3">
+    <div className="rounded-2xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Evolução Financeira</h3>
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-            <span className="text-[10px] font-bold text-muted-foreground">Sessões</span>
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-[10px] font-bold text-muted-foreground">Receita</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-violet-500" />
-            <span className="text-[10px] font-bold text-muted-foreground">Produtos</span>
+            <div className="w-2 h-2 rounded-full bg-red-400" />
+            <span className="text-[10px] font-bold text-muted-foreground">Despesa</span>
           </div>
         </div>
+      </div>
+      <div className="h-[220px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={evolutionData}>
+            <defs>
+              <linearGradient id="gradReceita" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="gradDespesa" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#f87171" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="#f87171" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.4} />
+            <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} />
+            <Tooltip content={<ChartTooltip />} />
+            <Area type="monotone" dataKey="receita" stroke="#10b981" strokeWidth={2.5} fill="url(#gradReceita)" />
+            <Area type="monotone" dataKey="despesa" stroke="#f87171" strokeWidth={2} fill="url(#gradDespesa)" />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
