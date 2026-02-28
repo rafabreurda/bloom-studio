@@ -14,6 +14,7 @@ import { FinanceTransactionList } from './FinanceTransactionList';
 interface FinanceViewProps {
   finances: Finance[];
   onAddFinance: (finance: Omit<Finance, 'id'>) => void;
+  onUpdateFinance: (finance: Finance) => void;
   onDeleteFinance: (id: string) => void;
   appointments: Appointment[];
   onRefetch?: () => void;
@@ -21,7 +22,7 @@ interface FinanceViewProps {
 
 type FinanceSubTab = 'resumo' | 'despesas';
 
-export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointments, onRefetch }: FinanceViewProps) {
+export function FinanceView({ finances, onAddFinance, onUpdateFinance, onDeleteFinance, appointments, onRefetch }: FinanceViewProps) {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showFinanceModal, setShowFinanceModal] = useState(false);
   const [subTab, setSubTab] = useState<FinanceSubTab>('resumo');
@@ -201,7 +202,7 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
 
       {subTab === 'despesas' && (
         <div className="flex-1 overflow-hidden">
-          <ExpensesView finances={filteredFinances} onAddFinance={onAddFinance} onDeleteFinance={onDeleteFinance} />
+          <ExpensesView finances={filteredFinances} onAddFinance={onAddFinance} onUpdateFinance={onUpdateFinance} onDeleteFinance={onDeleteFinance} />
         </div>
       )}
 
