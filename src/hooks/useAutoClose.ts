@@ -5,9 +5,10 @@ interface UseAutoCloseProps {
   appointments: Appointment[];
   onUpdateAppointment: (appointment: Appointment) => Promise<void>;
   onAddFinance: (finance: Omit<Finance, 'id'>) => Promise<any>;
+  onRefetchFinances?: () => void;
 }
 
-export function useAutoClose({ appointments, onUpdateAppointment, onAddFinance }: UseAutoCloseProps) {
+export function useAutoClose({ appointments, onUpdateAppointment, onAddFinance, onRefetchFinances }: UseAutoCloseProps) {
   const processedRef = useRef<Set<string>>(new Set());
 
   const checkAndAutoClose = useCallback(async () => {
@@ -65,6 +66,7 @@ export function useAutoClose({ appointments, onUpdateAppointment, onAddFinance }
               category: appo.isPartnership ? 'partnership' : 'session',
               isPartnership: appo.isPartnership,
             });
+            onRefetchFinances?.();
           }
         } catch (err) {
           console.error('Erro ao encerrar automaticamente:', err);
@@ -72,7 +74,7 @@ export function useAutoClose({ appointments, onUpdateAppointment, onAddFinance }
         }
       }
     }
-  }, [appointments, onUpdateAppointment, onAddFinance]);
+  }, [appointments, onUpdateAppointment, onAddFinance, onRefetchFinances]);
 
   useEffect(() => {
     // Check immediately and then every 60 seconds
