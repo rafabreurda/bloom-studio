@@ -4,6 +4,7 @@ import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ReceiptConfig {
   studioName: string;
@@ -16,34 +17,41 @@ interface ReceiptConfig {
 }
 
 const defaultReceiptConfig: ReceiptConfig = {
-  studioName: 'Sole Mio Bronzeamento Saudável',
+  studioName: '',
   cnpj: '',
   address: '',
   whatsapp: '',
   email: '',
   footerMessage: '',
-  signerName: 'Rosangela Stapasolla',
+  signerName: '',
 };
 
 export function ReceiptSection() {
+  const { currentAdmin } = useAuth();
   const [config, setConfig] = useState<ReceiptConfig>(defaultReceiptConfig);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    supabase.from('system_config').select('value').eq('key', 'receipt_config').then(({ data }) => {
+    if (!currentAdmin?.id) return;
+    supabase.from('system_config').select('value').eq('key', 'receipt_config').eq('owner_id', currentAdmin.id).then(({ data }) => {
       if (data && data.length > 0 && data[0].value) {
         setConfig({ ...defaultReceiptConfig, ...(data[0].value as unknown as ReceiptConfig) });
+      } else {
+        setConfig(defaultReceiptConfig);
       }
     });
-  }, []);
+  }, [currentAdmin?.id]);
 
   const handleSave = async () => {
+    if (!currentAdmin?.id) return;
     setIsSaving(true);
     try {
-      await supabase.from('system_config').upsert(
-        { key: 'receipt_config', value: config as any },
-        { onConflict: 'key' }
-      );
+      const { data: existing } = await supabase.from('system_config').select('id').eq('key', 'receipt_config').eq('owner_id', currentAdmin.id);
+      if (existing && existing.length > 0) {
+        await supabase.from('system_config').update({ value: config as any }).eq('id', existing[0].id);
+      } else {
+        await supabase.from('system_config').insert({ key: 'receipt_config', value: config as any, owner_id: currentAdmin.id });
+      }
       toast.success('Configuração de recibo salva!');
     } catch {
       toast.error('Erro ao salvar');
