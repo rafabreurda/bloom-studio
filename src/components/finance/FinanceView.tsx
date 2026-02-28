@@ -132,7 +132,7 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
             fileName="financeiro"
             title="Relatório Financeiro"
             sheetName="Finanças"
-            data={finances}
+            data={filteredFinances}
             columns={[
               { key: 'date', label: 'Data' },
               { key: 'description', label: 'Descrição' },
@@ -201,11 +201,11 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
 
       {subTab === 'despesas' && (
         <div className="flex-1 overflow-hidden">
-          <ExpensesView finances={finances} onAddFinance={onAddFinance} onDeleteFinance={onDeleteFinance} />
+          <ExpensesView finances={filteredFinances} onAddFinance={onAddFinance} onDeleteFinance={onDeleteFinance} />
         </div>
       )}
 
-      {showReportModal && <ReportModal finances={finances} onClose={() => setShowReportModal(false)} />}
+      {showReportModal && <ReportModal finances={filteredFinances} onClose={() => setShowReportModal(false)} />}
       {showFinanceModal && <FinanceModal onClose={() => setShowFinanceModal(false)} onSave={onAddFinance} />}
       {extractCard && (
         <ExtractModal
