@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Plus, FileText, DollarSign, Receipt, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { ExportButton } from '@/components/ui/ExportButton';
-import { ImportDataButton, transforms } from '@/components/ui/ImportDataButton';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { Finance, Appointment } from '@/types';
 import { ReportModal } from './ReportModal';
@@ -142,19 +141,6 @@ export function FinanceView({ finances, onAddFinance, onDeleteFinance, appointme
               { key: 'paymentMethod', label: 'Pagamento' },
               { key: 'category', label: 'Categoria' },
             ]}
-          />
-          <ImportDataButton
-            table="finances"
-            label="Financeiro"
-            columns={[
-              { candidates: ['data', 'date'], dbColumn: 'date', transform: (v) => transforms.date(v) || new Date().toISOString().split('T')[0] },
-              { candidates: ['descrição', 'descricao', 'description'], dbColumn: 'description', fallback: 'Importado' },
-              { candidates: ['tipo', 'type'], dbColumn: 'type', transform: (v) => { const s = String(v || '').toLowerCase(); return s.includes('saída') || s.includes('out') || s.includes('despesa') ? 'out' : 'in'; } },
-              { candidates: ['valor', 'value', 'preço'], dbColumn: 'value', transform: transforms.number },
-              { candidates: ['pagamento', 'payment', 'método'], dbColumn: 'payment_method', fallback: 'Pix' },
-              { candidates: ['categoria', 'category'], dbColumn: 'category', fallback: 'session' },
-            ]}
-            onImportComplete={() => onRefetch?.()}
           />
           <BronzeButton variant="secondary" icon={FileText} size="sm" onClick={() => setShowReportModal(true)}>Relatório</BronzeButton>
           <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => setShowFinanceModal(true)}>Nova Entrada</BronzeButton>
