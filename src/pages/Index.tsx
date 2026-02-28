@@ -127,6 +127,7 @@ const MainApp = () => {
     appointments,
     onUpdateAppointment: updateAppointment,
     onAddFinance: addFinance,
+    onRefetchFinances: refetchFinances,
   });
 
   // Modal state
@@ -507,13 +508,12 @@ const MainApp = () => {
             appointment={editingAppointment}
             onClose={() => setEditingAppointment(null)}
             onSave={async (appointment) => {
-              const wasWaiting = editingAppointment?.status === 'Aguardando Sinal';
-              const isNowConfirmed = appointment.status === 'Agendado';
+              const previousStatus = editingAppointment?.status;
               
               await updateAppointment(appointment);
               
-              // Create finance entry when status changes to "Agendado" (paid)
-              if (wasWaiting && isNowConfirmed && appointment.chargedValue > 0) {
+              // Create finance entry when status changes to "Agendado" from "Aguardando Sinal" (signal paid)
+              if (previousStatus === 'Aguardando Sinal' && appointment.status === 'Agendado' && appointment.chargedValue > 0) {
                 await addFinance({
                   date: appointment.date,
                   description: `Sessão - ${appointment.clientName}`,
@@ -524,6 +524,22 @@ const MainApp = () => {
                   isPartnership: appointment.isPartnership,
                 });
               }
+              
+              // Create finance entry when manually concluded
+              if (previousStatus !== 'Concluído' && appointment.status === 'Concluído' && appointment.chargedValue > 0 && appointment.paymentMethod) {
+                await addFinance({
+                  date: appointment.date,
+                  description: `Sessão - ${appointment.clientName}`,
+                  type: 'in',
+                  value: appointment.chargedValue,
+                  paymentMethod: appointment.paymentMethod,
+                  category: appointment.isPartnership ? 'partnership' : 'session',
+                  isPartnership: appointment.isPartnership,
+                });
+              }
+              
+              // Refetch finances to keep everything in sync
+              refetchFinances();
             }}
             onDelete={deleteAppointment}
             stock={stock}

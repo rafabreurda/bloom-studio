@@ -38,7 +38,7 @@ export function EditAppointmentModal({
     }) || []
   );
   const [paymentMethod, setPaymentMethod] = useState<'Pix' | 'Cartão' | 'Dinheiro'>(appointment.paymentMethod);
-  const [status, setStatus] = useState<'Aguardando Sinal' | 'Agendado' | 'Concluído'>(appointment.status);
+  const [status, setStatus] = useState<'Aguardando Sinal' | 'Agendado' | 'Concluído'>(appointment.status || 'Agendado');
   const [sessionCost, setSessionCost] = useState(appointment.cost || 0);
   const [selectedServiceId, setSelectedServiceId] = useState(appointment.serviceTypeId || '');
   const [date, setDate] = useState(() => {
@@ -375,11 +375,12 @@ export function EditAppointmentModal({
           <div className="text-right">
             <select 
               value={status}
-              onChange={e => setStatus(e.target.value as 'Aguardando Sinal' | 'Agendado')}
+              onChange={e => setStatus(e.target.value as 'Aguardando Sinal' | 'Agendado' | 'Concluído')}
               className="bg-gray-800 text-white font-black uppercase text-[10px] rounded-xl p-3 border-none focus:ring-0"
             >
               <option>Aguardando Sinal</option>
               <option>Agendado</option>
+              <option>Concluído</option>
             </select>
           </div>
         </div>
