@@ -3,6 +3,7 @@ import { X, Star, CheckCircle2, ShoppingCart, Handshake, Trash2, Sparkles, FileT
 import { ReceiptModal } from './ReceiptModal';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
+import { TimeRollerPicker } from '@/components/ui/TimeRollerPicker';
 import { StockItem, Appointment, Partnership, ServiceType } from '@/types';
 
 interface EditAppointmentModalProps {
@@ -181,21 +182,21 @@ export function EditAppointmentModal({
         </div>
 
         {/* Date & Time */}
-        <div className="grid grid-cols-2 gap-4">
-          <input 
-            type="date" 
-            className="input-bronze" 
-            value={date}
-            onChange={e => setDate(e.target.value)}
-            required 
-          />
-          <input 
-            type="time" 
-            className="input-bronze" 
-            value={time}
-            onChange={e => setTime(e.target.value)}
-            required 
-          />
+        <div className="grid grid-cols-2 gap-4 items-start">
+          <div>
+            <label className="text-[9px] font-black uppercase text-muted-foreground mb-1 block">Data</label>
+            <input 
+              type="date" 
+              className="input-bronze" 
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              required 
+            />
+          </div>
+          <div>
+            <label className="text-[9px] font-black uppercase text-muted-foreground mb-1 block">Horário</label>
+            <TimeRollerPicker value={time} onChange={setTime} />
+          </div>
         </div>
 
         {/* Service Type Selector */}

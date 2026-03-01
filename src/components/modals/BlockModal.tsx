@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Lock } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
+import { TimeRollerPicker } from '@/components/ui/TimeRollerPicker';
 import { Block } from '@/types';
 
 interface BlockModalProps {
@@ -12,6 +13,8 @@ interface BlockModalProps {
 
 export function BlockModal({ selectedDate, onClose, onBlock }: BlockModalProps) {
   const [blockType, setBlockType] = useState<'allDay' | 'timeRange' | 'dateRange'>('allDay');
+  const [startTime, setStartTime] = useState('08:00');
+  const [endTime, setEndTime] = useState('09:00');
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,7 +38,7 @@ export function BlockModal({ selectedDate, onClose, onBlock }: BlockModalProps) 
         type: blockType,
         reason: formData.get('reason') as string,
         date: dateStr,
-        time: blockType === 'timeRange' ? formData.get('startTime') as string : null,
+        time: blockType === 'timeRange' ? startTime : null,
       });
     }
     
@@ -137,23 +140,13 @@ export function BlockModal({ selectedDate, onClose, onBlock }: BlockModalProps) 
               <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">
                 Hora Início
               </label>
-              <input
-                name="startTime"
-                type="time"
-                className="input-bronze"
-                required
-              />
+              <TimeRollerPicker value={startTime} onChange={setStartTime} />
             </div>
             <div>
               <label className="text-[10px] font-bold text-muted-foreground uppercase mb-1 block">
                 Hora Fim
               </label>
-              <input
-                name="endTime"
-                type="time"
-                className="input-bronze"
-                required
-              />
+              <TimeRollerPicker value={endTime} onChange={setEndTime} />
             </div>
           </div>
         )}
