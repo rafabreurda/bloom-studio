@@ -13,51 +13,26 @@ export function TimeRollerPicker({ value, onChange, className }: TimeRollerPicke
   const selectedMinute = minutes.includes(m) ? m : '00';
 
   return (
-    <div className={`flex flex-col gap-3 ${className || ''}`}>
-      {/* Hours */}
-      <div>
-        <span className="text-[9px] font-black uppercase text-muted-foreground tracking-widest mb-1 block">Hora</span>
-        <div className="grid grid-cols-5 gap-1.5">
-          {hours.map(hour => (
-            <button
-              key={hour}
-              type="button"
-              onClick={() => onChange(`${hour}:${selectedMinute}`)}
-              className={`py-2 rounded-lg text-sm font-bold transition-all ${
-                hour === selectedHour
-                  ? 'bg-primary text-primary-foreground shadow-lg scale-105'
-                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-              }`}
-            >
-              {hour}
-            </button>
-          ))}
-        </div>
-      </div>
-      {/* Minutes */}
-      <div>
-        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-1 block">Minutos</span>
-        <div className="grid grid-cols-4 gap-1.5">
-          {minutes.map(min => (
-            <button
-              key={min}
-              type="button"
-              onClick={() => onChange(`${selectedHour}:${min}`)}
-              className={`py-2 rounded-lg text-sm font-bold transition-all ${
-                min === selectedMinute
-                  ? 'bg-primary text-primary-foreground shadow-lg scale-105'
-                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-              }`}
-            >
-              :{min}
-            </button>
-          ))}
-        </div>
-      </div>
-      {/* Selected time display */}
-      <div className="text-center text-lg font-black text-foreground">
-        {selectedHour}:{selectedMinute}
-      </div>
+    <div className={`flex gap-2 items-center ${className || ''}`}>
+      <select
+        value={selectedHour}
+        onChange={(e) => onChange(`${e.target.value}:${selectedMinute}`)}
+        className="flex-1 p-3 bg-background border border-border rounded-xl text-sm font-bold text-foreground appearance-none cursor-pointer"
+      >
+        {hours.map(hour => (
+          <option key={hour} value={hour}>{hour}h</option>
+        ))}
+      </select>
+      <span className="text-lg font-black text-muted-foreground">:</span>
+      <select
+        value={selectedMinute}
+        onChange={(e) => onChange(`${selectedHour}:${e.target.value}`)}
+        className="flex-1 p-3 bg-background border border-border rounded-xl text-sm font-bold text-foreground appearance-none cursor-pointer"
+      >
+        {minutes.map(min => (
+          <option key={min} value={min}>{min}</option>
+        ))}
+      </select>
     </div>
   );
 }
