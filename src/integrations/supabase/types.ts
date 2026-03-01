@@ -86,6 +86,8 @@ export type Database = {
           phone: string
           products: Json | null
           products_value: number
+          service_type_id: string | null
+          service_type_name: string | null
           status: string
           tags: string[] | null
           time: string
@@ -111,6 +113,8 @@ export type Database = {
           phone: string
           products?: Json | null
           products_value?: number
+          service_type_id?: string | null
+          service_type_name?: string | null
           status?: string
           tags?: string[] | null
           time: string
@@ -136,6 +140,8 @@ export type Database = {
           phone?: string
           products?: Json | null
           products_value?: number
+          service_type_id?: string | null
+          service_type_name?: string | null
           status?: string
           tags?: string[] | null
           time?: string
