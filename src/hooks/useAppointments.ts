@@ -43,6 +43,8 @@ export function useAppointments() {
           partnershipId: a.partnership_id || undefined,
           partnershipName: a.partnership_name || undefined,
           partnershipDiscount: a.partnership_discount || undefined,
+          serviceTypeId: a.service_type_id || undefined,
+          serviceTypeName: a.service_type_name || undefined,
           products: (a.products as unknown as AppointmentProduct[]) || [],
           createdAt: new Date(a.created_at),
         };
@@ -110,6 +112,8 @@ export function useAppointments() {
           products: (appointment.products || []) as unknown as Json,
           cost: appointment.cost || 0,
           owner_id: currentAdmin?.id,
+          service_type_id: appointment.serviceTypeId || null,
+          service_type_name: appointment.serviceTypeName || null,
         })
         .select()
         .single();
@@ -146,6 +150,8 @@ export function useAppointments() {
         partnershipId: data.partnership_id || undefined,
         partnershipName: data.partnership_name || undefined,
         partnershipDiscount: data.partnership_discount || undefined,
+        serviceTypeId: data.service_type_id || undefined,
+        serviceTypeName: data.service_type_name || undefined,
         products: (data.products as unknown as AppointmentProduct[]) || [],
         createdAt: new Date(data.created_at),
       };
@@ -186,6 +192,8 @@ export function useAppointments() {
           partnership_discount: appointment.partnershipDiscount,
           products: (appointment.products || []) as unknown as Json,
           cost: appointment.cost || 0,
+          service_type_id: appointment.serviceTypeId || null,
+          service_type_name: appointment.serviceTypeName || null,
         })
         .eq('id', appointment.id);
 
