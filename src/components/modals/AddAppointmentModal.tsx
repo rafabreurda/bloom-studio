@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { X, Star, CheckCircle2, ShoppingCart, Handshake, UserPlus, Sparkles } from 'lucide-react';
+import { X, Star, CheckCircle2, ShoppingCart, Handshake, UserPlus, Sparkles, Plus } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { ClientSearchCombobox } from './ClientSearchCombobox';
 import { TimeRollerPicker } from '@/components/ui/TimeRollerPicker';
-import { StockItem, Appointment, Client, Partnership, ServiceType } from '@/types';
+import { StockItem, Appointment, Client, Partnership, ServiceType, AppointmentService } from '@/types';
 
 interface AddAppointmentModalProps {
   selectedDate: Date;
