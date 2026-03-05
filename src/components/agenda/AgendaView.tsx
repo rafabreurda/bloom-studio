@@ -153,7 +153,7 @@ export function AgendaView({
                     time={time}
                     appointment={appointment}
                     block={block || (isDayBlocked ? { id: 'day-block', date: dateStr, time: null, type: 'allDay', reason: 'Dia bloqueado', createdAt: new Date() } : undefined)}
-                    onAddClick={onAddClick}
+                    onAddClick={(time: string) => onAddClick(time, selectedDate)}
                     onDeleteBlock={onDeleteBlock}
                     onCopyPix={handleCopyPix}
                     onSendWhatsApp={handleSendWhatsApp}
