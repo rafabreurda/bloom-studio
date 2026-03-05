@@ -195,7 +195,7 @@ export function AgendaView({
           selectedDate={selectedDate}
           appointments={appointments}
           blocks={blocks}
-          onAddClick={(time: string) => onAddClick(time, selectedDate)}
+          onAddClick={(time: string, date: Date) => onAddClick(time, normalizeLocalDate(date))}
           onDayClick={handleDayClick}
           onClientClick={onClientClick}
         />
