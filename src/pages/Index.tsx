@@ -513,21 +513,9 @@ const MainApp = () => {
               
               await updateAppointment(appointment);
               
-              // Create finance entry when status changes to "Agendado" from "Aguardando Sinal" (signal paid)
-              if (previousStatus === 'Aguardando Sinal' && appointment.status === 'Agendado' && appointment.chargedValue > 0) {
-                await addFinance({
-                  date: appointment.date,
-                  description: `Sessão - ${appointment.clientName}`,
-                  type: 'in',
-                  value: appointment.chargedValue,
-                  paymentMethod: appointment.paymentMethod,
-                  category: appointment.isPartnership ? 'partnership' : 'session',
-                  isPartnership: appointment.isPartnership,
-                });
-              }
-              
-              // Create finance entry when manually concluded
-              if (previousStatus !== 'Concluído' && appointment.status === 'Concluído' && appointment.chargedValue > 0 && appointment.paymentMethod) {
+              // Create finance entry ONLY when transitioning to "Agendado" from "Aguardando Sinal"
+              // This is the moment the client pays
+              if (previousStatus === 'Aguardando Sinal' && (appointment.status === 'Agendado' || appointment.status === 'Concluído') && appointment.chargedValue > 0) {
                 await addFinance({
                   date: appointment.date,
                   description: `Sessão - ${appointment.clientName}`,
