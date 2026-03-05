@@ -348,14 +348,11 @@ export function AddAppointmentModal({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-[9px] font-black uppercase text-muted-foreground">
-              Sessão
+              Serviços
             </label>
-            <input 
-              type="number" 
-              value={sessionValue} 
-              onChange={e => setSessionValue(Number(e.target.value))} 
-              className="input-bronze" 
-            />
+            <div className="input-bronze flex items-center">
+              <span className="text-sm font-bold">R$ {servicesTotal.toFixed(2)}</span>
+            </div>
           </div>
           <div className="space-y-1">
             <label className="text-[9px] font-black uppercase text-muted-foreground">
