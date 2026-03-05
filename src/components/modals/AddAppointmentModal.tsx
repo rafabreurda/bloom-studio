@@ -29,8 +29,6 @@ export function AddAppointmentModal({
 }: AddAppointmentModalProps) {
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
-  const [sessionValue, setSessionValue] = useState(150);
-  const [sessionCost, setSessionCost] = useState(0);
   const [selectedServices, setSelectedServices] = useState<AppointmentService[]>([]);
   const [isVIP, setIsVIP] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
