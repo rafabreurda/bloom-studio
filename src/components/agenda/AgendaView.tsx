@@ -172,7 +172,7 @@ export function AgendaView({
           selectedDate={selectedDate}
           appointments={appointments}
           blocks={blocks}
-          onAddClick={onAddClick}
+          onAddClick={(time: string) => onAddClick(time, selectedDate)}
           onDayClick={handleDayClick}
           onClientClick={onClientClick}
         />
