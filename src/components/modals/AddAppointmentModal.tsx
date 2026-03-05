@@ -172,7 +172,7 @@ export function AddAppointmentModal({
               name="date" 
               type="date" 
               className="input-bronze w-full" 
-              defaultValue={selectedDate.toISOString().split('T')[0]} 
+              defaultValue={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`} 
               required 
             />
           </div>
