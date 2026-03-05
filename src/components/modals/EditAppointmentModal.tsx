@@ -27,7 +27,6 @@ export function EditAppointmentModal({
 }: EditAppointmentModalProps) {
   const [clientName, setClientName] = useState(appointment.clientName);
   const [clientPhone, setClientPhone] = useState(appointment.phone);
-  const [sessionValue, setSessionValue] = useState(appointment.value);
   const [isVIP, setIsVIP] = useState(appointment.tags?.includes('VIP') || false);
   const [isConfirmed, setIsConfirmed] = useState(appointment.isConfirmed);
   const [isPartnership, setIsPartnership] = useState(appointment.isPartnership);
@@ -40,8 +39,19 @@ export function EditAppointmentModal({
   );
   const [paymentMethod, setPaymentMethod] = useState<'Pix' | 'Cartão' | 'Dinheiro'>(appointment.paymentMethod);
   const [status, setStatus] = useState<'Aguardando Sinal' | 'Agendado' | 'Concluído'>(appointment.status || 'Agendado');
-  const [sessionCost, setSessionCost] = useState(appointment.cost || 0);
-  const [selectedServiceId, setSelectedServiceId] = useState(appointment.serviceTypeId || '');
+  const [selectedServices, setSelectedServices] = useState<AppointmentService[]>(
+    appointment.services && appointment.services.length > 0
+      ? appointment.services
+      : appointment.serviceTypeId
+        ? [{
+            serviceId: appointment.serviceTypeId,
+            name: appointment.serviceTypeName || '',
+            duration: 0,
+            price: appointment.value,
+            cost: appointment.cost || 0,
+          }]
+        : []
+  );
   const [date, setDate] = useState(() => {
     const parts = appointment.date.split('/');
     return `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -52,14 +62,26 @@ export function EditAppointmentModal({
 
   const activeServices = serviceTypes.filter(s => s.isActive);
 
-  const handleServiceSelect = (serviceId: string) => {
-    setSelectedServiceId(serviceId);
+  const addService = (serviceId: string) => {
     const service = serviceTypes.find(s => s.id === serviceId);
     if (service) {
-      setSessionValue(service.price);
-      setSessionCost(service.cost);
+      setSelectedServices(prev => [...prev, {
+        serviceId: service.id,
+        name: service.name,
+        duration: service.duration,
+        price: service.price,
+        cost: service.cost,
+      }]);
     }
   };
+
+  const removeService = (index: number) => {
+    setSelectedServices(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const servicesTotal = selectedServices.reduce((acc, s) => acc + s.price, 0);
+  const servicesTotalCost = selectedServices.reduce((acc, s) => acc + s.cost, 0);
+  const sessionValue = servicesTotal;
 
   const selectedPartnership = partnerships.find(p => p.id === selectedPartnershipId);
   const productsTotal = selectedProducts.reduce((acc, curr) => acc + Number(curr.price), 0);
