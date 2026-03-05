@@ -139,6 +139,7 @@ const MainApp = () => {
   const [showSupplierModal, setShowSupplierModal] = useState(false);
   const [showPartnershipModal, setShowPartnershipModal] = useState(false);
   const [newAppoTime, setNewAppoTime] = useState('');
+  const [newAppoDate, setNewAppoDate] = useState<Date>(new Date());
   const [historyClient, setHistoryClient] = useState<Client | null>(null);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   
