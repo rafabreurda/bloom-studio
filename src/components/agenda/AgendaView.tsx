@@ -78,6 +78,11 @@ export function AgendaView({
     localStorage.setItem('bronze_agenda_selected_date', formatDateKey(selectedDate));
   }, [selectedDate]);
 
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('bronze_agenda_view_mode');
+    return (saved as ViewMode) || 'day';
+  });
+  const [whatsAppTarget, setWhatsAppTarget] = useState<Appointment | null>(null);
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
