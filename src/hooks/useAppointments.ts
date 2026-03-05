@@ -45,6 +45,7 @@ export function useAppointments() {
           partnershipDiscount: a.partnership_discount || undefined,
           serviceTypeId: a.service_type_id || undefined,
           serviceTypeName: a.service_type_name || undefined,
+          services: (a.services as unknown as AppointmentService[]) || [],
           products: (a.products as unknown as AppointmentProduct[]) || [],
           createdAt: new Date(a.created_at),
         };
