@@ -49,12 +49,35 @@ export function AgendaView({
     const [y, m, d] = brDateStr.split('-').map(Number);
     return new Date(y, m - 1, d);
   };
-  const [selectedDate, setSelectedDate] = useState(getNowInBrazil);
-  const [viewMode, setViewMode] = useState<ViewMode>(() => {
-    const saved = localStorage.getItem('bronze_agenda_view_mode');
-    return (saved as ViewMode) || 'day';
+
+  const normalizeLocalDate = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  const formatDateKey = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const parseDateKey = (value: string) => {
+    const [year, month, day] = value.split('-').map(Number);
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day);
+  };
+
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const savedDate = localStorage.getItem('bronze_agenda_selected_date');
+    if (savedDate) {
+      const parsed = parseDateKey(savedDate);
+      if (parsed) return parsed;
+    }
+    return getNowInBrazil();
   });
-  const [whatsAppTarget, setWhatsAppTarget] = useState<Appointment | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem('bronze_agenda_selected_date', formatDateKey(selectedDate));
+  }, [selectedDate]);
+
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
