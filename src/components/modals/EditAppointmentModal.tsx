@@ -93,7 +93,6 @@ export function EditAppointmentModal({
   const buildAppointmentData = (finalPaymentMethod: 'Pix' | 'Cartão' | 'Dinheiro', finalStatus: 'Aguardando Sinal' | 'Agendado' | 'Concluído'): Appointment => {
     const [year, month, day] = date.split('-');
     const dateStr = `${day}/${month}/${year}`;
-    const selectedService = serviceTypes.find(s => s.id === selectedServiceId);
     
     return {
       ...appointment,
@@ -102,11 +101,11 @@ export function EditAppointmentModal({
       date: dateStr,
       time,
       status: finalStatus,
-      value: Number(sessionValue),
+      value: servicesTotal,
       totalValue: finalTotal,
       productsValue: productsTotal,
       chargedValue: chargedValue,
-      cost: sessionCost,
+      cost: servicesTotalCost,
       tags: isVIP ? ['VIP'] : [],
       paymentMethod: finalPaymentMethod,
       isConfirmed,
@@ -114,8 +113,9 @@ export function EditAppointmentModal({
       partnershipId: isPartnership ? selectedPartnershipId : undefined,
       partnershipName: isPartnership ? selectedPartnership?.name : undefined,
       partnershipDiscount: isPartnership ? selectedPartnership?.discount : undefined,
-      serviceTypeId: selectedServiceId || undefined,
-      serviceTypeName: selectedService?.name || undefined,
+      serviceTypeId: selectedServices[0]?.serviceId || undefined,
+      serviceTypeName: selectedServices.map(s => s.name).join(', ') || undefined,
+      services: selectedServices,
       products: selectedProducts.map(p => ({
         productId: p.id,
         name: p.name,
