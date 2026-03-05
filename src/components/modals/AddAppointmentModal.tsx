@@ -182,24 +182,46 @@ export function AddAppointmentModal({
           </div>
         </div>
 
-        {/* Service Type Selector */}
+        {/* Service Type Selector - Multi */}
         {activeServices.length > 0 && (
-          <div className="p-4 bg-secondary rounded-3xl border border-border/10 space-y-2">
+          <div className="p-4 bg-secondary rounded-3xl border border-border/10 space-y-3">
             <p className="text-[10px] font-black uppercase text-foreground flex items-center gap-2">
-              <Sparkles size={14} /> Tipo de Serviço
+              <Sparkles size={14} /> Serviços
             </p>
             <select
-              value={selectedServiceId}
-              onChange={(e) => handleServiceSelect(e.target.value)}
+              onChange={(e) => {
+                addService(e.target.value);
+                e.target.value = "";
+              }}
               className="w-full p-3 bg-background border border-border rounded-xl text-xs font-bold text-foreground"
             >
-              <option value="">Selecionar serviço...</option>
+              <option value="">Adicionar serviço...</option>
               {activeServices.map(s => (
                 <option key={s.id} value={s.id}>
                   {s.name} — {s.duration}min — R$ {s.price.toFixed(2)}
                 </option>
               ))}
             </select>
+            <div className="flex flex-wrap gap-2">
+              {selectedServices.map((s, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1.5 bg-background rounded-lg text-[10px] border border-border flex items-center gap-2 text-foreground font-bold"
+                >
+                  {s.name} — R$ {s.price.toFixed(2)}
+                  <X
+                    size={12}
+                    className="cursor-pointer text-destructive"
+                    onClick={() => removeService(i)}
+                  />
+                </span>
+              ))}
+            </div>
+            {selectedServices.length > 0 && (
+              <p className="text-[10px] font-black text-primary">
+                Total Serviços: R$ {servicesTotal.toFixed(2)}
+              </p>
+            )}
           </div>
         )}
 
