@@ -91,7 +91,6 @@ export function AddAppointmentModal({
     const [year, month, day] = rawDate.split('-');
     const dateStr = `${day}/${month}/${year}`; // Convert to DD/MM/YYYY
     
-    const selectedService = serviceTypes.find(s => s.id === selectedServiceId);
     
     onAdd({
       clientName: clientName,
@@ -99,11 +98,11 @@ export function AddAppointmentModal({
       date: dateStr,
       time: selectedTime,
       status: formData.get('status') as 'Aguardando Sinal' | 'Agendado',
-      value: Number(sessionValue),
+      value: servicesTotal,
       totalValue: finalTotal,
       productsValue: productsTotal,
       chargedValue: chargedValue,
-      cost: sessionCost,
+      cost: servicesTotalCost,
       tags: [...(isVIP ? ['VIP'] : []), ...(isNewClient ? ['Cliente Nova'] : [])],
       paymentMethod: formData.get('paymentMethod') as 'Pix' | 'Cartão' | 'Dinheiro',
       isConfirmed,
@@ -111,8 +110,9 @@ export function AddAppointmentModal({
       partnershipId: isPartnership ? selectedPartnershipId : undefined,
       partnershipName: isPartnership ? selectedPartnership?.name : undefined,
       partnershipDiscount: isPartnership ? selectedPartnership?.discount : undefined,
-      serviceTypeId: selectedServiceId || undefined,
-      serviceTypeName: selectedService?.name || undefined,
+      serviceTypeId: selectedServices[0]?.serviceId || undefined,
+      serviceTypeName: selectedServices.map(s => s.name).join(', ') || undefined,
+      services: selectedServices,
       products: selectedProducts.map(p => ({
         productId: p.id,
         name: p.name,
