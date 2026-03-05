@@ -30,6 +30,14 @@ export interface AppointmentProduct {
   price: number;
 }
 
+export interface AppointmentService {
+  serviceId: string;
+  name: string;
+  duration: number;
+  price: number;
+  cost: number;
+}
+
 export interface Client {
   id: string;
   name: string;
