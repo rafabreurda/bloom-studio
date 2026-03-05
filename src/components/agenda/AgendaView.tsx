@@ -13,7 +13,7 @@ interface AgendaViewProps {
   stock: StockItem[];
   clients: Client[];
   onNavigate: (tab: TabId) => void;
-  onAddClick: (time: string) => void;
+  onAddClick: (time: string, date: Date) => void;
   onBlockClick: () => void;
   onDeleteBlock: (blockId: string) => void;
   onClientClick: (clientName: string, phone: string) => void;
@@ -131,7 +131,7 @@ export function AgendaView({
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
         onBlockClick={onBlockClick}
-        onAddClick={() => onAddClick('')}
+        onAddClick={() => onAddClick('', selectedDate)}
         onClearAll={onClearAll}
         onClearByDate={onClearByDate}
         onRefetch={onRefetch}
@@ -153,7 +153,7 @@ export function AgendaView({
                     time={time}
                     appointment={appointment}
                     block={block || (isDayBlocked ? { id: 'day-block', date: dateStr, time: null, type: 'allDay', reason: 'Dia bloqueado', createdAt: new Date() } : undefined)}
-                    onAddClick={onAddClick}
+                    onAddClick={(time: string) => onAddClick(time, selectedDate)}
                     onDeleteBlock={onDeleteBlock}
                     onCopyPix={handleCopyPix}
                     onSendWhatsApp={handleSendWhatsApp}
@@ -172,7 +172,7 @@ export function AgendaView({
           selectedDate={selectedDate}
           appointments={appointments}
           blocks={blocks}
-          onAddClick={onAddClick}
+          onAddClick={(time: string) => onAddClick(time, selectedDate)}
           onDayClick={handleDayClick}
           onClientClick={onClientClick}
         />

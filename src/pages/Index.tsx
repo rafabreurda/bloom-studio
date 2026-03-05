@@ -139,6 +139,7 @@ const MainApp = () => {
   const [showSupplierModal, setShowSupplierModal] = useState(false);
   const [showPartnershipModal, setShowPartnershipModal] = useState(false);
   const [newAppoTime, setNewAppoTime] = useState('');
+  const [newAppoDate, setNewAppoDate] = useState<Date>(new Date());
   const [historyClient, setHistoryClient] = useState<Client | null>(null);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   
@@ -153,8 +154,9 @@ const MainApp = () => {
     setIsSidebarOpen(false);
   };
 
-  const handleAddClick = (time: string) => {
+  const handleAddClick = (time: string, date?: Date) => {
     setNewAppoTime(time);
+    if (date) setNewAppoDate(date);
     setShowAddModal(true);
   };
 
@@ -420,7 +422,7 @@ const MainApp = () => {
       {showAddModal && (
         <div className="fixed inset-0 bg-background/90 z-[150] flex items-end md:items-center justify-center p-0 md:p-4 backdrop-blur-md animate-slide-up">
           <AddAppointmentModal
-            selectedDate={new Date()}
+            selectedDate={newAppoDate}
             defaultTime={newAppoTime}
             onClose={() => setShowAddModal(false)}
             onAdd={addAppointment}
