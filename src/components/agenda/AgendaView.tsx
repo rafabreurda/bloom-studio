@@ -142,7 +142,7 @@ export function AgendaView({
   };
 
   const handleDayClick = (date: Date) => {
-    setSelectedDate(date);
+    setSelectedDate(normalizeLocalDate(date));
     setViewMode('day');
   };
 
