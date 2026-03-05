@@ -31,7 +31,7 @@ export function AddAppointmentModal({
   const [clientPhone, setClientPhone] = useState('');
   const [sessionValue, setSessionValue] = useState(150);
   const [sessionCost, setSessionCost] = useState(0);
-  const [selectedServiceId, setSelectedServiceId] = useState('');
+  const [selectedServices, setSelectedServices] = useState<AppointmentService[]>([]);
   const [isVIP, setIsVIP] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isPartnership, setIsPartnership] = useState(false);
@@ -43,14 +43,26 @@ export function AddAppointmentModal({
 
   const activeServices = serviceTypes.filter(s => s.isActive);
 
-  const handleServiceSelect = (serviceId: string) => {
-    setSelectedServiceId(serviceId);
+  const addService = (serviceId: string) => {
     const service = serviceTypes.find(s => s.id === serviceId);
     if (service) {
-      setSessionValue(service.price);
-      setSessionCost(service.cost);
+      setSelectedServices(prev => [...prev, {
+        serviceId: service.id,
+        name: service.name,
+        duration: service.duration,
+        price: service.price,
+        cost: service.cost,
+      }]);
     }
   };
+
+  const removeService = (index: number) => {
+    setSelectedServices(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const servicesTotal = selectedServices.reduce((acc, s) => acc + s.price, 0);
+  const servicesTotalCost = selectedServices.reduce((acc, s) => acc + s.cost, 0);
+  const sessionValue = servicesTotal;
 
   const selectedPartnership = partnerships.find(p => p.id === selectedPartnershipId);
   const productsTotal = selectedProducts.reduce((acc, curr) => acc + Number(curr.price), 0);
