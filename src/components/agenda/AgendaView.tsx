@@ -150,7 +150,7 @@ export function AgendaView({
     <div className="flex flex-col gap-4 h-full overflow-hidden agenda-container">
       <AgendaHeader
         selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
+        onDateChange={(date) => setSelectedDate(normalizeLocalDate(date))}
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
         onBlockClick={onBlockClick}
