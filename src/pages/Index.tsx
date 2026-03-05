@@ -422,7 +422,7 @@ const MainApp = () => {
       {showAddModal && (
         <div className="fixed inset-0 bg-background/90 z-[150] flex items-end md:items-center justify-center p-0 md:p-4 backdrop-blur-md animate-slide-up">
           <AddAppointmentModal
-            selectedDate={new Date()}
+            selectedDate={newAppoDate}
             defaultTime={newAppoTime}
             onClose={() => setShowAddModal(false)}
             onAdd={addAppointment}
