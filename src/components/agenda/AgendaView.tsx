@@ -131,7 +131,7 @@ export function AgendaView({
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
         onBlockClick={onBlockClick}
-        onAddClick={() => onAddClick('')}
+        onAddClick={() => onAddClick('', selectedDate)}
         onClearAll={onClearAll}
         onClearByDate={onClearByDate}
         onRefetch={onRefetch}
