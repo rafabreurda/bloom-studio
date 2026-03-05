@@ -5,7 +5,7 @@ interface AgendaWeekViewProps {
   selectedDate: Date;
   appointments: Appointment[];
   blocks: Block[];
-  onAddClick: (time: string) => void;
+  onAddClick: (time: string, date: Date) => void;
   onDayClick: (date: Date) => void;
   onClientClick?: (clientName: string, phone: string) => void;
 }
