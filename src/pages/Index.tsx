@@ -154,8 +154,9 @@ const MainApp = () => {
     setIsSidebarOpen(false);
   };
 
-  const handleAddClick = (time: string) => {
+  const handleAddClick = (time: string, date?: Date) => {
     setNewAppoTime(time);
+    if (date) setNewAppoDate(date);
     setShowAddModal(true);
   };
 
