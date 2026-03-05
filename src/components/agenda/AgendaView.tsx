@@ -13,7 +13,7 @@ interface AgendaViewProps {
   stock: StockItem[];
   clients: Client[];
   onNavigate: (tab: TabId) => void;
-  onAddClick: (time: string) => void;
+  onAddClick: (time: string, date: Date) => void;
   onBlockClick: () => void;
   onDeleteBlock: (blockId: string) => void;
   onClientClick: (clientName: string, phone: string) => void;
