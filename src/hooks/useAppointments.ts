@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
-import { Appointment, AppointmentProduct } from '@/types';
+import { Appointment, AppointmentProduct, AppointmentService } from '@/types';
 import { toast } from 'sonner';
 import { Json } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
