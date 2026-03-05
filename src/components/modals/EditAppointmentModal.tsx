@@ -4,7 +4,7 @@ import { ReceiptModal } from './ReceiptModal';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { TimeRollerPicker } from '@/components/ui/TimeRollerPicker';
-import { StockItem, Appointment, Partnership, ServiceType } from '@/types';
+import { StockItem, Appointment, Partnership, ServiceType, AppointmentService } from '@/types';
 
 interface EditAppointmentModalProps {
   appointment: Appointment;
