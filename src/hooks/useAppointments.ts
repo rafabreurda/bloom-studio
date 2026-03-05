@@ -197,6 +197,7 @@ export function useAppointments() {
           cost: appointment.cost || 0,
           service_type_id: appointment.serviceTypeId || null,
           service_type_name: appointment.serviceTypeName || null,
+          services: (appointment.services || []) as unknown as Json,
         })
         .eq('id', appointment.id);
 
