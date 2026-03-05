@@ -4,7 +4,7 @@ import { ReceiptModal } from './ReceiptModal';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { TimeRollerPicker } from '@/components/ui/TimeRollerPicker';
-import { StockItem, Appointment, Partnership, ServiceType } from '@/types';
+import { StockItem, Appointment, Partnership, ServiceType, AppointmentService } from '@/types';
 
 interface EditAppointmentModalProps {
   appointment: Appointment;
@@ -27,7 +27,6 @@ export function EditAppointmentModal({
 }: EditAppointmentModalProps) {
   const [clientName, setClientName] = useState(appointment.clientName);
   const [clientPhone, setClientPhone] = useState(appointment.phone);
-  const [sessionValue, setSessionValue] = useState(appointment.value);
   const [isVIP, setIsVIP] = useState(appointment.tags?.includes('VIP') || false);
   const [isConfirmed, setIsConfirmed] = useState(appointment.isConfirmed);
   const [isPartnership, setIsPartnership] = useState(appointment.isPartnership);
@@ -40,8 +39,19 @@ export function EditAppointmentModal({
   );
   const [paymentMethod, setPaymentMethod] = useState<'Pix' | 'Cartão' | 'Dinheiro'>(appointment.paymentMethod);
   const [status, setStatus] = useState<'Aguardando Sinal' | 'Agendado' | 'Concluído'>(appointment.status || 'Agendado');
-  const [sessionCost, setSessionCost] = useState(appointment.cost || 0);
-  const [selectedServiceId, setSelectedServiceId] = useState(appointment.serviceTypeId || '');
+  const [selectedServices, setSelectedServices] = useState<AppointmentService[]>(
+    appointment.services && appointment.services.length > 0
+      ? appointment.services
+      : appointment.serviceTypeId
+        ? [{
+            serviceId: appointment.serviceTypeId,
+            name: appointment.serviceTypeName || '',
+            duration: 0,
+            price: appointment.value,
+            cost: appointment.cost || 0,
+          }]
+        : []
+  );
   const [date, setDate] = useState(() => {
     const parts = appointment.date.split('/');
     return `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -52,14 +62,26 @@ export function EditAppointmentModal({
 
   const activeServices = serviceTypes.filter(s => s.isActive);
 
-  const handleServiceSelect = (serviceId: string) => {
-    setSelectedServiceId(serviceId);
+  const addService = (serviceId: string) => {
     const service = serviceTypes.find(s => s.id === serviceId);
     if (service) {
-      setSessionValue(service.price);
-      setSessionCost(service.cost);
+      setSelectedServices(prev => [...prev, {
+        serviceId: service.id,
+        name: service.name,
+        duration: service.duration,
+        price: service.price,
+        cost: service.cost,
+      }]);
     }
   };
+
+  const removeService = (index: number) => {
+    setSelectedServices(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const servicesTotal = selectedServices.reduce((acc, s) => acc + s.price, 0);
+  const servicesTotalCost = selectedServices.reduce((acc, s) => acc + s.cost, 0);
+  const sessionValue = servicesTotal;
 
   const selectedPartnership = partnerships.find(p => p.id === selectedPartnershipId);
   const productsTotal = selectedProducts.reduce((acc, curr) => acc + Number(curr.price), 0);
@@ -71,7 +93,6 @@ export function EditAppointmentModal({
   const buildAppointmentData = (finalPaymentMethod: 'Pix' | 'Cartão' | 'Dinheiro', finalStatus: 'Aguardando Sinal' | 'Agendado' | 'Concluído'): Appointment => {
     const [year, month, day] = date.split('-');
     const dateStr = `${day}/${month}/${year}`;
-    const selectedService = serviceTypes.find(s => s.id === selectedServiceId);
     
     return {
       ...appointment,
@@ -80,11 +101,11 @@ export function EditAppointmentModal({
       date: dateStr,
       time,
       status: finalStatus,
-      value: Number(sessionValue),
+      value: servicesTotal,
       totalValue: finalTotal,
       productsValue: productsTotal,
       chargedValue: chargedValue,
-      cost: sessionCost,
+      cost: servicesTotalCost,
       tags: isVIP ? ['VIP'] : [],
       paymentMethod: finalPaymentMethod,
       isConfirmed,
@@ -92,8 +113,9 @@ export function EditAppointmentModal({
       partnershipId: isPartnership ? selectedPartnershipId : undefined,
       partnershipName: isPartnership ? selectedPartnership?.name : undefined,
       partnershipDiscount: isPartnership ? selectedPartnership?.discount : undefined,
-      serviceTypeId: selectedServiceId || undefined,
-      serviceTypeName: selectedService?.name || undefined,
+      serviceTypeId: selectedServices[0]?.serviceId || undefined,
+      serviceTypeName: selectedServices.map(s => s.name).join(', ') || undefined,
+      services: selectedServices,
       products: selectedProducts.map(p => ({
         productId: p.id,
         name: p.name,
@@ -201,22 +223,44 @@ export function EditAppointmentModal({
 
         {/* Service Type Selector */}
         {activeServices.length > 0 && (
-          <div className="p-4 bg-secondary rounded-3xl border border-border/10 space-y-2">
+          <div className="p-4 bg-secondary rounded-3xl border border-border/10 space-y-3">
             <p className="text-[10px] font-black uppercase text-foreground flex items-center gap-2">
-              <Sparkles size={14} /> Tipo de Serviço
+              <Sparkles size={14} /> Serviços
             </p>
             <select
-              value={selectedServiceId}
-              onChange={(e) => handleServiceSelect(e.target.value)}
+              onChange={(e) => {
+                addService(e.target.value);
+                e.target.value = "";
+              }}
               className="w-full p-3 bg-background border border-border rounded-xl text-xs font-bold text-foreground"
             >
-              <option value="">Selecionar serviço...</option>
+              <option value="">Adicionar serviço...</option>
               {activeServices.map(s => (
                 <option key={s.id} value={s.id}>
                   {s.name} — {s.duration}min — R$ {s.price.toFixed(2)}
                 </option>
               ))}
             </select>
+            <div className="flex flex-wrap gap-2">
+              {selectedServices.map((s, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1.5 bg-background rounded-lg text-[10px] border border-border flex items-center gap-2 text-foreground font-bold"
+                >
+                  {s.name} — R$ {s.price.toFixed(2)}
+                  <X
+                    size={12}
+                    className="cursor-pointer text-destructive"
+                    onClick={() => removeService(i)}
+                  />
+                </span>
+              ))}
+            </div>
+            {selectedServices.length > 0 && (
+              <p className="text-[10px] font-black text-primary">
+                Total Serviços: R$ {servicesTotal.toFixed(2)}
+              </p>
+            )}
           </div>
         )}
 
@@ -335,14 +379,11 @@ export function EditAppointmentModal({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-[9px] font-black uppercase text-muted-foreground">
-              Sessão
+              Serviços
             </label>
-            <input 
-              type="number" 
-              value={sessionValue} 
-              onChange={e => setSessionValue(Number(e.target.value))} 
-              className="input-bronze" 
-            />
+            <div className="input-bronze flex items-center">
+              <span className="text-sm font-bold">R$ {servicesTotal.toFixed(2)}</span>
+            </div>
           </div>
           <div className="space-y-1">
             <label className="text-[9px] font-black uppercase text-muted-foreground">

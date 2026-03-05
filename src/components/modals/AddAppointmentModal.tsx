@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { X, Star, CheckCircle2, ShoppingCart, Handshake, UserPlus, Sparkles } from 'lucide-react';
+import { X, Star, CheckCircle2, ShoppingCart, Handshake, UserPlus, Sparkles, Plus } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { ClientSearchCombobox } from './ClientSearchCombobox';
 import { TimeRollerPicker } from '@/components/ui/TimeRollerPicker';
-import { StockItem, Appointment, Client, Partnership, ServiceType } from '@/types';
+import { StockItem, Appointment, Client, Partnership, ServiceType, AppointmentService } from '@/types';
 
 interface AddAppointmentModalProps {
   selectedDate: Date;
@@ -29,9 +29,7 @@ export function AddAppointmentModal({
 }: AddAppointmentModalProps) {
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
-  const [sessionValue, setSessionValue] = useState(150);
-  const [sessionCost, setSessionCost] = useState(0);
-  const [selectedServiceId, setSelectedServiceId] = useState('');
+  const [selectedServices, setSelectedServices] = useState<AppointmentService[]>([]);
   const [isVIP, setIsVIP] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isPartnership, setIsPartnership] = useState(false);
@@ -43,14 +41,26 @@ export function AddAppointmentModal({
 
   const activeServices = serviceTypes.filter(s => s.isActive);
 
-  const handleServiceSelect = (serviceId: string) => {
-    setSelectedServiceId(serviceId);
+  const addService = (serviceId: string) => {
     const service = serviceTypes.find(s => s.id === serviceId);
     if (service) {
-      setSessionValue(service.price);
-      setSessionCost(service.cost);
+      setSelectedServices(prev => [...prev, {
+        serviceId: service.id,
+        name: service.name,
+        duration: service.duration,
+        price: service.price,
+        cost: service.cost,
+      }]);
     }
   };
+
+  const removeService = (index: number) => {
+    setSelectedServices(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const servicesTotal = selectedServices.reduce((acc, s) => acc + s.price, 0);
+  const servicesTotalCost = selectedServices.reduce((acc, s) => acc + s.cost, 0);
+  const sessionValue = servicesTotal;
 
   const selectedPartnership = partnerships.find(p => p.id === selectedPartnershipId);
   const productsTotal = selectedProducts.reduce((acc, curr) => acc + Number(curr.price), 0);
@@ -81,7 +91,6 @@ export function AddAppointmentModal({
     const [year, month, day] = rawDate.split('-');
     const dateStr = `${day}/${month}/${year}`; // Convert to DD/MM/YYYY
     
-    const selectedService = serviceTypes.find(s => s.id === selectedServiceId);
     
     onAdd({
       clientName: clientName,
@@ -89,11 +98,11 @@ export function AddAppointmentModal({
       date: dateStr,
       time: selectedTime,
       status: formData.get('status') as 'Aguardando Sinal' | 'Agendado',
-      value: Number(sessionValue),
+      value: servicesTotal,
       totalValue: finalTotal,
       productsValue: productsTotal,
       chargedValue: chargedValue,
-      cost: sessionCost,
+      cost: servicesTotalCost,
       tags: [...(isVIP ? ['VIP'] : []), ...(isNewClient ? ['Cliente Nova'] : [])],
       paymentMethod: formData.get('paymentMethod') as 'Pix' | 'Cartão' | 'Dinheiro',
       isConfirmed,
@@ -101,8 +110,9 @@ export function AddAppointmentModal({
       partnershipId: isPartnership ? selectedPartnershipId : undefined,
       partnershipName: isPartnership ? selectedPartnership?.name : undefined,
       partnershipDiscount: isPartnership ? selectedPartnership?.discount : undefined,
-      serviceTypeId: selectedServiceId || undefined,
-      serviceTypeName: selectedService?.name || undefined,
+      serviceTypeId: selectedServices[0]?.serviceId || undefined,
+      serviceTypeName: selectedServices.map(s => s.name).join(', ') || undefined,
+      services: selectedServices,
       products: selectedProducts.map(p => ({
         productId: p.id,
         name: p.name,
@@ -172,24 +182,46 @@ export function AddAppointmentModal({
           </div>
         </div>
 
-        {/* Service Type Selector */}
+        {/* Service Type Selector - Multi */}
         {activeServices.length > 0 && (
-          <div className="p-4 bg-secondary rounded-3xl border border-border/10 space-y-2">
+          <div className="p-4 bg-secondary rounded-3xl border border-border/10 space-y-3">
             <p className="text-[10px] font-black uppercase text-foreground flex items-center gap-2">
-              <Sparkles size={14} /> Tipo de Serviço
+              <Sparkles size={14} /> Serviços
             </p>
             <select
-              value={selectedServiceId}
-              onChange={(e) => handleServiceSelect(e.target.value)}
+              onChange={(e) => {
+                addService(e.target.value);
+                e.target.value = "";
+              }}
               className="w-full p-3 bg-background border border-border rounded-xl text-xs font-bold text-foreground"
             >
-              <option value="">Selecionar serviço...</option>
+              <option value="">Adicionar serviço...</option>
               {activeServices.map(s => (
                 <option key={s.id} value={s.id}>
                   {s.name} — {s.duration}min — R$ {s.price.toFixed(2)}
                 </option>
               ))}
             </select>
+            <div className="flex flex-wrap gap-2">
+              {selectedServices.map((s, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1.5 bg-background rounded-lg text-[10px] border border-border flex items-center gap-2 text-foreground font-bold"
+                >
+                  {s.name} — R$ {s.price.toFixed(2)}
+                  <X
+                    size={12}
+                    className="cursor-pointer text-destructive"
+                    onClick={() => removeService(i)}
+                  />
+                </span>
+              ))}
+            </div>
+            {selectedServices.length > 0 && (
+              <p className="text-[10px] font-black text-primary">
+                Total Serviços: R$ {servicesTotal.toFixed(2)}
+              </p>
+            )}
           </div>
         )}
 
@@ -316,14 +348,11 @@ export function AddAppointmentModal({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-[9px] font-black uppercase text-muted-foreground">
-              Sessão
+              Serviços
             </label>
-            <input 
-              type="number" 
-              value={sessionValue} 
-              onChange={e => setSessionValue(Number(e.target.value))} 
-              className="input-bronze" 
-            />
+            <div className="input-bronze flex items-center">
+              <span className="text-sm font-bold">R$ {servicesTotal.toFixed(2)}</span>
+            </div>
           </div>
           <div className="space-y-1">
             <label className="text-[9px] font-black uppercase text-muted-foreground">

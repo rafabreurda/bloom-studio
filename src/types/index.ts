@@ -19,6 +19,7 @@ export interface Appointment {
   partnershipDiscount?: number;
   serviceTypeId?: string;
   serviceTypeName?: string;
+  services?: AppointmentService[];
   createdAt: Date;
   products?: AppointmentProduct[];
 }
@@ -28,6 +29,14 @@ export interface AppointmentProduct {
   name: string;
   quantity: number;
   price: number;
+}
+
+export interface AppointmentService {
+  serviceId: string;
+  name: string;
+  duration: number;
+  price: number;
+  cost: number;
 }
 
 export interface Client {

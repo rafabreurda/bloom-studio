@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
-import { Appointment, AppointmentProduct } from '@/types';
+import { Appointment, AppointmentProduct, AppointmentService } from '@/types';
 import { toast } from 'sonner';
 import { Json } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -45,6 +45,7 @@ export function useAppointments() {
           partnershipDiscount: a.partnership_discount || undefined,
           serviceTypeId: a.service_type_id || undefined,
           serviceTypeName: a.service_type_name || undefined,
+          services: (a.services as unknown as AppointmentService[]) || [],
           products: (a.products as unknown as AppointmentProduct[]) || [],
           createdAt: new Date(a.created_at),
         };
@@ -114,6 +115,7 @@ export function useAppointments() {
           owner_id: currentAdmin?.id,
           service_type_id: appointment.serviceTypeId || null,
           service_type_name: appointment.serviceTypeName || null,
+          services: (appointment.services || []) as unknown as Json,
         })
         .select()
         .single();
@@ -152,6 +154,7 @@ export function useAppointments() {
         partnershipDiscount: data.partnership_discount || undefined,
         serviceTypeId: data.service_type_id || undefined,
         serviceTypeName: data.service_type_name || undefined,
+        services: (data.services as unknown as AppointmentService[]) || [],
         products: (data.products as unknown as AppointmentProduct[]) || [],
         createdAt: new Date(data.created_at),
       };
@@ -194,6 +197,7 @@ export function useAppointments() {
           cost: appointment.cost || 0,
           service_type_id: appointment.serviceTypeId || null,
           service_type_name: appointment.serviceTypeName || null,
+          services: (appointment.services || []) as unknown as Json,
         })
         .eq('id', appointment.id);
 

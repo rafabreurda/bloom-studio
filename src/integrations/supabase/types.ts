@@ -88,6 +88,7 @@ export type Database = {
           products_value: number
           service_type_id: string | null
           service_type_name: string | null
+          services: Json | null
           status: string
           tags: string[] | null
           time: string
@@ -115,6 +116,7 @@ export type Database = {
           products_value?: number
           service_type_id?: string | null
           service_type_name?: string | null
+          services?: Json | null
           status?: string
           tags?: string[] | null
           time: string
@@ -142,6 +144,7 @@ export type Database = {
           products_value?: number
           service_type_id?: string | null
           service_type_name?: string | null
+          services?: Json | null
           status?: string
           tags?: string[] | null
           time?: string
