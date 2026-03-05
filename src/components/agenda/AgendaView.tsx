@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AgendaHeader } from './AgendaHeader';
 import { TimeSlot } from './TimeSlot';
 import { AgendaWeekView } from './AgendaWeekView';
@@ -49,7 +49,35 @@ export function AgendaView({
     const [y, m, d] = brDateStr.split('-').map(Number);
     return new Date(y, m - 1, d);
   };
-  const [selectedDate, setSelectedDate] = useState(getNowInBrazil);
+
+  const normalizeLocalDate = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  const formatDateKey = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const parseDateKey = (value: string) => {
+    const [year, month, day] = value.split('-').map(Number);
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day);
+  };
+
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const savedDate = localStorage.getItem('bronze_agenda_selected_date');
+    if (savedDate) {
+      const parsed = parseDateKey(savedDate);
+      if (parsed) return parsed;
+    }
+    return getNowInBrazil();
+  });
+
+  useEffect(() => {
+    localStorage.setItem('bronze_agenda_selected_date', formatDateKey(selectedDate));
+  }, [selectedDate]);
+
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     const saved = localStorage.getItem('bronze_agenda_view_mode');
     return (saved as ViewMode) || 'day';
@@ -119,7 +147,7 @@ export function AgendaView({
   };
 
   const handleDayClick = (date: Date) => {
-    setSelectedDate(date);
+    setSelectedDate(normalizeLocalDate(date));
     setViewMode('day');
   };
 
@@ -127,7 +155,7 @@ export function AgendaView({
     <div className="flex flex-col gap-4 h-full overflow-hidden agenda-container">
       <AgendaHeader
         selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
+        onDateChange={(date) => setSelectedDate(normalizeLocalDate(date))}
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
         onBlockClick={onBlockClick}
@@ -153,7 +181,7 @@ export function AgendaView({
                     time={time}
                     appointment={appointment}
                     block={block || (isDayBlocked ? { id: 'day-block', date: dateStr, time: null, type: 'allDay', reason: 'Dia bloqueado', createdAt: new Date() } : undefined)}
-                    onAddClick={(time: string) => onAddClick(time, selectedDate)}
+                    onAddClick={(time: string) => onAddClick(time, normalizeLocalDate(selectedDate))}
                     onDeleteBlock={onDeleteBlock}
                     onCopyPix={handleCopyPix}
                     onSendWhatsApp={handleSendWhatsApp}
@@ -172,7 +200,7 @@ export function AgendaView({
           selectedDate={selectedDate}
           appointments={appointments}
           blocks={blocks}
-          onAddClick={(time: string) => onAddClick(time, selectedDate)}
+          onAddClick={(time: string, date: Date) => onAddClick(time, normalizeLocalDate(date))}
           onDayClick={handleDayClick}
           onClientClick={onClientClick}
         />
@@ -185,7 +213,7 @@ export function AgendaView({
           blocks={blocks}
           onDayClick={handleDayClick}
           onClientClick={onClientClick}
-          onMonthChange={setSelectedDate}
+          onMonthChange={(date) => setSelectedDate(normalizeLocalDate(date))}
         />
       )}
 

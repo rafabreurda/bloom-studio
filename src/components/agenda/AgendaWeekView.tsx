@@ -5,7 +5,7 @@ interface AgendaWeekViewProps {
   selectedDate: Date;
   appointments: Appointment[];
   blocks: Block[];
-  onAddClick: (time: string) => void;
+  onAddClick: (time: string, date: Date) => void;
   onDayClick: (date: Date) => void;
   onClientClick?: (clientName: string, phone: string) => void;
 }
@@ -149,7 +149,7 @@ export function AgendaWeekView({
                       <button
                         onClick={() => {
                           onDayClick(day);
-                          onAddClick('09:00');
+                          onAddClick('09:00', day);
                         }}
                         className="w-full h-16 border-2 border-dashed rounded-lg flex items-center justify-center transition-colors hover:border-primary hover:text-primary"
                         style={{ 
