@@ -115,6 +115,7 @@ export function useAppointments() {
           owner_id: currentAdmin?.id,
           service_type_id: appointment.serviceTypeId || null,
           service_type_name: appointment.serviceTypeName || null,
+          services: (appointment.services || []) as unknown as Json,
         })
         .select()
         .single();
