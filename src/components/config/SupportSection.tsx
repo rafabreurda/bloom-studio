@@ -58,10 +58,13 @@ export function SupportSection() {
 
       const url = urlData.publicUrl;
 
-      await supabase.from('system_config').upsert(
-        { key: 'support_card_image', value: { url } as any },
-        { onConflict: 'key' }
-      );
+      // Delete existing global support card image entry, then insert new one
+      await supabase.from('system_config').delete().eq('key', 'support_card_image').is('owner_id', null);
+      await supabase.from('system_config').insert({
+        key: 'support_card_image',
+        value: { url } as any,
+        owner_id: null,
+      });
 
       setImageUrl(url);
       toast.success('Cartão de visita atualizado!');
