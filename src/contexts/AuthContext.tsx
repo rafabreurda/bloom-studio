@@ -45,6 +45,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (permissionsError) throw permissionsError;
 
+      console.log('[AUTH] Profiles loaded:', profiles?.length, profiles);
+      console.log('[AUTH] Roles loaded:', roles?.length, roles);
+      console.log('[AUTH] Permissions loaded:', permissions?.length, permissions);
+
       const adminsWithRoles: AdminWithRole[] = (profiles || []).map(profile => {
         const userRole = roles?.find(r => r.user_id === profile.id);
         const userPermissions = permissions?.find(p => p.user_id === profile.id);
@@ -57,10 +61,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
       });
 
+      console.log('[AUTH] Admins with roles:', adminsWithRoles.map(a => ({ name: a.name, role: a.role })));
       setAdmins(adminsWithRoles);
       return adminsWithRoles;
     } catch (error) {
-      console.error('Error loading admins:', error);
+      console.error('[AUTH] Error loading admins:', error);
       return [];
     }
   };
