@@ -17,7 +17,7 @@ export function SupportSection() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    supabase.from('system_config').select('value').eq('key', 'support_card_image').then(({ data: rows }) => {
+    supabase.from('system_config').select('value').eq('key', 'support_card_image').is('owner_id', null).then(({ data: rows }) => {
       if (rows && rows.length > 0) {
         const raw = rows[0].value as any;
         if (raw?.url) setImageUrl(raw.url);
