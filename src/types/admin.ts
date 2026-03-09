@@ -9,6 +9,7 @@ export interface AdminProfile {
   phone: string | null;
   password_hash: string | null;
   password_display: string | null;
+  username: string | null;
   created_at: string;
   updated_at: string;
 }

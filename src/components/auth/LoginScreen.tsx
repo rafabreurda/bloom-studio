@@ -21,13 +21,16 @@ export function LoginScreen() {
     setIsSubmitting(true);
     setError('');
 
-    // Find admin by name (case insensitive, trimmed)
+    // Find admin by name or username (case insensitive, trimmed, flexible)
     const trimmedLogin = login.trim().toLowerCase();
     const admin = admins.find(
-      a => a.name.trim().toLowerCase() === trimmedLogin
+      a => a.name.trim().toLowerCase() === trimmedLogin ||
+           (a.username && a.username.trim().toLowerCase() === trimmedLogin) ||
+           a.name.trim().toLowerCase().replace(/\s+/g, '') === trimmedLogin.replace(/\s+/g, '')
     );
 
     if (!admin) {
+      console.log('[LOGIN] Admins disponíveis:', admins.map(a => a.name));
       setError('Usuário não encontrado.');
       setIsSubmitting(false);
       return;
