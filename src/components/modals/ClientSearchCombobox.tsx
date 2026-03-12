@@ -229,5 +229,17 @@ export function ClientSearchCombobox({
         </Command>
       </PopoverContent>
     </Popover>
+    {supportsContactPicker && (
+      <Button
+        type="button"
+        variant="outline"
+        className="shrink-0 h-auto min-h-[48px] px-3 input-bronze"
+        onClick={handlePickContact}
+        title="Importar contato do telefone"
+      >
+        <Contact size={20} />
+      </Button>
+    )}
+    </div>
   );
 }
