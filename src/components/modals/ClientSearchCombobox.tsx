@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, ChevronsUpDown, Search, Star, User, Users, UserPlus } from 'lucide-react';
+import { Check, ChevronsUpDown, Search, Star, User, Users, UserPlus, Contact } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
