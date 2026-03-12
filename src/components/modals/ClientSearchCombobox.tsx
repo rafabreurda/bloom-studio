@@ -84,7 +84,34 @@ export function ClientSearchCombobox({
     }
   };
 
+  const supportsContactPicker = 'contacts' in navigator && 'ContactsManager' in window;
+
+  const handlePickContact = async () => {
+    try {
+      const props = ['name', 'tel'];
+      const opts = { multiple: false };
+      // @ts-ignore - Contact Picker API
+      const contacts = await navigator.contacts.select(props, opts);
+      if (contacts && contacts.length > 0) {
+        const contact = contacts[0];
+        const name = contact.name?.[0] || '';
+        const phone = contact.tel?.[0]?.replace(/\D/g, '') || '';
+        if (name || phone) {
+          onSelect({
+            name: name || phone,
+            phone: phone,
+            isVIP: false,
+            source: 'manual',
+          });
+        }
+      }
+    } catch (err) {
+      console.log('Contact picker cancelled or not supported');
+    }
+  };
+
   return (
+    <div className="flex gap-2">
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
