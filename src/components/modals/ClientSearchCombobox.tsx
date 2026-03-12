@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, ChevronsUpDown, Search, Star, User, Users, UserPlus } from 'lucide-react';
+import { Check, ChevronsUpDown, Search, Star, User, Users, UserPlus, Contact } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -84,7 +84,34 @@ export function ClientSearchCombobox({
     }
   };
 
+  const supportsContactPicker = 'contacts' in navigator && 'ContactsManager' in window;
+
+  const handlePickContact = async () => {
+    try {
+      const props = ['name', 'tel'];
+      const opts = { multiple: false };
+      // @ts-ignore - Contact Picker API
+      const contacts = await navigator.contacts.select(props, opts);
+      if (contacts && contacts.length > 0) {
+        const contact = contacts[0];
+        const name = contact.name?.[0] || '';
+        const phone = contact.tel?.[0]?.replace(/\D/g, '') || '';
+        if (name || phone) {
+          onSelect({
+            name: name || phone,
+            phone: phone,
+            isVIP: false,
+            source: 'manual',
+          });
+        }
+      }
+    } catch (err) {
+      console.log('Contact picker cancelled or not supported');
+    }
+  };
+
   return (
+    <div className="flex gap-2">
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
@@ -202,5 +229,17 @@ export function ClientSearchCombobox({
         </Command>
       </PopoverContent>
     </Popover>
+    {supportsContactPicker && (
+      <Button
+        type="button"
+        variant="outline"
+        className="shrink-0 h-auto min-h-[48px] px-3 input-bronze"
+        onClick={handlePickContact}
+        title="Importar contato do telefone"
+      >
+        <Contact size={20} />
+      </Button>
+    )}
+    </div>
   );
 }
