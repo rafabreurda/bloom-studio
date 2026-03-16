@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Lock, Plus, Trash2 } from 'lucide-react';
 import { BronzeButton } from '@/components/ui/BronzeButton';
-import { ImportDataButton, transforms } from '@/components/ui/ImportDataButton';
+
 import { ViewMode } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 
