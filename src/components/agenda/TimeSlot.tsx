@@ -104,15 +104,19 @@ export function TimeSlot({
               </div>
             )}
             
-            {/* Client Info - Clickable */}
-            <button 
-              onClick={() => onClientClick?.(appointment.clientName, appointment.phone)}
+            {/* Client Info - Clickable → opens WhatsApp */}
+            <button
+              onClick={() => {
+                const clean = appointment.phone.replace(/\D/g, '');
+                const number = clean.startsWith('55') ? clean : `55${clean}`;
+                window.open(`https://wa.me/${number}`, '_blank');
+              }}
               className="flex flex-col gap-0.5 overflow-hidden text-left hover:opacity-80 transition-opacity"
             >
               <div className="flex items-center gap-1">
                 {isVIP && <Star size={12} className="text-amber-500" fill="#f59e0b" />}
                 {isPartnership && !isVIP && <Handshake size={12} className="text-violet-500" />}
-                <span 
+                <span
                   className={`font-black text-sm md:text-base truncate hover:underline ${
                     isVIP ? 'text-amber-600' : isPartnership ? 'text-violet-600' : ''
                   }`}
