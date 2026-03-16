@@ -13,6 +13,7 @@ import { ReceiptSection } from './ReceiptSection';
 import { SupportSection } from './SupportSection';
 import { UsersView } from '@/components/users/UsersView';
 import { PlansSection } from './PlansSection';
+import { ImportSection } from './ImportSection';
 import { toast } from 'sonner';
 
 const SUPABASE_URL = "https://iphluakvvklyvymwhfxh.supabase.co";
