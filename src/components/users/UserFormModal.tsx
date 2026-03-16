@@ -181,8 +181,30 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
             </Field>
           </div>
 
-          {/* Address */}
           <p className="text-xs font-black uppercase text-primary tracking-widest pt-2">Endereço</p>
+
+          <Field label="CEP">
+            <div className="relative">
+              <input
+                type="text"
+                value={addressZip}
+                onChange={e => {
+                  const formatted = formatCEP(e.target.value);
+                  setAddressZip(formatted);
+                  if (formatted.replace(/\D/g, '').length === 8) {
+                    fetchAddressByCep(formatted);
+                  }
+                }}
+                className="input-bronze"
+                placeholder="00000-000"
+              />
+              {loadingCep && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">
+                  Buscando...
+                </span>
+              )}
+            </div>
+          </Field>
 
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2">
@@ -205,9 +227,6 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="CEP">
-              <input type="text" value={addressZip} onChange={e => setAddressZip(e.target.value)} className="input-bronze" placeholder="00000-000" />
-            </Field>
             <Field label="Estado">
               <select value={addressState} onChange={e => setAddressState(e.target.value)} className="input-bronze">
                 <option value="">Selecione</option>
