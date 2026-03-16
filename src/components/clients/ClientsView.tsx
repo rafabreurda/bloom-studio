@@ -118,10 +118,8 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
                 { key: 'notes', label: 'Observações' },
               ]}
             />
-            <ImportClientsButton onImportComplete={() => onRefetch?.()} />
-            <BronzeButton variant="outline" icon={RefreshCw} size="sm" onClick={() => onSyncFromAppointments?.()}>Sincronizar Agenda</BronzeButton>
             <BronzeButton variant="danger" icon={Trash2} size="sm" onClick={() => setShowDeleteAll(true)}>Apagar Todos</BronzeButton>
-            <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => { setEditingClient(null); setShowModal(true); }}>Novo</BronzeButton>
+            <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => { setEditingClient(null); setShowModal(true); }}>Adicionar Cliente</BronzeButton>
           </div>
         )}
       </div>
