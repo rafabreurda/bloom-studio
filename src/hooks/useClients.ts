@@ -73,7 +73,7 @@ export function useClients() {
           anamnesis_history: (client.anamnesisHistory || []) as unknown as Json,
           history: [] as unknown as Json,
           owner_id: currentAdmin?.id,
-        })
+        } as any)
         .select()
         .single();
 
