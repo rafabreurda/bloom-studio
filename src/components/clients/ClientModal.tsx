@@ -21,6 +21,10 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
+  const [addressStreet, setAddressStreet] = useState('');
+  const [addressNeighborhood, setAddressNeighborhood] = useState('');
+  const [addressCity, setAddressCity] = useState('');
+  const [addressZip, setAddressZip] = useState('');
   const [birthday, setBirthday] = useState('');
   const [cpf, setCpf] = useState('');
   const [notes, setNotes] = useState('');
@@ -37,6 +41,10 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
       setPhone(client.phone);
       setEmail(client.email || '');
       setAddress(client.address || '');
+      setAddressStreet(client.addressStreet || '');
+      setAddressNeighborhood(client.addressNeighborhood || '');
+      setAddressCity(client.addressCity || '');
+      setAddressZip(client.addressZip || '');
       setBirthday(client.birthday || '');
       setCpf(client.cpf || '');
       setNotes(client.notes || '');
@@ -58,6 +66,10 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
       phone,
       email: email || undefined,
       address: address || undefined,
+      addressStreet: addressStreet || undefined,
+      addressNeighborhood: addressNeighborhood || undefined,
+      addressCity: addressCity || undefined,
+      addressZip: addressZip || undefined,
       birthday: birthday || undefined,
       cpf: cpf || undefined,
       notes: notes || undefined,
@@ -260,38 +272,81 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                  Endereço
+                  Rua
                 </label>
                 <input
                   type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  value={addressStreet}
+                  onChange={(e) => setAddressStreet(e.target.value)}
                   className="input-bronze"
-                  placeholder="Rua, número, bairro, cidade"
+                  placeholder="Nome da rua, número"
                 />
-                {address && (
-                  <div className="flex gap-2">
-                    <a
-                      href={`https://waze.com/ul?q=${encodeURIComponent(address)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#33ccff]/10 text-[#00a3cc] text-xs font-bold hover:bg-[#33ccff]/20 transition-colors"
-                    >
-                      <Navigation size={13} />
-                      Waze
-                    </a>
-                    <a
-                      href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 text-xs font-bold hover:bg-emerald-500/20 transition-colors"
-                    >
-                      <Map size={13} />
-                      Google Maps
-                    </a>
-                  </div>
-                )}
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                    Bairro
+                  </label>
+                  <input
+                    type="text"
+                    value={addressNeighborhood}
+                    onChange={(e) => setAddressNeighborhood(e.target.value)}
+                    className="input-bronze"
+                    placeholder="Bairro"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                    Cidade
+                  </label>
+                  <input
+                    type="text"
+                    value={addressCity}
+                    onChange={(e) => setAddressCity(e.target.value)}
+                    className="input-bronze"
+                    placeholder="Cidade"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                    CEP
+                  </label>
+                  <input
+                    type="text"
+                    value={addressZip}
+                    onChange={(e) => setAddressZip(e.target.value)}
+                    className="input-bronze"
+                    placeholder="00000-000"
+                  />
+                </div>
+              </div>
+
+              {(addressStreet || addressCity) && (
+                <div className="flex gap-2">
+                  <a
+                    href={`https://waze.com/ul?q=${encodeURIComponent([addressStreet, addressNeighborhood, addressCity].filter(Boolean).join(', '))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#33ccff]/10 text-[#00a3cc] text-xs font-bold hover:bg-[#33ccff]/20 transition-colors"
+                  >
+                    <Navigation size={13} />
+                    Waze
+                  </a>
+                  <a
+                    href={`https://maps.google.com/?q=${encodeURIComponent([addressStreet, addressNeighborhood, addressCity].filter(Boolean).join(', '))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 text-xs font-bold hover:bg-emerald-500/20 transition-colors"
+                  >
+                    <Map size={13} />
+                    Google Maps
+                  </a>
+                </div>
+              )}
 
               {/* Tags */}
               <div className="space-y-2">

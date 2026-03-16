@@ -45,6 +45,10 @@ export interface Client {
   phone: string;
   email?: string;
   address?: string;
+  addressStreet?: string;
+  addressNeighborhood?: string;
+  addressCity?: string;
+  addressZip?: string;
   birthday?: string;
   cpf?: string;
   anamnesis?: AnamnesisForm;
