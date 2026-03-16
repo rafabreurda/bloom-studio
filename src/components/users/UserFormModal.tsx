@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { X, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
@@ -77,6 +77,32 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
   const [showPassword, setShowPassword] = useState(false);
   const [planId, setPlanId] = useState(extra.plan_id || '');
   const [paymentNotes, setPaymentNotes] = useState(extra.payment_notes || '');
+  const [loadingCep, setLoadingCep] = useState(false);
+
+  const formatCEP = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    return numbers.replace(/(\d{5})(\d)/, '$1-$2').slice(0, 9);
+  };
+
+  const fetchAddressByCep = useCallback(async (cepRaw: string) => {
+    const cep = cepRaw.replace(/\D/g, '');
+    if (cep.length !== 8) return;
+    setLoadingCep(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await res.json();
+      if (!data.erro) {
+        setAddressStreet(data.logradouro || '');
+        setAddressNeighborhood(data.bairro || '');
+        setAddressCity(data.localidade || '');
+        setAddressState(data.uf || '');
+      }
+    } catch (e) {
+      console.error('Erro ao buscar CEP:', e);
+    } finally {
+      setLoadingCep(false);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,8 +181,30 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
             </Field>
           </div>
 
-          {/* Address */}
           <p className="text-xs font-black uppercase text-primary tracking-widest pt-2">Endereço</p>
+
+          <Field label="CEP">
+            <div className="relative">
+              <input
+                type="text"
+                value={addressZip}
+                onChange={e => {
+                  const formatted = formatCEP(e.target.value);
+                  setAddressZip(formatted);
+                  if (formatted.replace(/\D/g, '').length === 8) {
+                    fetchAddressByCep(formatted);
+                  }
+                }}
+                className="input-bronze"
+                placeholder="00000-000"
+              />
+              {loadingCep && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">
+                  Buscando...
+                </span>
+              )}
+            </div>
+          </Field>
 
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-2">
@@ -179,9 +227,6 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="CEP">
-              <input type="text" value={addressZip} onChange={e => setAddressZip(e.target.value)} className="input-bronze" placeholder="00000-000" />
-            </Field>
             <Field label="Estado">
               <select value={addressState} onChange={e => setAddressState(e.target.value)} className="input-bronze">
                 <option value="">Selecione</option>
