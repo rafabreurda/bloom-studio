@@ -103,10 +103,12 @@ export function ClientHistoryModal({ client, tags = [], onClose, onUpdateClient 
               <div className="flex items-start gap-3">
                 <MapPin size={16} className="text-muted-foreground mt-0.5" />
                 <div className="text-sm space-y-0.5">
-                  {client.addressStreet && <p>{client.addressStreet}</p>}
+                  {client.addressStreet && (
+                    <p>{client.addressStreet}{client.addressNumber ? `, ${client.addressNumber}` : ''}{client.addressType ? ` (${client.addressType})` : ''}</p>
+                  )}
                   {client.addressNeighborhood && <p>{client.addressNeighborhood}</p>}
-                  {(client.addressCity || client.addressZip) && (
-                    <p>{[client.addressCity, client.addressZip].filter(Boolean).join(' - ')}</p>
+                  {(client.addressCity || client.addressState || client.addressZip) && (
+                    <p>{[client.addressCity, client.addressState].filter(Boolean).join(' - ')}{client.addressZip ? ` • CEP: ${client.addressZip}` : ''}</p>
                   )}
                   {!client.addressStreet && client.address && <p>{client.address}</p>}
                 </div>

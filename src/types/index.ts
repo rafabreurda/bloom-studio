@@ -46,8 +46,11 @@ export interface Client {
   email?: string;
   address?: string;
   addressStreet?: string;
+  addressNumber?: string;
+  addressType?: string;
   addressNeighborhood?: string;
   addressCity?: string;
+  addressState?: string;
   addressZip?: string;
   birthday?: string;
   cpf?: string;
