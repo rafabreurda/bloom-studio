@@ -1,6 +1,6 @@
 import { Plus, Minus, Pencil, Trash2, AlertCircle, ShoppingBag } from 'lucide-react';
 import { ExportButton } from '@/components/ui/ExportButton';
-import { ImportDataButton, transforms } from '@/components/ui/ImportDataButton';
+
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
