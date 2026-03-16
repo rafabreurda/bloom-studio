@@ -111,6 +111,31 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
     );
   };
 
+  const formatCEP = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    return numbers.replace(/(\d{5})(\d)/, '$1-$2').slice(0, 9);
+  };
+
+  const fetchAddressByCep = async (cepRaw: string) => {
+    const cep = cepRaw.replace(/\D/g, '');
+    if (cep.length !== 8) return;
+    setLoadingCep(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await res.json();
+      if (!data.erro) {
+        setAddressStreet(data.logradouro || '');
+        setAddressNeighborhood(data.bairro || '');
+        setAddressCity(data.localidade || '');
+        setAddressState(data.uf || '');
+      }
+    } catch (e) {
+      console.error('Erro ao buscar CEP:', e);
+    } finally {
+      setLoadingCep(false);
+    }
+  };
+
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     return numbers
