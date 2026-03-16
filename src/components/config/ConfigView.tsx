@@ -25,7 +25,7 @@ interface ConfigViewProps {
   onUploadBackground?: (file: File) => Promise<string | null>;
 }
 
-type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens' | 'recibo' | 'suporte' | 'senha' | 'usuarios' | 'planos';
+type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens' | 'recibo' | 'suporte' | 'senha' | 'usuarios' | 'planos' | 'importar';
 
 export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLogo, onUploadBackground }: ConfigViewProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('estudio');
