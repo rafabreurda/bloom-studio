@@ -1,10 +1,9 @@
 import { useState, useMemo, useRef } from 'react';
-import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown, Crown, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown, Crown, AlertTriangle } from 'lucide-react';
 import { ExportButton } from '@/components/ui/ExportButton';
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
-import { ImportClientsButton } from './ImportClientsButton';
 import { Client, ClientTag, Partnership, Appointment, WhatsAppTemplate } from '@/types';
 import { ClientModal } from './ClientModal';
 import { ClientHistoryModal } from './ClientHistoryModal';
