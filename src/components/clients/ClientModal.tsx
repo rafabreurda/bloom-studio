@@ -41,6 +41,10 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
       setPhone(client.phone);
       setEmail(client.email || '');
       setAddress(client.address || '');
+      setAddressStreet(client.addressStreet || '');
+      setAddressNeighborhood(client.addressNeighborhood || '');
+      setAddressCity(client.addressCity || '');
+      setAddressZip(client.addressZip || '');
       setBirthday(client.birthday || '');
       setCpf(client.cpf || '');
       setNotes(client.notes || '');
