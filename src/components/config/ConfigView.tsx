@@ -546,6 +546,10 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
           <PlansSection />
         )}
 
+        {activeSection === 'importar' && (
+          <ImportSection onImportComplete={() => {}} />
+        )}
+
       </div>
     </div>
   );
