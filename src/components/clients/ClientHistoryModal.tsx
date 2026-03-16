@@ -99,10 +99,17 @@ export function ClientHistoryModal({ client, tags = [], onClose, onUpdateClient 
               </div>
             )}
             
-            {client.address && (
-              <div className="flex items-center gap-3">
-                <MapPin size={16} className="text-muted-foreground" />
-                <span className="text-sm">{client.address}</span>
+            {(client.addressStreet || client.addressNeighborhood || client.addressCity || client.addressZip || client.address) && (
+              <div className="flex items-start gap-3">
+                <MapPin size={16} className="text-muted-foreground mt-0.5" />
+                <div className="text-sm space-y-0.5">
+                  {client.addressStreet && <p>{client.addressStreet}</p>}
+                  {client.addressNeighborhood && <p>{client.addressNeighborhood}</p>}
+                  {(client.addressCity || client.addressZip) && (
+                    <p>{[client.addressCity, client.addressZip].filter(Boolean).join(' - ')}</p>
+                  )}
+                  {!client.addressStreet && client.address && <p>{client.address}</p>}
+                </div>
               </div>
             )}
             
