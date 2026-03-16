@@ -222,7 +222,10 @@ export type Database = {
           address: string | null
           address_city: string | null
           address_neighborhood: string | null
+          address_number: string | null
+          address_state: string | null
           address_street: string | null
+          address_type: string | null
           address_zip: string | null
           anamnesis_history: Json | null
           birthday: string | null
@@ -244,7 +247,10 @@ export type Database = {
           address?: string | null
           address_city?: string | null
           address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
           address_street?: string | null
+          address_type?: string | null
           address_zip?: string | null
           anamnesis_history?: Json | null
           birthday?: string | null
@@ -266,7 +272,10 @@ export type Database = {
           address?: string | null
           address_city?: string | null
           address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
           address_street?: string | null
+          address_type?: string | null
           address_zip?: string | null
           anamnesis_history?: Json | null
           birthday?: string | null
