@@ -305,6 +305,33 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
                 />
               </div>
 
+              {/* CEP first - triggers auto-fill */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                  CEP
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={addressZip}
+                    onChange={(e) => {
+                      const formatted = formatCEP(e.target.value);
+                      setAddressZip(formatted);
+                      if (formatted.replace(/\D/g, '').length === 8) {
+                        fetchAddressByCep(formatted);
+                      }
+                    }}
+                    className="input-bronze"
+                    placeholder="00000-000"
+                  />
+                  {loadingCep && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">
+                      Buscando...
+                    </span>
+                  )}
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
                   Rua
@@ -314,8 +341,38 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
                   value={addressStreet}
                   onChange={(e) => setAddressStreet(e.target.value)}
                   className="input-bronze"
-                  placeholder="Nome da rua, número"
+                  placeholder="Nome da rua"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                    Número
+                  </label>
+                  <input
+                    type="text"
+                    value={addressNumber}
+                    onChange={(e) => setAddressNumber(e.target.value)}
+                    className="input-bronze"
+                    placeholder="123"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                    Tipo
+                  </label>
+                  <select
+                    value={addressType}
+                    onChange={(e) => setAddressType(e.target.value)}
+                    className="input-bronze"
+                  >
+                    <option value="">Selecione</option>
+                    <option value="casa">Casa</option>
+                    <option value="apto">Apartamento</option>
+                    <option value="comercial">Comercial</option>
+                  </select>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -345,25 +402,24 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                    CEP
-                  </label>
-                  <input
-                    type="text"
-                    value={addressZip}
-                    onChange={(e) => setAddressZip(e.target.value)}
-                    className="input-bronze"
-                    placeholder="00000-000"
-                  />
-                </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                  Estado
+                </label>
+                <input
+                  type="text"
+                  value={addressState}
+                  onChange={(e) => setAddressState(e.target.value)}
+                  className="input-bronze"
+                  placeholder="UF"
+                  maxLength={2}
+                />
               </div>
 
               {(addressStreet || addressCity) && (
                 <div className="flex gap-2">
                   <a
-                    href={`https://waze.com/ul?q=${encodeURIComponent([addressStreet, addressNeighborhood, addressCity].filter(Boolean).join(', '))}`}
+                    href={`https://waze.com/ul?q=${encodeURIComponent([addressStreet, addressNumber, addressNeighborhood, addressCity, addressState].filter(Boolean).join(', '))}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#33ccff]/10 text-[#00a3cc] text-xs font-bold hover:bg-[#33ccff]/20 transition-colors"
@@ -372,7 +428,7 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
                     Waze
                   </a>
                   <a
-                    href={`https://maps.google.com/?q=${encodeURIComponent([addressStreet, addressNeighborhood, addressCity].filter(Boolean).join(', '))}`}
+                    href={`https://maps.google.com/?q=${encodeURIComponent([addressStreet, addressNumber, addressNeighborhood, addressCity, addressState].filter(Boolean).join(', '))}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 text-xs font-bold hover:bg-emerald-500/20 transition-colors"
