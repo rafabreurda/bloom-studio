@@ -195,6 +195,7 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
         { id: 'mensagens' as ConfigSection, icon: MessageSquare, label: 'Mensagens' },
         { id: 'recibo' as ConfigSection, icon: FileText, label: 'Recibo' },
         { id: 'senha' as ConfigSection, icon: Lock, label: 'Minha Senha' },
+        { id: 'importar' as ConfigSection, icon: Upload, label: 'Importar' },
         { id: 'suporte' as ConfigSection, icon: Headphones, label: 'Suporte' },
       ];
 
