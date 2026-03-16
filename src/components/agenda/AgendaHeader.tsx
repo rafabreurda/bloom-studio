@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Lock, Plus, Trash2 } from 'lucide-react';
 import { BronzeButton } from '@/components/ui/BronzeButton';
-import { ImportDataButton, transforms } from '@/components/ui/ImportDataButton';
+
 import { ViewMode } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -197,66 +197,6 @@ export function AgendaHeader({
         
         {/* Action Buttons */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <ImportDataButton
-            table="appointments"
-            label="Agendamentos"
-            columns={[
-              { candidates: ['cliente', 'nome', 'client', 'name'], dbColumn: 'client_name', fallback: 'Sem nome' },
-              { candidates: ['telefone', 'phone', 'celular', 'whatsapp', 'fone'], dbColumn: 'phone', fallback: '0' },
-              { candidates: ['data', 'date', 'dia'], dbColumn: 'date', transform: (v) => {
-                if (!v) return new Date().toISOString().split('T')[0];
-                let s = String(v).trim();
-                // Strip weekday prefix like "Sáb, " or "Seg, "
-                const commaIdx = s.indexOf(',');
-                if (commaIdx !== -1 && commaIdx < 6) {
-                  s = s.substring(commaIdx + 1).trim();
-                }
-                return transforms.date(s) || new Date().toISOString().split('T')[0];
-              }},
-              { candidates: ['horário', 'horario', 'hora', 'time', 'início'], dbColumn: 'time', transform: (v) => {
-                if (!v) return '10:00';
-                const s = String(v).trim();
-                // Extract start time from "14:00 às 15:00"
-                const match = s.match(/^(\d{1,2}:\d{2})/);
-                return match ? match[1] : '10:00';
-              }},
-              { candidates: ['preço', 'preco', 'valor', 'value', 'price'], dbColumn: 'value', transform: (v) => {
-                if (!v) return 0;
-                const s = String(v).replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.').trim();
-                return parseFloat(s) || 0;
-              }},
-              { candidates: ['situação', 'situacao', 'status'], dbColumn: 'status', transform: (v) => {
-                if (!v || String(v).trim() === '-') return 'Concluído';
-                const s = String(v).trim().toLowerCase();
-                if (s.includes('não comparec') || s.includes('nao comparec')) return 'Agendado';
-                if (s.includes('cancelad')) return 'Agendado';
-                return 'Concluído';
-              }},
-              { candidates: ['pagamento', 'payment', 'forma', 'método'], dbColumn: 'payment_method', fallback: 'Pix' },
-              { candidates: ['serviço', 'servico', 'tipo', 'atendimento', 'service'], dbColumn: 'tags', transform: (v) => v ? [String(v).trim()] : [] },
-            ]}
-            onPreProcess={async (rows) => {
-              const { data: clients } = await supabase.from('clients').select('name, phone');
-              const clientMap = new Map<string, string>();
-              if (clients) {
-                for (const c of clients) {
-                  clientMap.set(c.name.toLowerCase().trim(), c.phone);
-                }
-              }
-              return rows.map(row => {
-                const name = (row.client_name || '').toLowerCase().trim();
-                if ((!row.phone || row.phone === '0') && clientMap.has(name)) {
-                  row.phone = clientMap.get(name)!;
-                }
-                if (!row.total_value) row.total_value = row.value || 0;
-                if (!row.charged_value) row.charged_value = row.value || 0;
-                if (row.tags && !Array.isArray(row.tags)) row.tags = [String(row.tags)];
-                if (!row.tags) row.tags = [];
-                return row;
-              });
-            }}
-            onImportComplete={() => onRefetch?.()}
-          />
           <BronzeButton variant="danger" icon={Lock} size="sm" onClick={onBlockClick}>
             Bloquear
           </BronzeButton>

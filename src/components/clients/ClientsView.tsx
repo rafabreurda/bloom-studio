@@ -1,10 +1,9 @@
 import { useState, useMemo, useRef } from 'react';
-import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown, Crown, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown, Crown, AlertTriangle } from 'lucide-react';
 import { ExportButton } from '@/components/ui/ExportButton';
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
-import { ImportClientsButton } from './ImportClientsButton';
 import { Client, ClientTag, Partnership, Appointment, WhatsAppTemplate } from '@/types';
 import { ClientModal } from './ClientModal';
 import { ClientHistoryModal } from './ClientHistoryModal';
@@ -119,10 +118,8 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
                 { key: 'notes', label: 'Observações' },
               ]}
             />
-            <ImportClientsButton onImportComplete={() => onRefetch?.()} />
-            <BronzeButton variant="outline" icon={RefreshCw} size="sm" onClick={() => onSyncFromAppointments?.()}>Sincronizar Agenda</BronzeButton>
             <BronzeButton variant="danger" icon={Trash2} size="sm" onClick={() => setShowDeleteAll(true)}>Apagar Todos</BronzeButton>
-            <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => { setEditingClient(null); setShowModal(true); }}>Novo</BronzeButton>
+            <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => { setEditingClient(null); setShowModal(true); }}>Adicionar Cliente</BronzeButton>
           </div>
         )}
       </div>

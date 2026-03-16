@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles, UserCircle, Headphones, FileText, Lock, Eye, EyeOff, LogOut, UsersRound, Layers } from 'lucide-react';
+import { Save, Building2, CreditCard, Tag, MessageSquare, Image, Sparkles, UserCircle, Headphones, FileText, Lock, Eye, EyeOff, LogOut, UsersRound, Layers, Upload } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { SystemConfig, ClientTag, WhatsAppTemplate, ServiceType } from '@/types';
@@ -13,6 +13,7 @@ import { ReceiptSection } from './ReceiptSection';
 import { SupportSection } from './SupportSection';
 import { UsersView } from '@/components/users/UsersView';
 import { PlansSection } from './PlansSection';
+import { ImportSection } from './ImportSection';
 import { toast } from 'sonner';
 
 const SUPABASE_URL = "https://iphluakvvklyvymwhfxh.supabase.co";
@@ -25,7 +26,7 @@ interface ConfigViewProps {
   onUploadBackground?: (file: File) => Promise<string | null>;
 }
 
-type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens' | 'recibo' | 'suporte' | 'senha' | 'usuarios' | 'planos';
+type ConfigSection = 'estudio' | 'pagamentos' | 'servicos' | 'tags' | 'mensagens' | 'recibo' | 'suporte' | 'senha' | 'usuarios' | 'planos' | 'importar';
 
 export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLogo, onUploadBackground }: ConfigViewProps) {
   const [activeSection, setActiveSection] = useState<ConfigSection>('estudio');
@@ -194,6 +195,7 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
         { id: 'mensagens' as ConfigSection, icon: MessageSquare, label: 'Mensagens' },
         { id: 'recibo' as ConfigSection, icon: FileText, label: 'Recibo' },
         { id: 'senha' as ConfigSection, icon: Lock, label: 'Minha Senha' },
+        { id: 'importar' as ConfigSection, icon: Upload, label: 'Importar' },
         { id: 'suporte' as ConfigSection, icon: Headphones, label: 'Suporte' },
       ];
 
@@ -542,6 +544,10 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
 
         {activeSection === 'planos' && isAdminChefe && (
           <PlansSection />
+        )}
+
+        {activeSection === 'importar' && (
+          <ImportSection onImportComplete={() => {}} />
         )}
 
       </div>

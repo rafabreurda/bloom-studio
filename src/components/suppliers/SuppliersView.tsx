@@ -1,6 +1,6 @@
 import { Plus, MessageSquare, Pencil, Trash2, Truck, Package } from 'lucide-react';
 import { ExportButton } from '@/components/ui/ExportButton';
-import { ImportDataButton } from '@/components/ui/ImportDataButton';
+
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
@@ -41,16 +41,6 @@ export function SuppliersView({
               { key: 'contact', label: 'Contato' },
               { key: 'products', label: 'Produtos' },
             ]}
-          />
-          <ImportDataButton
-            table="suppliers"
-            label="Fornecedores"
-            columns={[
-              { candidates: ['nome', 'name', 'fornecedor'], dbColumn: 'name', fallback: 'Sem nome' },
-              { candidates: ['contato', 'contact', 'telefone', 'phone'], dbColumn: 'contact' },
-              { candidates: ['produtos', 'products', 'itens'], dbColumn: 'products' },
-            ]}
-            onImportComplete={() => onRefetch?.()}
           />
           <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
             Novo Fornecedor

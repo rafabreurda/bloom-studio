@@ -1,6 +1,6 @@
 import { Plus, Minus, Pencil, Trash2, AlertCircle, ShoppingBag } from 'lucide-react';
 import { ExportButton } from '@/components/ui/ExportButton';
-import { ImportDataButton, transforms } from '@/components/ui/ImportDataButton';
+
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
@@ -51,17 +51,6 @@ export function StockView({
               { key: 'price', label: 'Preço (R$)' },
               { key: 'minStock', label: 'Estoque Mínimo' },
             ]}
-          />
-          <ImportDataButton
-            table="stock"
-            label="Estoque"
-            columns={[
-              { candidates: ['produto', 'nome', 'name', 'item'], dbColumn: 'name', fallback: 'Sem nome' },
-              { candidates: ['quantidade', 'qtd', 'quantity'], dbColumn: 'quantity', transform: transforms.number },
-              { candidates: ['preço', 'preco', 'price', 'valor'], dbColumn: 'price', transform: transforms.number },
-              { candidates: ['mínimo', 'minimo', 'min', 'estoque mín'], dbColumn: 'min_stock', transform: transforms.number },
-            ]}
-            onImportComplete={() => onRefetch?.()}
           />
           <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
             Novo Produto

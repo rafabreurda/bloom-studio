@@ -1,6 +1,6 @@
 import { Plus, MessageSquare, Pencil, Trash2, Handshake, Percent } from 'lucide-react';
 import { ExportButton } from '@/components/ui/ExportButton';
-import { ImportDataButton, transforms } from '@/components/ui/ImportDataButton';
+
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
@@ -41,16 +41,6 @@ export function PartnershipsView({
               { key: 'discount', label: 'Desconto (%)' },
               { key: 'contact', label: 'Contato' },
             ]}
-          />
-          <ImportDataButton
-            table="partnerships"
-            label="Parcerias"
-            columns={[
-              { candidates: ['nome', 'name', 'parceiro'], dbColumn: 'name', fallback: 'Sem nome' },
-              { candidates: ['desconto', 'discount', '%'], dbColumn: 'discount', transform: transforms.number },
-              { candidates: ['contato', 'contact', 'telefone', 'phone'], dbColumn: 'contact' },
-            ]}
-            onImportComplete={() => onRefetch?.()}
           />
           <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
             Nova Parceria
