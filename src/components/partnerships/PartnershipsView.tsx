@@ -42,16 +42,6 @@ export function PartnershipsView({
               { key: 'contact', label: 'Contato' },
             ]}
           />
-          <ImportDataButton
-            table="partnerships"
-            label="Parcerias"
-            columns={[
-              { candidates: ['nome', 'name', 'parceiro'], dbColumn: 'name', fallback: 'Sem nome' },
-              { candidates: ['desconto', 'discount', '%'], dbColumn: 'discount', transform: transforms.number },
-              { candidates: ['contato', 'contact', 'telefone', 'phone'], dbColumn: 'contact' },
-            ]}
-            onImportComplete={() => onRefetch?.()}
-          />
           <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
             Nova Parceria
           </BronzeButton>

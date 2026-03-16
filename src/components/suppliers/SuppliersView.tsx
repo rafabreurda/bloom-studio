@@ -42,16 +42,6 @@ export function SuppliersView({
               { key: 'products', label: 'Produtos' },
             ]}
           />
-          <ImportDataButton
-            table="suppliers"
-            label="Fornecedores"
-            columns={[
-              { candidates: ['nome', 'name', 'fornecedor'], dbColumn: 'name', fallback: 'Sem nome' },
-              { candidates: ['contato', 'contact', 'telefone', 'phone'], dbColumn: 'contact' },
-              { candidates: ['produtos', 'products', 'itens'], dbColumn: 'products' },
-            ]}
-            onImportComplete={() => onRefetch?.()}
-          />
           <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
             Novo Fornecedor
           </BronzeButton>

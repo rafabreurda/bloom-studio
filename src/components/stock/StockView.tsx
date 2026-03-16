@@ -52,17 +52,6 @@ export function StockView({
               { key: 'minStock', label: 'Estoque Mínimo' },
             ]}
           />
-          <ImportDataButton
-            table="stock"
-            label="Estoque"
-            columns={[
-              { candidates: ['produto', 'nome', 'name', 'item'], dbColumn: 'name', fallback: 'Sem nome' },
-              { candidates: ['quantidade', 'qtd', 'quantity'], dbColumn: 'quantity', transform: transforms.number },
-              { candidates: ['preço', 'preco', 'price', 'valor'], dbColumn: 'price', transform: transforms.number },
-              { candidates: ['mínimo', 'minimo', 'min', 'estoque mín'], dbColumn: 'min_stock', transform: transforms.number },
-            ]}
-            onImportComplete={() => onRefetch?.()}
-          />
           <BronzeButton variant="gold" icon={Plus} size="sm" onClick={onAddClick}>
             Novo Produto
           </BronzeButton>
