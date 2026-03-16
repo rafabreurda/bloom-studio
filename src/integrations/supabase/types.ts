@@ -220,6 +220,10 @@ export type Database = {
       clients: {
         Row: {
           address: string | null
+          address_city: string | null
+          address_neighborhood: string | null
+          address_street: string | null
+          address_zip: string | null
           anamnesis_history: Json | null
           birthday: string | null
           cpf: string | null
@@ -238,6 +242,10 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          address_city?: string | null
+          address_neighborhood?: string | null
+          address_street?: string | null
+          address_zip?: string | null
           anamnesis_history?: Json | null
           birthday?: string | null
           cpf?: string | null
@@ -256,6 +264,10 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          address_city?: string | null
+          address_neighborhood?: string | null
+          address_street?: string | null
+          address_zip?: string | null
           anamnesis_history?: Json | null
           birthday?: string | null
           cpf?: string | null
