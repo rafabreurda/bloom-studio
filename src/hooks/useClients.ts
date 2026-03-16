@@ -73,7 +73,7 @@ export function useClients() {
           anamnesis_history: (client.anamnesisHistory || []) as unknown as Json,
           history: [] as unknown as Json,
           owner_id: currentAdmin?.id,
-        })
+        } as any)
         .select()
         .single();
 
@@ -131,7 +131,7 @@ export function useClients() {
           partnership_id: client.partnershipId,
           anamnesis_history: (client.anamnesisHistory || []) as unknown as Json,
           history: (client.history || []) as unknown as Json,
-        })
+        } as any)
         .eq('id', client.id);
 
       if (error) throw error;
