@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react';
-import { X, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { X, CheckCircle2, Eye, EyeOff, Upload, FileText, Download, Trash2 } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { AdminWithRole } from '@/types/admin';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Plan {
   id: string;
