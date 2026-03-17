@@ -108,6 +108,31 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
     }
   }, []);
 
+  const handleContractUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error('Arquivo máximo: 10MB'); return; }
+    
+    setUploadingContract(true);
+    try {
+      const uniqueName = `contracts/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage.from('studio-assets').upload(uniqueName, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from('studio-assets').getPublicUrl(uniqueName);
+      setContractUrl(urlData.publicUrl);
+      toast.success('Contrato enviado!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao enviar contrato');
+    } finally {
+      setUploadingContract(false);
+    }
+  };
+
+  const handleRemoveContract = () => {
+    setContractUrl('');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
