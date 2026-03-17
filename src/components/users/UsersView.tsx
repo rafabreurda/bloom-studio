@@ -93,6 +93,7 @@ export function UsersView() {
           username: formData.username || null,
           plan_id: formData.plan_id || null,
           payment_notes: formData.payment_notes || null,
+          contract_url: formData.contract_url || null,
         } as any).eq('id', newProfileId);
 
         await supabase.rpc('set_admin_password', { _user_id: newProfileId, _password: formData.password });
