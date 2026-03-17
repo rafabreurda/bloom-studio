@@ -283,12 +283,47 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
                     Data de Nascimento
                   </label>
-                  <input
-                    type="date"
-                    value={birthday}
-                    onChange={(e) => setBirthday(e.target.value)}
-                    className="input-bronze"
-                  />
+                  <div className="grid grid-cols-3 gap-2">
+                    <select
+                      value={birthday ? birthday.split('-')[2] || '' : ''}
+                      onChange={(e) => {
+                        const parts = (birthday || '--').split('-');
+                        setBirthday(`${parts[0] || ''}-${parts[1] || ''}-${e.target.value}`);
+                      }}
+                      className="input-bronze"
+                    >
+                      <option value="">Dia</option>
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                        <option key={d} value={String(d).padStart(2, '0')}>{d}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={birthday ? birthday.split('-')[1] || '' : ''}
+                      onChange={(e) => {
+                        const parts = (birthday || '--').split('-');
+                        setBirthday(`${parts[0] || ''}-${e.target.value}-${parts[2] || ''}`);
+                      }}
+                      className="input-bronze"
+                    >
+                      <option value="">Mês</option>
+                      {['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'].map((m, i) => (
+                        <option key={i} value={String(i + 1).padStart(2, '0')}>{m}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={birthday ? birthday.split('-')[0] || '' : ''}
+                      onChange={(e) => {
+                        const parts = (birthday || '--').split('-');
+                        setBirthday(`${e.target.value}-${parts[1] || ''}-${parts[2] || ''}`);
+                      }}
+                      className="input-bronze"
+                    >
+                      <option value="">Ano</option>
+                      {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                        <option key={y} value={String(y)}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 
