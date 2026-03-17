@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react';
-import { X, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { X, CheckCircle2, Eye, EyeOff, Upload, FileText, Download, Trash2 } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { AdminWithRole } from '@/types/admin';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Plan {
   id: string;
@@ -27,6 +29,7 @@ interface UserFormData {
   password: string;
   plan_id: string;
   payment_notes: string;
+  contract_url: string;
 }
 
 interface UserFormModalProps {
@@ -77,6 +80,8 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
   const [showPassword, setShowPassword] = useState(false);
   const [planId, setPlanId] = useState(extra.plan_id || '');
   const [paymentNotes, setPaymentNotes] = useState(extra.payment_notes || '');
+  const [contractUrl, setContractUrl] = useState(extra.contract_url || '');
+  const [uploadingContract, setUploadingContract] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
 
   const formatCEP = (value: string) => {
@@ -104,6 +109,31 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
     }
   }, []);
 
+  const handleContractUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error('Arquivo máximo: 10MB'); return; }
+    
+    setUploadingContract(true);
+    try {
+      const uniqueName = `contracts/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage.from('studio-assets').upload(uniqueName, file, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from('studio-assets').getPublicUrl(uniqueName);
+      setContractUrl(urlData.publicUrl);
+      toast.success('Contrato enviado!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao enviar contrato');
+    } finally {
+      setUploadingContract(false);
+    }
+  };
+
+  const handleRemoveContract = () => {
+    setContractUrl('');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -125,7 +155,7 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
       address_street: addressStreet, address_number: addressNumber,
       address_neighborhood: addressNeighborhood, address_city: addressCity,
       address_zip: addressZip, address_state: addressState,
-      username, password, plan_id: planId, payment_notes: paymentNotes,
+      username, password, plan_id: planId, payment_notes: paymentNotes, contract_url: contractUrl,
     });
   };
 
@@ -281,6 +311,28 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
           <Field label="Observações de Cobrança">
             <textarea value={paymentNotes} onChange={e => setPaymentNotes(e.target.value)} className="input-bronze min-h-[80px]" placeholder="Pix, cartão de crédito, etc." />
           </Field>
+
+          {/* Contract */}
+          <p className="text-xs font-black uppercase text-primary tracking-widest pt-2">Contrato</p>
+
+          {contractUrl ? (
+            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl border border-border">
+              <FileText size={20} className="text-primary shrink-0" />
+              <span className="text-sm font-medium truncate flex-1">Contrato anexado</span>
+              <a href={contractUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-primary hover:text-primary/80">
+                <Download size={18} />
+              </a>
+              <button type="button" onClick={handleRemoveContract} className="p-2 text-destructive hover:text-destructive/80">
+                <Trash2 size={18} />
+              </button>
+            </div>
+          ) : (
+            <label className="flex items-center gap-3 p-4 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+              <Upload size={20} className="text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{uploadingContract ? 'Enviando...' : 'Anexar contrato (PDF, imagem...)'}</span>
+              <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onChange={handleContractUpload} disabled={uploadingContract} />
+            </label>
+          )}
 
           <BronzeButton type="submit" variant="gold" icon={CheckCircle2} className="w-full h-[60px]" disabled={isLoading}>
             {editingAdmin ? 'Salvar Alterações' : 'Adicionar Usuário'}

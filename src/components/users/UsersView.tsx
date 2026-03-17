@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Edit2, Trash2, X, CheckCircle2, Eye, EyeOff, Crown, User, ChevronDown, ChevronUp } from 'lucide-react';
+import { UserPlus, Edit2, Trash2, X, CheckCircle2, Eye, EyeOff, Crown, User, ChevronDown, ChevronUp, FileText, Download } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -66,6 +66,7 @@ export function UsersView() {
           username: formData.username || null,
           plan_id: formData.plan_id || null,
           payment_notes: formData.payment_notes || null,
+          contract_url: formData.contract_url || null,
         } as any).eq('id', editingAdmin.id);
 
         if (formData.password) {
@@ -92,6 +93,7 @@ export function UsersView() {
           username: formData.username || null,
           plan_id: formData.plan_id || null,
           payment_notes: formData.payment_notes || null,
+          contract_url: formData.contract_url || null,
         } as any).eq('id', newProfileId);
 
         await supabase.rpc('set_admin_password', { _user_id: newProfileId, _password: formData.password });
@@ -210,6 +212,22 @@ export function UsersView() {
                       <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest mb-1">Plano & Pagamento</p>
                       <p>📦 {planName}</p>
                       {extra.payment_notes && <p>💳 {extra.payment_notes}</p>}
+                    </div>
+                  )}
+
+                  {extra.contract_url && (
+                    <div className="mt-3">
+                      <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest mb-1">Contrato</p>
+                      <a
+                        href={extra.contract_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-xl text-sm font-bold hover:bg-primary/20 transition-colors"
+                      >
+                        <FileText size={16} />
+                        Baixar Contrato
+                        <Download size={14} />
+                      </a>
                     </div>
                   )}
                 </div>

@@ -489,6 +489,7 @@ export type Database = {
           address_zip: string | null
           background_photo: string | null
           birthday: string | null
+          contract_url: string | null
           cpf: string | null
           created_at: string
           email: string | null
@@ -515,6 +516,7 @@ export type Database = {
           address_zip?: string | null
           background_photo?: string | null
           birthday?: string | null
+          contract_url?: string | null
           cpf?: string | null
           created_at?: string
           email?: string | null
@@ -541,6 +543,7 @@ export type Database = {
           address_zip?: string | null
           background_photo?: string | null
           birthday?: string | null
+          contract_url?: string | null
           cpf?: string | null
           created_at?: string
           email?: string | null
