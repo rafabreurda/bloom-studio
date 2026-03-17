@@ -96,30 +96,34 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
           </div>
         </div>
         {subTab === 'list' && (
-          <div className="flex gap-2 w-full sm:w-auto">
-            <div className="relative flex-1 sm:w-56 lg:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-              <input type="text" placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-bronze pl-9 w-full text-sm" />
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <div className="flex gap-2 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-56 lg:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+                <input type="text" placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-bronze pl-9 w-full text-sm" />
+              </div>
+              <ExportButton
+                fileName="clientes"
+                title="Base de Clientes"
+                sheetName="Clientes"
+                data={filteredClients}
+                columns={[
+                  { key: 'name', label: 'Nome' },
+                  { key: 'phone', label: 'Telefone' },
+                  { key: 'email', label: 'E-mail' },
+                  { key: 'cpf', label: 'CPF' },
+                  { key: 'birthday', label: 'Aniversário' },
+                  { key: 'address', label: 'Endereço' },
+                  { key: 'isVIP', label: 'VIP' },
+                  { key: 'tags', label: 'Tags' },
+                  { key: 'notes', label: 'Observações' },
+                ]}
+              />
             </div>
-            <ExportButton
-              fileName="clientes"
-              title="Base de Clientes"
-              sheetName="Clientes"
-              data={filteredClients}
-              columns={[
-                { key: 'name', label: 'Nome' },
-                { key: 'phone', label: 'Telefone' },
-                { key: 'email', label: 'E-mail' },
-                { key: 'cpf', label: 'CPF' },
-                { key: 'birthday', label: 'Aniversário' },
-                { key: 'address', label: 'Endereço' },
-                { key: 'isVIP', label: 'VIP' },
-                { key: 'tags', label: 'Tags' },
-                { key: 'notes', label: 'Observações' },
-              ]}
-            />
-            <BronzeButton variant="danger" icon={Trash2} size="sm" onClick={() => setShowDeleteAll(true)}>Apagar Todos</BronzeButton>
-            <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => { setEditingClient(null); setShowModal(true); }}>Adicionar Cliente</BronzeButton>
+            <div className="flex gap-2">
+              <BronzeButton variant="danger" icon={Trash2} size="sm" onClick={() => setShowDeleteAll(true)}>Apagar Todos</BronzeButton>
+              <BronzeButton variant="gold" icon={Plus} size="sm" onClick={() => { setEditingClient(null); setShowModal(true); }}>Adicionar Cliente</BronzeButton>
+            </div>
           </div>
         )}
       </div>
