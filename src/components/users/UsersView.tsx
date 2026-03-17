@@ -214,6 +214,22 @@ export function UsersView() {
                       {extra.payment_notes && <p>💳 {extra.payment_notes}</p>}
                     </div>
                   )}
+
+                  {extra.contract_url && (
+                    <div className="mt-3">
+                      <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest mb-1">Contrato</p>
+                      <a
+                        href={extra.contract_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-xl text-sm font-bold hover:bg-primary/20 transition-colors"
+                      >
+                        <FileText size={16} />
+                        Baixar Contrato
+                        <Download size={14} />
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
             </BronzeCard>
