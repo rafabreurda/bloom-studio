@@ -66,6 +66,7 @@ export function UsersView() {
           username: formData.username || null,
           plan_id: formData.plan_id || null,
           payment_notes: formData.payment_notes || null,
+          contract_url: formData.contract_url || null,
         } as any).eq('id', editingAdmin.id);
 
         if (formData.password) {
