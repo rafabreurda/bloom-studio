@@ -29,6 +29,7 @@ interface UserFormData {
   password: string;
   plan_id: string;
   payment_notes: string;
+  contract_url: string;
 }
 
 interface UserFormModalProps {
