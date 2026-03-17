@@ -30,7 +30,7 @@ export function UsersView() {
     supabase.from('plans').select('*').eq('is_active', true).order('name').then(({ data }) => {
       if (data) setPlans(data as Plan[]);
     });
-    supabase.from('profiles').select('*').then(({ data }) => {
+    supabase.from('profiles').select('*, contract_url').then(({ data }) => {
       if (data) {
         const extras: Record<string, any> = {};
         data.forEach(p => { extras[p.id] = p; });

@@ -185,6 +185,7 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
         { id: 'estudio' as ConfigSection, icon: Building2, label: 'Visual' },
         { id: 'usuarios' as ConfigSection, icon: UsersRound, label: 'Usuários' },
         { id: 'planos' as ConfigSection, icon: Layers, label: 'Planos' },
+        { id: 'tags' as ConfigSection, icon: Tag, label: 'Tags de Clientes' },
         { id: 'suporte' as ConfigSection, icon: Headphones, label: 'Suporte' },
       ]
     : [
