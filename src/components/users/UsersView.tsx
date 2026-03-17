@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Edit2, Trash2, X, CheckCircle2, Eye, EyeOff, Crown, User, ChevronDown, ChevronUp } from 'lucide-react';
+import { UserPlus, Edit2, Trash2, X, CheckCircle2, Eye, EyeOff, Crown, User, ChevronDown, ChevronUp, FileText, Download } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { useAuth } from '@/contexts/AuthContext';
