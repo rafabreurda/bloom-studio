@@ -375,6 +375,21 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
                 </div>
               </div>
 
+              {addressType === 'apto' && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                    Nº do Apartamento / Bloco
+                  </label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="input-bronze"
+                    placeholder="Ex: Apto 101, Bloco A"
+                  />
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
