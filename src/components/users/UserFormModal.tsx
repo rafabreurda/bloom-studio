@@ -154,7 +154,7 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
       address_street: addressStreet, address_number: addressNumber,
       address_neighborhood: addressNeighborhood, address_city: addressCity,
       address_zip: addressZip, address_state: addressState,
-      username, password, plan_id: planId, payment_notes: paymentNotes,
+      username, password, plan_id: planId, payment_notes: paymentNotes, contract_url: contractUrl,
     });
   };
 
