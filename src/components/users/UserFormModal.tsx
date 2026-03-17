@@ -167,8 +167,16 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
                 </select>
               </div>
             </Field>
-            <Field label="CPF / ID">
-              <input type="text" value={cpf} onChange={e => setCpf(e.target.value)} className="input-bronze" placeholder="000.000.000-00" />
+            <Field label="CPF / CNPJ">
+              <input type="text" value={cpf} onChange={e => {
+                let v = e.target.value.replace(/\D/g, '');
+                if (v.length <= 11) {
+                  v = v.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                } else {
+                  v = v.slice(0, 14).replace(/(\d{2})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1/$2').replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+                }
+                setCpf(v);
+              }} className="input-bronze" placeholder="000.000.000-00" maxLength={18} />
             </Field>
           </div>
 
