@@ -311,6 +311,28 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
             <textarea value={paymentNotes} onChange={e => setPaymentNotes(e.target.value)} className="input-bronze min-h-[80px]" placeholder="Pix, cartão de crédito, etc." />
           </Field>
 
+          {/* Contract */}
+          <p className="text-xs font-black uppercase text-primary tracking-widest pt-2">Contrato</p>
+
+          {contractUrl ? (
+            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl border border-border">
+              <FileText size={20} className="text-primary shrink-0" />
+              <span className="text-sm font-medium truncate flex-1">Contrato anexado</span>
+              <a href={contractUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-primary hover:text-primary/80">
+                <Download size={18} />
+              </a>
+              <button type="button" onClick={handleRemoveContract} className="p-2 text-destructive hover:text-destructive/80">
+                <Trash2 size={18} />
+              </button>
+            </div>
+          ) : (
+            <label className="flex items-center gap-3 p-4 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+              <Upload size={20} className="text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{uploadingContract ? 'Enviando...' : 'Anexar contrato (PDF, imagem...)'}</span>
+              <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onChange={handleContractUpload} disabled={uploadingContract} />
+            </label>
+          )}
+
           <BronzeButton type="submit" variant="gold" icon={CheckCircle2} className="w-full h-[60px]" disabled={isLoading}>
             {editingAdmin ? 'Salvar Alterações' : 'Adicionar Usuário'}
           </BronzeButton>
