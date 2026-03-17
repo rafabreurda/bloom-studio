@@ -79,6 +79,8 @@ export function UserFormModal({ editingAdmin, adminExtras, plans, onSubmit, onCl
   const [showPassword, setShowPassword] = useState(false);
   const [planId, setPlanId] = useState(extra.plan_id || '');
   const [paymentNotes, setPaymentNotes] = useState(extra.payment_notes || '');
+  const [contractUrl, setContractUrl] = useState(extra.contract_url || '');
+  const [uploadingContract, setUploadingContract] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
 
   const formatCEP = (value: string) => {
