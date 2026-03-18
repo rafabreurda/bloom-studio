@@ -5,7 +5,7 @@ interface TimeRollerPickerProps {
 }
 
 export function TimeRollerPicker({ value, onChange, className }: TimeRollerPickerProps) {
-  const hours = Array.from({ length: 16 }, (_, i) => (i + 7).toString().padStart(2, '0'));
+  const hours = Array.from({ length: 17 }, (_, i) => (i + 6).toString().padStart(2, '0'));
   const minutes = ['00', '15', '30', '45'];
 
   const [h, m] = value ? value.split(':') : ['08', '00'];
