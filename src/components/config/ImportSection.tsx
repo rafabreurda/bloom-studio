@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Upload, Users, Calendar, Package, ShoppingBag, Truck, Handshake } from 'lucide-react';
+import { Upload, Download, Users, Calendar, Package, ShoppingBag, Truck, Handshake } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { ImportDataButton, transforms } from '@/components/ui/ImportDataButton';
 import { ImportClientsButton } from '@/components/clients/ImportClientsButton';
+import { ExportButton } from '@/components/ui/ExportButton';
+import { useClients } from '@/hooks/useClients';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ImportSectionProps {
@@ -50,12 +52,38 @@ const importOptions = [
 
 export function ImportSection({ onImportComplete }: ImportSectionProps) {
   const [selected, setSelected] = useState<string | null>(null);
+  const { clients } = useClients();
 
   return (
     <BronzeCard className="bg-secondary/50 space-y-6">
-      <div className="flex items-center gap-3">
-        <Upload size={20} className="text-primary" />
-        <h3 className="text-lg font-black uppercase text-primary">Importar Dados</h3>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Upload size={20} className="text-primary" />
+          <h3 className="text-lg font-black uppercase text-primary">Importar / Exportar</h3>
+        </div>
+        <ExportButton
+          fileName="clientes"
+          title="Base de Clientes"
+          sheetName="Clientes"
+          data={clients}
+          columns={[
+            { key: 'name', label: 'Nome' },
+            { key: 'phone', label: 'Telefone' },
+            { key: 'email', label: 'E-mail' },
+            { key: 'cpf', label: 'CPF' },
+            { key: 'birthday', label: 'Aniversário' },
+            { key: 'addressStreet', label: 'Rua' },
+            { key: 'addressNumber', label: 'Número' },
+            { key: 'addressNeighborhood', label: 'Bairro' },
+            { key: 'addressCity', label: 'Cidade' },
+            { key: 'addressState', label: 'Estado' },
+            { key: 'addressZip', label: 'CEP' },
+            { key: 'clientSince', label: 'Cliente Desde' },
+            { key: 'totalSessions', label: 'Total de Bronzes' },
+            { key: 'isVIP', label: 'VIP' },
+            { key: 'notes', label: 'Observações' },
+          ]}
+        />
       </div>
 
       <p className="text-xs text-muted-foreground">

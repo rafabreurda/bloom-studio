@@ -1,6 +1,5 @@
 import { useState, useMemo, useRef } from 'react';
 import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown, Crown, AlertTriangle } from 'lucide-react';
-import { ExportButton } from '@/components/ui/ExportButton';
 import { ImportClientsButton } from './ImportClientsButton';
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
@@ -104,23 +103,6 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
                 <input type="text" placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-bronze pl-9 w-full text-sm" />
               </div>
               <ImportClientsButton onImportComplete={() => window.location.reload()} />
-              <ExportButton
-                fileName="clientes"
-                title="Base de Clientes"
-                sheetName="Clientes"
-                data={filteredClients}
-                columns={[
-                  { key: 'name', label: 'Nome' },
-                  { key: 'phone', label: 'Telefone' },
-                  { key: 'email', label: 'E-mail' },
-                  { key: 'cpf', label: 'CPF' },
-                  { key: 'birthday', label: 'Aniversário' },
-                  { key: 'address', label: 'Endereço' },
-                  { key: 'isVIP', label: 'VIP' },
-                  { key: 'tags', label: 'Tags' },
-                  { key: 'notes', label: 'Observações' },
-                ]}
-              />
             </div>
             <div className="flex gap-2">
               <BronzeButton variant="danger" icon={Trash2} size="sm" onClick={() => setShowDeleteAll(true)}>Apagar Todos</BronzeButton>
