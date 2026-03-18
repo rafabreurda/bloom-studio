@@ -186,8 +186,17 @@ export function UsersView() {
                     {admin.role === 'admin_chefe' ? <Crown size={20} /> : <User size={20} />}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold truncate">{admin.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold truncate">{admin.name}</p>
+                      {extra.is_blocked && (
+                        <Badge variant="destructive" className="text-[10px] px-1.5 py-0">Bloqueado</Badge>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">📱 {admin.phone || 'Sem telefone'}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Clock size={12} className="text-muted-foreground" />
+                      <span className="text-[11px] text-muted-foreground">{formatLastSeen(extra.last_seen_at)}</span>
+                    </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-xs text-muted-foreground">🔑</span>
                       <span className="text-xs font-mono font-bold">
