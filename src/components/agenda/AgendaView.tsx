@@ -174,7 +174,23 @@ export function AgendaView({
                 const appointment = appointments.find(a => a.date === dateStr && (a.time === time || a.time.startsWith(time.split(':')[0] + ':' + time.split(':')[1])));
                 const block = blocks.find(b => b.date === dateStr && b.time === time);
                 const isDayBlocked = isDateBlocked(dateStr);
-                
+
+                let clientAddress: string | undefined;
+                if (appointment) {
+                  const client = clients.find(c => c.phone === appointment.phone)
+                    || clients.find(c => c.name.toLowerCase() === appointment.clientName.toLowerCase());
+                  if (client) {
+                    const parts = [
+                      client.addressStreet,
+                      client.addressNumber,
+                      client.addressNeighborhood,
+                      client.addressCity,
+                      client.addressState,
+                    ].filter(Boolean);
+                    clientAddress = parts.length > 0 ? parts.join(', ') : (client.address || undefined);
+                  }
+                }
+
                 return (
                   <TimeSlot
                     key={time}
@@ -187,6 +203,7 @@ export function AgendaView({
                     onSendWhatsApp={handleSendWhatsApp}
                     onClientClick={onClientClick}
                     onAppointmentClick={onAppointmentClick}
+                    clientAddress={clientAddress}
                   />
                 );
               })}

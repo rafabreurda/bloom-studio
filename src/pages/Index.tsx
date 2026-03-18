@@ -17,6 +17,7 @@ import { SupplierModal } from '@/components/suppliers/SupplierModal';
 import { PartnershipsView } from '@/components/partnerships/PartnershipsView';
 import { PackagesView } from '@/components/packages/PackagesView';
 import { UsersView } from '@/components/users/UsersView';
+import { GpsView } from '@/components/gps/GpsView';
 
 import { PartnershipModal } from '@/components/partnerships/PartnershipModal';
 import { AddAppointmentModal } from '@/components/modals/AddAppointmentModal';
@@ -409,6 +410,8 @@ const MainApp = () => {
               onUploadBackground={uploadBackground}
             />
           )}
+
+          {activeTab === 'gps' && <GpsView />}
 
           {/* Users tab removed - now inside ConfigView */}
         </div>

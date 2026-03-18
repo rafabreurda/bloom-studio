@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { 
-  Calendar, Users, DollarSign, ShoppingBag, Truck, Handshake, 
-  ClipboardList, Settings, UserCheck, X, Package, UsersRound, LogOut, ChevronUp 
+import {
+  Calendar, Users, DollarSign, ShoppingBag, Truck, Handshake,
+  ClipboardList, Settings, UserCheck, X, Package, UsersRound, LogOut, ChevronUp, Navigation
 } from 'lucide-react';
 import { TabId } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,6 +25,7 @@ const baseMenuItems = [
   { id: 'fornecedores' as TabId, icon: Truck, label: 'Fornecedores', color: '#ef4444' },
   { id: 'parcerias' as TabId, icon: Handshake, label: 'Parcerias', color: '#ec4899' },
   { id: 'lista-espera' as TabId, icon: ClipboardList, label: 'Lista de Espera', color: '#14b8a6' },
+  { id: 'gps' as TabId, icon: Navigation, label: 'GPS', color: '#4285f4' },
   { id: 'config' as TabId, icon: Settings, label: 'Configurações', color: '#6b7280' },
 ];
 

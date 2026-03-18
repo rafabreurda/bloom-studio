@@ -1,4 +1,5 @@
-import { Plus, X, Star, CheckCircle2, Copy, MessageSquare, Handshake, Pencil, UserPlus } from 'lucide-react';
+import { Plus, X, Star, CheckCircle2, Copy, MessageSquare, Handshake, Pencil, UserPlus, Navigation } from 'lucide-react';
+import { openGps } from '@/components/gps/GpsView';
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { Appointment, Block } from '@/types';
 
@@ -12,6 +13,7 @@ interface TimeSlotProps {
   onSendWhatsApp: (phone: string, clientName: string) => void;
   onClientClick?: (clientName: string, phone: string) => void;
   onAppointmentClick?: (appointment: Appointment) => void;
+  clientAddress?: string;
 }
 
 export function TimeSlot({
@@ -24,6 +26,7 @@ export function TimeSlot({
   onSendWhatsApp,
   onClientClick,
   onAppointmentClick,
+  clientAddress,
 }: TimeSlotProps) {
   const isVIP = appointment?.tags?.includes('VIP');
   const isNewClient = appointment?.tags?.includes('Cliente Nova');
@@ -125,6 +128,18 @@ export function TimeSlot({
                   {appointment.clientName}
                 </span>
                 {appointment.isConfirmed && <CheckCircle2 size={14} className="text-emerald-500" />}
+                {clientAddress && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openGps(clientAddress);
+                    }}
+                    className="ml-0.5 p-0.5 rounded-md hover:opacity-80 transition-opacity"
+                    title="Abrir GPS"
+                  >
+                    <Navigation size={13} className="text-blue-500" />
+                  </button>
+                )}
               </div>
               <p 
                 className="text-[10px] md:text-xs font-bold truncate flex items-center gap-1"
