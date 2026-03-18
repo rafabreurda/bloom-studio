@@ -36,6 +36,13 @@ export function LoginScreen() {
       return;
     }
 
+    // Check if user is blocked
+    if ((admin as any).is_blocked) {
+      setError('Usuário bloqueado. Entre em contato com o administrador.');
+      setIsSubmitting(false);
+      return;
+    }
+
     const success = await switchAdmin(admin.id, password);
     if (!success) {
       setError('Senha incorreta. Tente novamente.');

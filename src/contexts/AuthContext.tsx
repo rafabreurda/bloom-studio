@@ -108,6 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCurrentAdmin(admin);
     // Persist session
     localStorage.setItem(SESSION_KEY, adminId);
+    // Update last_seen_at
+    supabase.from('profiles').update({ last_seen_at: new Date().toISOString() } as any).eq('id', adminId).then(() => {});
     return true;
   };
 

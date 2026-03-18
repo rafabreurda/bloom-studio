@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Edit2, Trash2, X, CheckCircle2, Eye, EyeOff, Crown, User, ChevronDown, ChevronUp, FileText, Download } from 'lucide-react';
+import { UserPlus, Edit2, Trash2, X, CheckCircle2, Eye, EyeOff, Crown, User, ChevronDown, ChevronUp, FileText, Download, Ban, Clock } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +8,7 @@ import { AdminWithRole, getDisplayRole } from '@/types/admin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { UserFormModal } from './UserFormModal';
+import { Badge } from '@/components/ui/badge';
 
 interface Plan {
   id: string;
@@ -123,6 +124,39 @@ export function UsersView() {
     return plans.find(p => p.id === pId)?.name || null;
   };
 
+  const toggleBlockUser = async (userId: string, currentBlocked: boolean) => {
+    const newBlocked = !currentBlocked;
+    const { error } = await supabase.from('profiles').update({ is_blocked: newBlocked } as any).eq('id', userId);
+    if (error) {
+      toast.error('Erro ao atualizar status');
+      return;
+    }
+    toast.success(newBlocked ? 'Usuário bloqueado' : 'Usuário desbloqueado');
+    await refreshAdmins();
+    // Refresh extras
+    const { data } = await supabase.from('profiles').select('*').then(r => r);
+    if (data) {
+      const extras: Record<string, any> = {};
+      data.forEach((p: any) => { extras[p.id] = p; });
+      setAdminExtras(extras);
+    }
+  };
+
+  const formatLastSeen = (dateStr: string | null) => {
+    if (!dateStr) return 'Nunca acessou';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return 'Online agora';
+    if (diffMin < 60) return `Há ${diffMin} min`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `Há ${diffH}h`;
+    const diffD = Math.floor(diffH / 24);
+    if (diffD < 7) return `Há ${diffD} dia${diffD > 1 ? 's' : ''}`;
+    return date.toLocaleDateString('pt-BR');
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -152,8 +186,17 @@ export function UsersView() {
                     {admin.role === 'admin_chefe' ? <Crown size={20} /> : <User size={20} />}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold truncate">{admin.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold truncate">{admin.name}</p>
+                      {extra.is_blocked && (
+                        <Badge variant="destructive" className="text-[10px] px-1.5 py-0">Bloqueado</Badge>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">📱 {admin.phone || 'Sem telefone'}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Clock size={12} className="text-muted-foreground" />
+                      <span className="text-[11px] text-muted-foreground">{formatLastSeen(extra.last_seen_at)}</span>
+                    </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-xs text-muted-foreground">🔑</span>
                       <span className="text-xs font-mono font-bold">
@@ -175,6 +218,15 @@ export function UsersView() {
                   <button onClick={() => openEditModal(admin)} className="p-2 text-muted-foreground hover:text-primary">
                     <Edit2 size={16} />
                   </button>
+                  {admin.id !== currentAdmin?.id && admin.role !== 'admin_chefe' && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleBlockUser(admin.id, !!extra.is_blocked); }}
+                      className={`p-2 ${extra.is_blocked ? 'text-destructive' : 'text-muted-foreground hover:text-destructive'}`}
+                      title={extra.is_blocked ? 'Desbloquear usuário' : 'Bloquear usuário'}
+                    >
+                      <Ban size={16} />
+                    </button>
+                  )}
                   {admin.id !== currentAdmin?.id && (
                     <button onClick={() => handleDelete(admin.id)} className="p-2 text-muted-foreground hover:text-destructive" disabled={isLoading}>
                       <Trash2 size={16} />

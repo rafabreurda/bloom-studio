@@ -506,6 +506,8 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          is_blocked: boolean
+          last_seen_at: string | null
           name: string
           password_display: string | null
           password_hash: string | null
@@ -533,6 +535,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          is_blocked?: boolean
+          last_seen_at?: string | null
           name: string
           password_display?: string | null
           password_hash?: string | null
@@ -560,6 +564,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          is_blocked?: boolean
+          last_seen_at?: string | null
           name?: string
           password_display?: string | null
           password_hash?: string | null
