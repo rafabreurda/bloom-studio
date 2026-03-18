@@ -218,6 +218,15 @@ export function UsersView() {
                   <button onClick={() => openEditModal(admin)} className="p-2 text-muted-foreground hover:text-primary">
                     <Edit2 size={16} />
                   </button>
+                  {admin.id !== currentAdmin?.id && admin.role !== 'admin_chefe' && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleBlockUser(admin.id, !!extra.is_blocked); }}
+                      className={`p-2 ${extra.is_blocked ? 'text-destructive' : 'text-muted-foreground hover:text-destructive'}`}
+                      title={extra.is_blocked ? 'Desbloquear usuário' : 'Bloquear usuário'}
+                    >
+                      <Ban size={16} />
+                    </button>
+                  )}
                   {admin.id !== currentAdmin?.id && (
                     <button onClick={() => handleDelete(admin.id)} className="p-2 text-muted-foreground hover:text-destructive" disabled={isLoading}>
                       <Trash2 size={16} />
