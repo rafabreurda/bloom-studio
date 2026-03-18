@@ -153,7 +153,7 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
 
   return (
     <>
-      <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
+      <input ref={fileRef} type="file" accept="*" className="hidden" onChange={handleFile} />
       <BronzeButton variant="outline" icon={Upload} size="sm" onClick={() => fileRef.current?.click()}>
         Importar
       </BronzeButton>

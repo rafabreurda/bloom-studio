@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { Search, Plus, Star, Phone, Edit2, Trash2, User, Handshake, ChevronUp, ChevronDown, Crown, AlertTriangle } from 'lucide-react';
 import { ExportButton } from '@/components/ui/ExportButton';
+import { ImportClientsButton } from './ImportClientsButton';
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
@@ -102,6 +103,7 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                 <input type="text" placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-bronze pl-9 w-full text-sm" />
               </div>
+              <ImportClientsButton onImportComplete={() => window.location.reload()} />
               <ExportButton
                 fileName="clientes"
                 title="Base de Clientes"
