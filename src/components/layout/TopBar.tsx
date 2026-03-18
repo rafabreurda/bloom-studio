@@ -18,6 +18,7 @@ export function TopBar({ onMenuClick, activeTab }: TopBarProps) {
       'lista-espera': 'Lista de Espera',
       'config': 'Configurações',
       'usuarios': 'Usuários',
+      'gps': 'GPS',
     };
     return labels[tab];
   };
