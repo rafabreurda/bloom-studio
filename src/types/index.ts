@@ -56,6 +56,10 @@ export interface Client {
   cpf?: string;
   anamnesis?: AnamnesisForm;
   anamnesisHistory?: AnamnesisRecord[];
+  neighborhood?: string;
+  city?: string;
+  clientSince?: string;
+  totalSessions?: number;
   notes?: string;
   tags: string[];
   isVIP: boolean;

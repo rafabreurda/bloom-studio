@@ -229,6 +229,8 @@ export type Database = {
           address_zip: string | null
           anamnesis_history: Json | null
           birthday: string | null
+          city: string | null
+          client_since: string | null
           cpf: string | null
           created_at: string
           email: string | null
@@ -236,11 +238,13 @@ export type Database = {
           id: string
           is_vip: boolean
           name: string
+          neighborhood: string | null
           notes: string | null
           owner_id: string | null
           partnership_id: string | null
           phone: string
           tags: string[] | null
+          total_sessions: number | null
           updated_at: string
         }
         Insert: {
@@ -254,6 +258,8 @@ export type Database = {
           address_zip?: string | null
           anamnesis_history?: Json | null
           birthday?: string | null
+          city?: string | null
+          client_since?: string | null
           cpf?: string | null
           created_at?: string
           email?: string | null
@@ -261,11 +267,13 @@ export type Database = {
           id?: string
           is_vip?: boolean
           name: string
+          neighborhood?: string | null
           notes?: string | null
           owner_id?: string | null
           partnership_id?: string | null
           phone: string
           tags?: string[] | null
+          total_sessions?: number | null
           updated_at?: string
         }
         Update: {
@@ -279,6 +287,8 @@ export type Database = {
           address_zip?: string | null
           anamnesis_history?: Json | null
           birthday?: string | null
+          city?: string | null
+          client_since?: string | null
           cpf?: string | null
           created_at?: string
           email?: string | null
@@ -286,11 +296,13 @@ export type Database = {
           id?: string
           is_vip?: boolean
           name?: string
+          neighborhood?: string | null
           notes?: string | null
           owner_id?: string | null
           partnership_id?: string | null
           phone?: string
           tags?: string[] | null
+          total_sessions?: number | null
           updated_at?: string
         }
         Relationships: [

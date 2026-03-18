@@ -29,6 +29,8 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
   const [addressState, setAddressState] = useState('');
   const [addressZip, setAddressZip] = useState('');
   const [loadingCep, setLoadingCep] = useState(false);
+  const [clientSince, setClientSince] = useState('');
+  const [totalSessions, setTotalSessions] = useState('');
   const [birthday, setBirthday] = useState('');
   const [cpf, setCpf] = useState('');
   const [notes, setNotes] = useState('');
@@ -48,10 +50,12 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
       setAddressStreet(client.addressStreet || '');
       setAddressNumber(client.addressNumber || '');
       setAddressType(client.addressType || '');
-      setAddressNeighborhood(client.addressNeighborhood || '');
-      setAddressCity(client.addressCity || '');
+      setAddressNeighborhood(client.addressNeighborhood || client.neighborhood || '');
+      setAddressCity(client.addressCity || client.city || '');
       setAddressState(client.addressState || '');
       setAddressZip(client.addressZip || '');
+      setClientSince(client.clientSince || '');
+      setTotalSessions(client.totalSessions?.toString() || '');
       setBirthday(client.birthday || '');
       setCpf(client.cpf || '');
       setNotes(client.notes || '');
@@ -80,6 +84,10 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
       addressCity: addressCity || undefined,
       addressState: addressState || undefined,
       addressZip: addressZip || undefined,
+      neighborhood: addressNeighborhood || undefined,
+      city: addressCity || undefined,
+      clientSince: clientSince || undefined,
+      totalSessions: totalSessions ? Number(totalSessions) : undefined,
       birthday: birthday || undefined,
       cpf: cpf || undefined,
       notes: notes || undefined,
@@ -425,6 +433,7 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
                 </div>
               )}
 
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
@@ -488,6 +497,35 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
                   </a>
                 </div>
               )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                    Cliente Desde
+                  </label>
+                  <input
+                    type="text"
+                    value={clientSince}
+                    onChange={(e) => setClientSince(e.target.value)}
+                    className="input-bronze"
+                    placeholder="ex: março de 2024"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                    Total de Bronzes
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={totalSessions}
+                    onChange={(e) => setTotalSessions(e.target.value)}
+                    className="input-bronze"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
 
               {/* Tags */}
               <div className="space-y-2">

@@ -84,6 +84,10 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
       const colPhone = findColumn(headers, 'telefone', 'phone', 'celular', 'fone');
       const colEmail = findColumn(headers, 'email', 'e-mail');
       const colAddress = findColumn(headers, 'endereço', 'endereco', 'address');
+      const colNeighborhood = findColumn(headers, 'bairro', 'neighborhood');
+      const colCity = findColumn(headers, 'cidade', 'city');
+      const colClientSince = findColumn(headers, 'cliente desde', 'client_since', 'desde');
+      const colTotalSessions = findColumn(headers, 'quantos bronzes', 'total bronzes', 'sessoes', 'sessões', 'total_sessions');
       const colBirthday = findColumn(headers, 'nascimento', 'aniversário', 'birthday', 'data nasc');
       const colCpf = findColumn(headers, 'cpf');
       const colNotes = findColumn(headers, 'observação', 'observacao', 'referência', 'notes', 'obs');
@@ -105,6 +109,10 @@ export function ImportClientsButton({ onImportComplete }: ImportClientsButtonPro
           phone,
           email: colEmail ? String(row[colEmail] || '').trim() || undefined : undefined,
           address: colAddress ? String(row[colAddress] || '').trim() || undefined : undefined,
+          neighborhood: colNeighborhood ? String(row[colNeighborhood] || '').trim() || undefined : undefined,
+          city: colCity ? String(row[colCity] || '').trim() || undefined : undefined,
+          client_since: colClientSince ? String(row[colClientSince] || '').trim() || undefined : undefined,
+          total_sessions: colTotalSessions && row[colTotalSessions] ? Number(row[colTotalSessions]) || undefined : undefined,
           birthday: colBirthday ? normalizeDate(row[colBirthday]) || undefined : undefined,
           cpf: colCpf ? String(row[colCpf] || '').trim() || undefined : undefined,
           notes: colNotes ? String(row[colNotes] || '').trim() || undefined : undefined,
