@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Edit2, Trash2, X, CheckCircle2, Eye, EyeOff, Crown, User, ChevronDown, ChevronUp, FileText, Download } from 'lucide-react';
+import { UserPlus, Edit2, Trash2, X, CheckCircle2, Eye, EyeOff, Crown, User, ChevronDown, ChevronUp, FileText, Download, Ban, Clock } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +8,7 @@ import { AdminWithRole, getDisplayRole } from '@/types/admin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { UserFormModal } from './UserFormModal';
+import { Badge } from '@/components/ui/badge';
 
 interface Plan {
   id: string;
