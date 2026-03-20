@@ -21,8 +21,8 @@ export function useBlocks() {
 
       setBlocks(data?.map(b => ({
         id: b.id,
-        date: new Date(b.date).toLocaleDateString('pt-BR'),
-        endDate: b.end_date ? new Date(b.end_date).toLocaleDateString('pt-BR') : undefined,
+        date: b.date.split('-').reverse().join('/'),
+        endDate: b.end_date ? b.end_date.split('-').reverse().join('/') : undefined,
         time: b.time,
         type: b.type as 'allDay' | 'timeRange' | 'dateRange',
         reason: b.reason || '',

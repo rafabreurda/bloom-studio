@@ -21,18 +21,19 @@ export function BlockModal({ selectedDate, onClose, onBlock }: BlockModalProps) 
     const formData = new FormData(e.currentTarget);
     
     if (blockType === 'dateRange') {
-      const startDate = new Date(formData.get('startDate') as string);
-      const endDate = new Date(formData.get('endDate') as string);
-      
+      const [sy, sm, sd] = (formData.get('startDate') as string).split('-');
+      const [ey, em, ed] = (formData.get('endDate') as string).split('-');
+
       onBlock({
         type: 'dateRange',
         reason: formData.get('reason') as string,
-        date: startDate.toLocaleDateString('pt-BR'),
-        endDate: endDate.toLocaleDateString('pt-BR'),
+        date: `${sd}/${sm}/${sy}`,
+        endDate: `${ed}/${em}/${ey}`,
         time: null,
       });
     } else {
-      const dateStr = new Date(formData.get('date') as string).toLocaleDateString('pt-BR');
+      const [y, m, d] = (formData.get('date') as string).split('-');
+      const dateStr = `${d}/${m}/${y}`;
       
       onBlock({
         type: blockType,
