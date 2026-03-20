@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { Lock, Unlock } from 'lucide-react';
 import { AgendaHeader } from './AgendaHeader';
 import { TimeSlot } from './TimeSlot';
 import { AgendaWeekView } from './AgendaWeekView';
 import { AgendaMonthView } from './AgendaMonthView';
 import { WhatsAppSendModal } from '@/components/modals/WhatsAppSendModal';
+import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { Appointment, Block, StockItem, TabId, ViewMode, Client, WhatsAppTemplate } from '@/types';
 import { toast } from 'sonner';
 
@@ -133,18 +135,27 @@ export function AgendaView({
     }
   };
 
-  // Check if a date is blocked (considering dateRange blocks)
-  const isDateBlocked = (checkDateStr: string) => {
-    return blocks.some(block => {
+  // Parse DD/MM/YYYY sem converter para UTC (evita desvio de fuso)
+  const parseBrDate = (dateStr: string) => {
+    const [d, m, y] = dateStr.split('/').map(Number);
+    return new Date(y, m - 1, d);
+  };
+
+  // Retorna o bloco real que cobre o dia (com ID correto para deletar)
+  const getDayBlock = (checkDateStr: string): Block | undefined => {
+    return blocks.find(block => {
       if (block.type === 'dateRange' && block.endDate) {
-        const checkDate = new Date(checkDateStr.split('/').reverse().join('-'));
-        const start = new Date(block.date.split('/').reverse().join('-'));
-        const end = new Date(block.endDate.split('/').reverse().join('-'));
+        const checkDate = parseBrDate(checkDateStr);
+        const start = parseBrDate(block.date);
+        const end = parseBrDate(block.endDate);
         return checkDate >= start && checkDate <= end;
       }
       return block.date === checkDateStr && block.type === 'allDay';
     });
   };
+
+  // Check if a date is blocked (considering dateRange blocks)
+  const isDateBlocked = (checkDateStr: string) => !!getDayBlock(checkDateStr);
 
   const handleDayClick = (date: Date) => {
     setSelectedDate(normalizeLocalDate(date));
@@ -166,51 +177,73 @@ export function AgendaView({
       />
 
       {/* Conditional View Rendering */}
-      {viewMode === 'day' && (
-        <div className="flex-1 rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col agenda-card border agenda-border">
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
-            <div className="divide-y agenda-border">
-              {timeSlots.map(time => {
-                const appointment = appointments.find(a => a.date === dateStr && (a.time === time || a.time.startsWith(time.split(':')[0] + ':' + time.split(':')[1])));
-                const block = blocks.find(b => b.date === dateStr && b.time === time);
-                const isDayBlocked = isDateBlocked(dateStr);
-
-                let clientAddress: string | undefined;
-                if (appointment) {
-                  const client = clients.find(c => c.phone === appointment.phone)
-                    || clients.find(c => c.name.toLowerCase() === appointment.clientName.toLowerCase());
-                  if (client) {
-                    const parts = [
-                      client.addressStreet,
-                      client.addressNumber,
-                      client.addressNeighborhood,
-                      client.addressCity,
-                      client.addressState,
-                    ].filter(Boolean);
-                    clientAddress = parts.length > 0 ? parts.join(', ') : (client.address || undefined);
+      {viewMode === 'day' && (() => {
+        const dayBlock = getDayBlock(dateStr);
+        return (
+          <>
+            {/* Banner de dia bloqueado com botão Desbloquear */}
+            {dayBlock && (
+              <div className="flex items-center justify-between px-4 py-3 rounded-2xl border border-destructive/40 bg-destructive/10 shrink-0">
+                <span className="text-xs font-black uppercase text-destructive flex items-center gap-2">
+                  <Lock size={14} /> Dia bloqueado — {dayBlock.reason}
+                </span>
+                <ConfirmDeleteDialog
+                  description="Deseja desbloquear este dia?"
+                  onConfirm={() => onDeleteBlock(dayBlock.id)}
+                  trigger={
+                    <button className="flex items-center gap-1 text-xs font-black uppercase text-destructive hover:opacity-70 transition-opacity">
+                      <Unlock size={14} /> Desbloquear
+                    </button>
                   }
-                }
+                />
+              </div>
+            )}
 
-                return (
-                  <TimeSlot
-                    key={time}
-                    time={time}
-                    appointment={appointment}
-                    block={block || (isDayBlocked ? { id: 'day-block', date: dateStr, time: null, type: 'allDay', reason: 'Dia bloqueado', createdAt: new Date() } : undefined)}
-                    onAddClick={(time: string) => onAddClick(time, normalizeLocalDate(selectedDate))}
-                    onDeleteBlock={onDeleteBlock}
-                    onCopyPix={handleCopyPix}
-                    onSendWhatsApp={handleSendWhatsApp}
-                    onClientClick={onClientClick}
-                    onAppointmentClick={onAppointmentClick}
-                    clientAddress={clientAddress}
-                  />
-                );
-              })}
+            <div className="flex-1 rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col agenda-card border agenda-border">
+              <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <div className="divide-y agenda-border">
+                  {timeSlots.map(time => {
+                    const appointment = appointments.find(a => a.date === dateStr && (a.time === time || a.time.startsWith(time.split(':')[0] + ':' + time.split(':')[1])));
+                    const block = blocks.find(b => b.date === dateStr && b.time === time);
+
+                    let clientAddress: string | undefined;
+                    if (appointment) {
+                      const client = clients.find(c => c.phone === appointment.phone)
+                        || clients.find(c => c.name.toLowerCase() === appointment.clientName.toLowerCase());
+                      if (client) {
+                        const parts = [
+                          client.addressStreet,
+                          client.addressNumber,
+                          client.addressNeighborhood,
+                          client.addressCity,
+                          client.addressState,
+                        ].filter(Boolean);
+                        clientAddress = parts.length > 0 ? parts.join(', ') : (client.address || undefined);
+                      }
+                    }
+
+                    return (
+                      <TimeSlot
+                        key={time}
+                        time={time}
+                        appointment={appointment}
+                        block={block || (dayBlock ? { ...dayBlock } : undefined)}
+                        onAddClick={(time: string) => onAddClick(time, normalizeLocalDate(selectedDate))}
+                        onDeleteBlock={onDeleteBlock}
+                        onCopyPix={handleCopyPix}
+                        onSendWhatsApp={handleSendWhatsApp}
+                        onClientClick={onClientClick}
+                        onAppointmentClick={onAppointmentClick}
+                        clientAddress={clientAddress}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        );
+      })()}
 
       {viewMode === 'week' && (
         <AgendaWeekView
