@@ -1,34 +1,52 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { Block } from '@/types';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
+const parseIsoDate = (iso: string) => iso.split('-').reverse().join('/');
+
 export function useBlocks() {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
-  const { currentAdmin, isAdminChefe } = useAuth();
+  const { currentAdmin, isAdminChefe, admins } = useAuth();
 
   const fetchBlocks = useCallback(async () => {
+    if (!currentAdmin) return;
     try {
-      const data = await fetchAllFromTable('blocks', '*', { orderBy: 'date', ascending: false });
+      let query = (supabase.from('blocks' as any) as any)
+        .select('*')
+        .order('date', { ascending: false });
 
-      setBlocks(data?.map(b => ({
+      if (!isAdminChefe) {
+        // Sub-admin: vê bloqueios próprios + do chefe do mesmo salão
+        const chefe = admins.find(a => a.role === 'admin_chefe');
+        if (chefe && chefe.id !== currentAdmin.id) {
+          query = query.or(`owner_id.eq.${currentAdmin.id},owner_id.eq.${chefe.id}`);
+        } else {
+          query = query.eq('owner_id', currentAdmin.id);
+        }
+      }
+      // admin_chefe: sem filtro de owner_id, vê todos os bloqueios do salão
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      setBlocks((data || []).map((b: any) => ({
         id: b.id,
-        date: b.date.split('-').reverse().join('/'),
-        endDate: b.end_date ? b.end_date.split('-').reverse().join('/') : undefined,
+        date: parseIsoDate(b.date),
+        endDate: b.end_date ? parseIsoDate(b.end_date) : undefined,
         time: b.time,
         type: b.type as 'allDay' | 'timeRange' | 'dateRange',
         reason: b.reason || '',
         createdAt: new Date(b.created_at),
-      })) || []);
+      })));
     } catch (error) {
       console.error('Erro ao carregar bloqueios:', error);
     } finally {
       setLoading(false);
     }
-  }, [currentAdmin, isAdminChefe]);
+  }, [currentAdmin, isAdminChefe, admins]);
 
   useEffect(() => {
     if (currentAdmin) fetchBlocks();
@@ -62,8 +80,8 @@ export function useBlocks() {
 
       const newBlock: Block = {
         id: data.id,
-        date: new Date(data.date).toLocaleDateString('pt-BR'),
-        endDate: data.end_date ? new Date(data.end_date).toLocaleDateString('pt-BR') : undefined,
+        date: parseIsoDate(data.date),
+        endDate: data.end_date ? parseIsoDate(data.end_date) : undefined,
         time: data.time,
         type: data.type as 'allDay' | 'timeRange' | 'dateRange',
         reason: data.reason || '',
