@@ -12,12 +12,7 @@ export function useBlocks() {
 
   const fetchBlocks = useCallback(async () => {
     try {
-      const filters: Record<string, string> = {};
-      if (currentAdmin && !isAdminChefe) {
-        filters.owner_id = currentAdmin.id;
-      }
-
-      const data = await fetchAllFromTable('blocks', '*', { orderBy: 'date', ascending: false, filters: Object.keys(filters).length > 0 ? filters : undefined });
+      const data = await fetchAllFromTable('blocks', '*', { orderBy: 'date', ascending: false });
 
       setBlocks(data?.map(b => ({
         id: b.id,

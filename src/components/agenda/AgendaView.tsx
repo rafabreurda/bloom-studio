@@ -16,7 +16,7 @@ interface AgendaViewProps {
   clients: Client[];
   onNavigate: (tab: TabId) => void;
   onAddClick: (time: string, date: Date) => void;
-  onBlockClick: () => void;
+  onBlockClick: (date?: Date) => void;
   onDeleteBlock: (blockId: string) => void;
   onClientClick: (clientName: string, phone: string) => void;
   onAppointmentClick: (appointment: Appointment) => void;
@@ -169,7 +169,7 @@ export function AgendaView({
         onDateChange={(date) => setSelectedDate(normalizeLocalDate(date))}
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
-        onBlockClick={onBlockClick}
+        onBlockClick={() => onBlockClick(selectedDate)}
         onAddClick={() => onAddClick('', selectedDate)}
         onClearAll={onClearAll}
         onClearByDate={onClearByDate}

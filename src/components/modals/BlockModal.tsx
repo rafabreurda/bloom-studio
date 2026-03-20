@@ -13,6 +13,13 @@ interface BlockModalProps {
 
 export function BlockModal({ selectedDate, onClose, onBlock }: BlockModalProps) {
   const [blockType, setBlockType] = useState<'allDay' | 'timeRange' | 'dateRange'>('allDay');
+
+  const toLocalDateString = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
   const [startTime, setStartTime] = useState('08:00');
   const [endTime, setEndTime] = useState('09:00');
 
@@ -107,7 +114,7 @@ export function BlockModal({ selectedDate, onClose, onBlock }: BlockModalProps) 
                 name="startDate"
                 type="date"
                 className="input-bronze"
-                defaultValue={selectedDate.toISOString().split('T')[0]}
+                defaultValue={toLocalDateString(selectedDate)}
                 required
               />
             </div>
@@ -119,7 +126,7 @@ export function BlockModal({ selectedDate, onClose, onBlock }: BlockModalProps) 
                 name="endDate"
                 type="date"
                 className="input-bronze"
-                defaultValue={selectedDate.toISOString().split('T')[0]}
+                defaultValue={toLocalDateString(selectedDate)}
                 required
               />
             </div>
@@ -129,7 +136,7 @@ export function BlockModal({ selectedDate, onClose, onBlock }: BlockModalProps) 
             name="date"
             type="date"
             className="input-bronze"
-            defaultValue={selectedDate.toISOString().split('T')[0]}
+            defaultValue={toLocalDateString(selectedDate)}
             required
           />
         )}

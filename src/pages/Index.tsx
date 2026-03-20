@@ -134,6 +134,7 @@ const MainApp = () => {
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBlockModal, setShowBlockModal] = useState(false);
+  const [blockSelectedDate, setBlockSelectedDate] = useState<Date>(new Date());
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [showRestrictedModal, setShowRestrictedModal] = useState(false);
   const [showStockModal, setShowStockModal] = useState(false);
@@ -300,7 +301,7 @@ const MainApp = () => {
               clients={clients}
               onNavigate={handleTabChange}
               onAddClick={handleAddClick}
-              onBlockClick={() => setShowBlockModal(true)}
+              onBlockClick={(date?: Date) => { if (date) setBlockSelectedDate(date); setShowBlockModal(true); }}
               onDeleteBlock={deleteBlock}
               onClientClick={handleClientClickFromAgenda}
               onAppointmentClick={(appointment) => setEditingAppointment(appointment)}
@@ -440,7 +441,7 @@ const MainApp = () => {
       {showBlockModal && (
         <div className="fixed inset-0 bg-background/80 z-[150] flex items-center justify-center p-4 backdrop-blur-md">
           <BlockModal
-            selectedDate={new Date()}
+            selectedDate={blockSelectedDate}
             onClose={() => setShowBlockModal(false)}
             onBlock={addBlock}
           />
