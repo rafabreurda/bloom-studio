@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { X, Star, CheckCircle2, ShoppingCart, Handshake, Trash2, Sparkles, FileText, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { ReceiptModal } from './ReceiptModal';
 import { BronzeCard } from '@/components/ui/BronzeCard';
@@ -141,6 +142,7 @@ export function EditAppointmentModal({
       await onSave(buildAppointmentData(paymentMethod, status));
       onClose();
     } catch {
+      toast.error('Erro ao salvar agendamento');
       setIsSaving(false);
     }
   };
@@ -154,6 +156,7 @@ export function EditAppointmentModal({
       await onSave(buildAppointmentData(method, 'Agendado'));
       onClose();
     } catch {
+      toast.error('Erro ao salvar agendamento');
       setIsSaving(false);
     }
   };

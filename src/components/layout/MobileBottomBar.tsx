@@ -5,6 +5,7 @@ import {
 import { TabId } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface MobileBottomBarProps {
   activeTab: TabId;
@@ -28,6 +29,21 @@ const menuItems = [
 export function MobileBottomBar({ activeTab, onTabChange, onOpenSidebar }: MobileBottomBarProps) {
   const { isAdminChefe, currentAdmin, logout } = useAuth();
   const [showMore, setShowMore] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+
+  const handleLogout = () => {
+    if (confirmLogout) {
+      logout();
+    } else {
+      setConfirmLogout(true);
+      toast('Toque novamente para sair', {
+        duration: 3000,
+        onDismiss: () => setConfirmLogout(false),
+        onAutoClose: () => setConfirmLogout(false),
+      });
+      setTimeout(() => setConfirmLogout(false), 3000);
+    }
+  };
 
   // Admin chefe only sees config
   if (isAdminChefe) {
@@ -97,12 +113,12 @@ export function MobileBottomBar({ activeTab, onTabChange, onOpenSidebar }: Mobil
           </button>
           {/* User + Logout */}
           <button
-            onClick={logout}
-            className="flex flex-col items-center justify-center gap-1 px-3 py-1 rounded-xl transition-all min-w-[56px] text-muted-foreground"
+            onClick={handleLogout}
+            className={`flex flex-col items-center justify-center gap-1 px-3 py-1 rounded-xl transition-all min-w-[56px] ${confirmLogout ? 'bg-destructive/10' : 'text-muted-foreground'}`}
           >
-            <LogOut size={20} className="text-destructive" />
+            <LogOut size={20} className={confirmLogout ? 'text-destructive animate-pulse' : 'text-destructive'} />
             <span className="text-[9px] font-black uppercase leading-none truncate max-w-[56px]">
-              {currentAdmin?.name?.split(' ')[0] || 'Sair'}
+              {confirmLogout ? 'Sair?' : (currentAdmin?.name?.split(' ')[0] || 'Sair')}
             </span>
           </button>
         </div>

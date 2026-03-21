@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { X, Star, CheckCircle2, ShoppingCart, Handshake, UserPlus, Sparkles } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
@@ -103,6 +104,10 @@ export function AddAppointmentModal({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isSaving) return;
+    if (!clientName.trim()) {
+      toast.error('Informe o nome da cliente');
+      return;
+    }
     setIsSaving(true);
     try {
       const formData = new FormData(e.currentTarget);
