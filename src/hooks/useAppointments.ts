@@ -20,6 +20,9 @@ export function useAppointments() {
 
       const allData = await fetchAllFromTable('appointments', '*', { orderBy: 'date', ascending: false, filters: Object.keys(filters).length > 0 ? filters : undefined });
 
+      // Guard: if currentAdmin changed while fetching, discard stale results
+      if (!allData) return;
+
       setAppointments(allData?.map(a => {
         const [year, month, day] = a.date.split('-');
         const dateStr = `${day}/${month}/${year}`;

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { Appointment, Finance } from '@/types';
+import { isFinanceProcessed, markFinanceProcessed } from '@/lib/financeTracker';
 
 interface UseAutoCloseProps {
   appointments: Appointment[];
@@ -52,11 +53,11 @@ export function useAutoClose({ appointments, onUpdateAppointment, onAddFinance, 
       if (shouldClose) {
         processedRef.current.add(appo.id);
         try {
-          // Update appointment status to Concluído
           await onUpdateAppointment({ ...appo, status: 'Concluído' });
 
-          // Create finance entry if chargedValue > 0 and has payment method
-          if (appo.chargedValue > 0 && appo.paymentMethod) {
+          // Only create finance if not already created by manual payment confirmation
+          if (appo.chargedValue > 0 && appo.paymentMethod && !isFinanceProcessed(appo.id)) {
+            markFinanceProcessed(appo.id);
             await onAddFinance({
               date: appo.date,
               description: `Sessão (auto) - ${appo.clientName}`,

@@ -59,6 +59,7 @@ export function EditAppointmentModal({
   const [time, setTime] = useState(appointment.time);
   const [showReceipt, setShowReceipt] = useState(false);
   const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const activeServices = serviceTypes.filter(s => s.isActive);
 
@@ -125,25 +126,36 @@ export function EditAppointmentModal({
     };
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    // If changing to "Agendado" from "Aguardando Sinal", show payment confirmation
+    if (isSaving) return;
+
     const wasWaiting = appointment.status === 'Aguardando Sinal';
     if (wasWaiting && status === 'Agendado') {
       setShowPaymentConfirm(true);
       return;
     }
-    
-    onSave(buildAppointmentData(paymentMethod, status));
-    onClose();
+
+    setIsSaving(true);
+    try {
+      await onSave(buildAppointmentData(paymentMethod, status));
+      onClose();
+    } catch {
+      setIsSaving(false);
+    }
   };
 
-  const handlePaymentConfirm = (method: 'Pix' | 'Cartão' | 'Dinheiro') => {
+  const handlePaymentConfirm = async (method: 'Pix' | 'Cartão' | 'Dinheiro') => {
+    if (isSaving) return;
+    setIsSaving(true);
     setPaymentMethod(method);
     setShowPaymentConfirm(false);
-    onSave(buildAppointmentData(method, 'Agendado'));
-    onClose();
+    try {
+      await onSave(buildAppointmentData(method, 'Agendado'));
+      onClose();
+    } catch {
+      setIsSaving(false);
+    }
   };
 
   const addProduct = (productId: string) => {
@@ -438,13 +450,14 @@ export function EditAppointmentModal({
           >
             Recibo
           </BronzeButton>
-          <BronzeButton 
-            className="flex-1 h-[60px]" 
-            variant="gold" 
-            type="submit" 
+          <BronzeButton
+            className="flex-1 h-[60px]"
+            variant="gold"
+            type="submit"
             icon={CheckCircle2}
+            disabled={isSaving}
           >
-            Salvar Alterações
+            {isSaving ? 'Salvando...' : 'Salvar Alterações'}
           </BronzeButton>
         </div>
       </form>
@@ -466,7 +479,8 @@ export function EditAppointmentModal({
             <div className="space-y-3">
               <button
                 onClick={() => handlePaymentConfirm('Pix')}
-                className="w-full flex items-center gap-4 p-4 bg-secondary hover:bg-muted rounded-2xl border border-border/10 transition-all group"
+                disabled={isSaving}
+                className="w-full flex items-center gap-4 p-4 bg-secondary hover:bg-muted rounded-2xl border border-border/10 transition-all group disabled:opacity-50"
               >
                 <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
                   <Smartphone size={22} className="text-emerald-500" />
@@ -476,7 +490,8 @@ export function EditAppointmentModal({
 
               <button
                 onClick={() => handlePaymentConfirm('Cartão')}
-                className="w-full flex items-center gap-4 p-4 bg-secondary hover:bg-muted rounded-2xl border border-border/10 transition-all group"
+                disabled={isSaving}
+                className="w-full flex items-center gap-4 p-4 bg-secondary hover:bg-muted rounded-2xl border border-border/10 transition-all group disabled:opacity-50"
               >
                 <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
                   <CreditCard size={22} className="text-blue-500" />
@@ -486,7 +501,8 @@ export function EditAppointmentModal({
 
               <button
                 onClick={() => handlePaymentConfirm('Dinheiro')}
-                className="w-full flex items-center gap-4 p-4 bg-secondary hover:bg-muted rounded-2xl border border-border/10 transition-all group"
+                disabled={isSaving}
+                className="w-full flex items-center gap-4 p-4 bg-secondary hover:bg-muted rounded-2xl border border-border/10 transition-all group disabled:opacity-50"
               >
                 <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center">
                   <Banknote size={22} className="text-yellow-500" />

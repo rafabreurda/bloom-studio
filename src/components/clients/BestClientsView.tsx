@@ -35,7 +35,8 @@ export function BestClientsView({ clients, appointments, inactivityDays, onInact
       );
 
       const totalSessions = clientAppts.length;
-      const totalSpent = clientAppts.reduce((sum, a) => sum + (a.chargedValue || a.totalValue || 0), 0);
+      // Use chargedValue (actual amount charged) — 0 is valid for free sessions
+      const totalSpent = clientAppts.reduce((sum, a) => sum + (a.chargedValue ?? 0), 0);
 
       // Find last session date
       let lastSessionDate: string | null = null;
@@ -48,7 +49,8 @@ export function BestClientsView({ clients, appointments, inactivityDays, onInact
         }).sort((a, b) => b.getTime() - a.getTime());
 
         lastSessionDate = dates[0].toLocaleDateString('pt-BR');
-        daysSinceLastSession = Math.floor((now.getTime() - dates[0].getTime()) / (1000 * 60 * 60 * 24));
+        const diff = Math.floor((now.getTime() - dates[0].getTime()) / (1000 * 60 * 60 * 24));
+        daysSinceLastSession = diff < 0 ? 0 : diff; // Future appointments treated as "today"
       }
 
       return {

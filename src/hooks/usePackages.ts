@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchAllFromTable } from '@/lib/supabaseFetchAll';
 import { toast } from 'sonner';
@@ -20,6 +20,7 @@ export interface Package {
 export function usePackages() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
+  const processingSession = useRef<Set<string>>(new Set());
   const { currentAdmin, isAdminChefe } = useAuth();
 
   const fetchPackages = useCallback(async () => {
@@ -109,8 +110,10 @@ export function usePackages() {
   };
 
   const useSession = async (packageId: string) => {
+    if (processingSession.current.has(packageId)) return;
     const pkg = packages.find(p => p.id === packageId);
     if (!pkg) return;
+    processingSession.current.add(packageId);
 
     const newUsed = pkg.usedSessions + 1;
     const isComplete = newUsed >= pkg.totalSessions;
@@ -136,6 +139,8 @@ export function usePackages() {
     } catch (error) {
       console.error('Erro ao usar sessão:', error);
       toast.error('Erro ao usar sessão do pacote');
+    } finally {
+      processingSession.current.delete(packageId);
     }
   };
 

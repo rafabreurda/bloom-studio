@@ -9,6 +9,15 @@ import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { Appointment, Block, StockItem, TabId, ViewMode, Client, WhatsAppTemplate } from '@/types';
 import { toast } from 'sonner';
 
+// Static time slots — generated once, not on every render
+const TIME_SLOTS: string[] = [];
+for (let h = 6; h <= 23; h++) {
+  for (let m = 0; m < 60; m += 15) {
+    if (h === 23 && m > 0) break;
+    TIME_SLOTS.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
+  }
+}
+
 interface AgendaViewProps {
   appointments: Appointment[];
   blocks: Block[];
@@ -91,14 +100,7 @@ export function AgendaView({
     localStorage.setItem('bronze_agenda_view_mode', mode);
   };
 
-  // Generate time slots from 7:00 to 22:00 in 15-minute intervals
-  const timeSlots: string[] = [];
-  for (let h = 6; h <= 23; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      if (h === 23 && m > 0) break;
-      timeSlots.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
-    }
-  }
+  const timeSlots = TIME_SLOTS;
 
   const dateStr = selectedDate.toLocaleDateString('pt-BR');
 

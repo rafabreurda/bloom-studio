@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { markFinanceProcessed } from '@/lib/financeTracker';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoginScreen } from '@/components/auth/LoginScreen';
 import { Sidebar } from '@/components/layout/Sidebar';
@@ -537,9 +538,9 @@ const MainApp = () => {
               
               await updateAppointment(appointment);
               
-              // Create finance entry ONLY when transitioning to "Agendado" from "Aguardando Sinal"
-              // This is the moment the client pays
+              // Create finance entry ONLY when transitioning from "Aguardando Sinal"
               if (previousStatus === 'Aguardando Sinal' && (appointment.status === 'Agendado' || appointment.status === 'Concluído') && appointment.chargedValue > 0) {
+                markFinanceProcessed(appointment.id);
                 await addFinance({
                   date: appointment.date,
                   description: `Sessão - ${appointment.clientName}`,

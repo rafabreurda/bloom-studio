@@ -10,7 +10,7 @@ interface AddAppointmentModalProps {
   selectedDate: Date;
   defaultTime: string;
   onClose: () => void;
-  onAdd: (appointment: Omit<Appointment, 'id' | 'createdAt'>) => void;
+  onAdd: (appointment: Omit<Appointment, 'id' | 'createdAt'>) => void | Promise<void>;
   stock: StockItem[];
   clients: Client[];
   partnerships: Partnership[];
@@ -38,6 +38,7 @@ export function AddAppointmentModal({
   const [isManualPhone, setIsManualPhone] = useState(true);
   const [isNewClient, setIsNewClient] = useState(false);
   const [selectedTime, setSelectedTime] = useState(defaultTime || '08:00');
+  const [isSaving, setIsSaving] = useState(false);
 
   const activeServices = serviceTypes.filter(s => s.isActive);
 
@@ -83,45 +84,48 @@ export function AddAppointmentModal({
     setIsNewClient(data.source === 'manual');
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    // Parse date directly without creating Date object to avoid timezone issues
-    const rawDate = formData.get('date') as string; // Format: YYYY-MM-DD
-    const [year, month, day] = rawDate.split('-');
-    const dateStr = `${day}/${month}/${year}`; // Convert to DD/MM/YYYY
-    
-    
-    onAdd({
-      clientName: clientName,
-      phone: clientPhone,
-      date: dateStr,
-      time: selectedTime,
-      status: formData.get('status') as 'Aguardando Sinal' | 'Agendado',
-      value: servicesTotal,
-      totalValue: finalTotal,
-      productsValue: productsTotal,
-      chargedValue: chargedValue,
-      cost: servicesTotalCost,
-      tags: [...(isVIP ? ['VIP'] : []), ...(isNewClient ? ['Cliente Nova'] : [])],
-      paymentMethod: formData.get('paymentMethod') as 'Pix' | 'Cartão' | 'Dinheiro',
-      isConfirmed,
-      isPartnership,
-      partnershipId: isPartnership ? selectedPartnershipId : undefined,
-      partnershipName: isPartnership ? selectedPartnership?.name : undefined,
-      partnershipDiscount: isPartnership ? selectedPartnership?.discount : undefined,
-      serviceTypeId: selectedServices[0]?.serviceId || undefined,
-      serviceTypeName: selectedServices.map(s => s.name).join(', ') || undefined,
-      services: selectedServices,
-      products: selectedProducts.map(p => ({
-        productId: p.id,
-        name: p.name,
-        quantity: 1,
-        price: p.price,
-      })),
-    });
-    
-    onClose();
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const rawDate = formData.get('date') as string;
+      const [year, month, day] = rawDate.split('-');
+      const dateStr = `${day}/${month}/${year}`;
+
+      await onAdd({
+        clientName: clientName,
+        phone: clientPhone,
+        date: dateStr,
+        time: selectedTime,
+        status: formData.get('status') as 'Aguardando Sinal' | 'Agendado',
+        value: servicesTotal,
+        totalValue: finalTotal,
+        productsValue: productsTotal,
+        chargedValue: chargedValue,
+        cost: servicesTotalCost,
+        tags: [...(isVIP ? ['VIP'] : []), ...(isNewClient ? ['Cliente Nova'] : [])],
+        paymentMethod: formData.get('paymentMethod') as 'Pix' | 'Cartão' | 'Dinheiro',
+        isConfirmed,
+        isPartnership,
+        partnershipId: isPartnership ? selectedPartnershipId : undefined,
+        partnershipName: isPartnership ? selectedPartnership?.name : undefined,
+        partnershipDiscount: isPartnership ? selectedPartnership?.discount : undefined,
+        serviceTypeId: selectedServices[0]?.serviceId || undefined,
+        serviceTypeName: selectedServices.map(s => s.name).join(', ') || undefined,
+        services: selectedServices,
+        products: selectedProducts.map(p => ({
+          productId: p.id,
+          name: p.name,
+          quantity: 1,
+          price: p.price,
+        })),
+      });
+      onClose();
+    } catch {
+      setIsSaving(false);
+    }
   };
 
   const addProduct = (productId: string) => {
@@ -391,13 +395,14 @@ export function AddAppointmentModal({
         </div>
 
         {/* Submit */}
-        <BronzeButton 
-          className="w-full h-[70px]" 
-          variant="gold" 
-          type="submit" 
+        <BronzeButton
+          className="w-full h-[70px]"
+          variant="gold"
+          type="submit"
           icon={CheckCircle2}
+          disabled={isSaving}
         >
-          Lançar Bronze
+          {isSaving ? 'Salvando...' : 'Lançar Bronze'}
         </BronzeButton>
       </form>
     </BronzeCard>

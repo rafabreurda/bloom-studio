@@ -45,9 +45,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (permissionsError) throw permissionsError;
 
-      console.log('[AUTH] Profiles loaded:', profiles?.length, profiles);
-      console.log('[AUTH] Roles loaded:', roles?.length, roles);
-      console.log('[AUTH] Permissions loaded:', permissions?.length, permissions);
 
       const adminsWithRoles: AdminWithRole[] = (profiles || []).map(profile => {
         const userRole = roles?.find(r => r.user_id === profile.id);
@@ -61,7 +58,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
       });
 
-      console.log('[AUTH] Admins with roles:', adminsWithRoles.map(a => ({ name: a.name, role: a.role })));
       setAdmins(adminsWithRoles);
       return adminsWithRoles;
     } catch (error) {
@@ -73,6 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasPermission = (tabId: TabId): boolean => {
     if (!currentAdmin) return false;
     if (currentAdmin.role === 'admin_chefe') return true;
+    // Tabs that don't require explicit permission
+    const alwaysAllowed: TabId[] = ['gps', 'pacotes'];
+    if (alwaysAllowed.includes(tabId)) return true;
     if (currentAdmin.permissions) {
       const permMap: Record<string, keyof AdminPermissions> = {
         agenda: 'agenda',
@@ -86,8 +85,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       const key = permMap[tabId];
       if (key) return currentAdmin.permissions[key] as boolean;
+      // Unknown tab with no permission record — allow except config
+      return tabId !== 'config';
     }
-    return tabId !== 'config';
+    // No permissions record at all — deny everything except safe tabs
+    return alwaysAllowed.includes(tabId);
   };
 
   const switchAdmin = async (adminId: string, password?: string): Promise<boolean> => {
