@@ -30,6 +30,7 @@ export const defaultConfig: SystemConfig = {
   pixKey: '',
   payLink: '',
   lowStockThreshold: 5,
+  bronzeGoal: 10,
   admins: defaultAdmins,
   clientTags: defaultClientTags,
   whatsappTemplates: defaultWhatsAppTemplates,

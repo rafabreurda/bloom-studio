@@ -131,6 +131,18 @@ const MainApp = () => {
     onRefetchFinances: refetchFinances,
   });
 
+  // Bronze goal notification — alert when a client reaches the target
+  const checkBronzeGoal = (clientName: string, phone: string) => {
+    const goal = systemConfig.bronzeGoal ?? 10;
+    const count = appointments.filter(a =>
+      a.clientName.toLowerCase() === clientName.toLowerCase() ||
+      (phone && a.phone === phone)
+    ).length + 1; // +1 because the new appointment isn't in state yet
+    if (count === goal) {
+      toast.success(`🏆 ${clientName} atingiu ${goal} bronzes! Hora de premiar!`, { duration: 8000 });
+    }
+  };
+
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBlockModal, setShowBlockModal] = useState(false);
@@ -160,6 +172,11 @@ const MainApp = () => {
     setNewAppoTime(time);
     if (date) setNewAppoDate(date);
     setShowAddModal(true);
+  };
+
+  const handleAddAppointment = async (appointment: Parameters<typeof addAppointment>[0]) => {
+    checkBronzeGoal(appointment.clientName, appointment.phone);
+    await addAppointment(appointment);
   };
 
   // State for pre-filled new client registration
@@ -320,6 +337,7 @@ const MainApp = () => {
               partnerships={partnerships}
               appointments={appointments}
               whatsappTemplates={systemConfig.whatsappTemplates}
+              bronzeGoal={systemConfig.bronzeGoal ?? 10}
               onAddClient={addClient}
               onEditClient={updateClient}
               onDeleteClient={deleteClient}
@@ -429,7 +447,7 @@ const MainApp = () => {
             selectedDate={newAppoDate}
             defaultTime={newAppoTime}
             onClose={() => setShowAddModal(false)}
-            onAdd={addAppointment}
+            onAdd={handleAddAppointment}
             stock={stock}
             clients={clients}
             partnerships={partnerships}

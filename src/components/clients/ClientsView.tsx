@@ -15,6 +15,7 @@ interface ClientsViewProps {
   partnerships: Partnership[];
   appointments: Appointment[];
   whatsappTemplates: WhatsAppTemplate[];
+  bronzeGoal?: number;
   onAddClient: (client: Omit<Client, 'id' | 'createdAt' | 'history'>) => void;
   onEditClient: (client: Client) => void;
   onDeleteClient: (id: string) => void;
@@ -23,7 +24,7 @@ interface ClientsViewProps {
   onRefetch?: () => void;
 }
 
-export function ClientsView({ clients, tags, partnerships, appointments, whatsappTemplates, onAddClient, onEditClient, onDeleteClient, onDeleteAllClients, onSyncFromAppointments, onRefetch }: ClientsViewProps) {
+export function ClientsView({ clients, tags, partnerships, appointments, whatsappTemplates, bronzeGoal, onAddClient, onEditClient, onDeleteClient, onDeleteAllClients, onSyncFromAppointments, onRefetch }: ClientsViewProps) {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -119,6 +120,7 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
           inactivityDays={inactivityDays}
           onInactivityDaysChange={setInactivityDays}
           whatsappTemplates={whatsappTemplates}
+          bronzeGoal={bronzeGoal}
         />
       ) : (
       <>

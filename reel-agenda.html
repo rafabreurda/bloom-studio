@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroFlux Agendamento — Reel</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+  gap: 40px;
+}
+
+.hint {
+  color: #555;
+  font-size: 13px;
+  text-align: center;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ─── PHONE ─── */
+.phone {
+  width: 390px;
+  height: 844px;
+  border-radius: 50px;
+  border: 9px solid #222;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 0 0 1px #333,
+    0 30px 80px rgba(0,0,0,0.9),
+    inset 0 0 0 1px #444;
+  background: #0d0d0d;
+}
+
+/* Notch */
+.phone::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 120px; height: 28px;
+  background: #222;
+  border-radius: 0 0 20px 20px;
+  z-index: 100;
+}
+
+/* ─── BARRA DE PROGRESSO ─── */
+.progress-bar {
+  position: absolute;
+  top: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #d4a017, #f0c040);
+  z-index: 200;
+  width: 0;
+  animation: progress 10s linear forwards;
+}
+@keyframes progress { to { width: 100%; } }
+
+/* ─── CENAS ─── */
+.scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+/* ══════════════════════════════════
+   CENA 1 — PROBLEMA (0–2.5s)
+══════════════════════════════════ */
+#scene1 {
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  gap: 0;
+  animation: s1 2.8s ease forwards;
+}
+
+@keyframes s1 {
+  0%   { opacity: 0; }
+  8%   { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.prob-label {
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  opacity: 0;
+  animation: fadeUp 0.4s 0.2s forwards;
+}
+
+.prob-title {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 900;
+  text-align: center;
+  line-height: 1.3;
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: fadeUp 0.4s 0.4s forwards;
+}
+.prob-title span { color: #ef4444; }
+
+/* Planilha simulada */
+.excel-sheet {
+  background: #1a2a1a;
+  border: 1px solid #2d4a2d;
+  border-radius: 12px;
+  overflow: hidden;
+  width: 100%;
+  opacity: 0;
+  animation: fadeUp 0.5s 0.6s forwards;
+}
+
+.excel-header {
+  background: #1d6a2a;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  padding: 6px 8px;
+  gap: 4px;
+}
+.excel-th {
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.excel-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  padding: 5px 8px;
+  gap: 4px;
+  border-bottom: 1px solid #1d3a1d;
+}
+.excel-row:nth-child(odd) { background: #141f14; }
+.excel-row:nth-child(even) { background: #111b11; }
+
+.excel-cell {
+  font-size: 10px;
+  color: #9ca3af;
+  text-align: center;
+}
+.excel-cell.name { color: #d1d5db; text-align: left; }
+.excel-cell.red { color: #f87171; }
+.excel-cell.green { color: #4ade80; }
+
+.excel-mess {
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #1a1010;
+  border-top: 1px solid #3a1a1a;
+}
+.excel-mess span { font-size: 9px; color: #f87171; font-weight: 700; }
+
+.prob-pain {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  opacity: 0;
+  animation: fadeUp 0.4s 1s forwards;
+}
+.pain-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1a1010;
+  border: 1px solid #3a1515;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.pain-item span { font-size: 12px; color: #ef4444; font-weight: 600; }
+
+/* ══════════════════════════════════
+   CENA 2 — DASHBOARD FINANCEIRO (2.5s–8s)
+══════════════════════════════════ */
+#scene2 {
+  background: #0d0d0d;
+  display: flex;
+  flex-direction: column;
+  animation: s2 10s ease forwards;
+}
+
+@keyframes s2 {
+  0%   { opacity: 0; }
+  27%  { opacity: 0; }
+  31%  { opacity: 1; }
+  78%  { opacity: 1; }
+  83%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* Status bar */
+.s2-statusbar {
+  background: #111;
+  padding: 32px 20px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #1e1e1e;
+}
+.nf-logo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.nf-logo-icon {
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, #d4a017, #f0c040);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 900;
+  color: #000;
+}
+.nf-logo-text {
+  font-size: 13px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.3px;
+}
+.nf-logo-text span { color: #d4a017; }
+.s2-month {
+  font-size: 11px;
+  color: #666;
+  font-weight: 600;
+}
+
+/* Body scroll */
+.s2-body {
+  flex: 1;
+  overflow: hidden;
+  padding: 14px 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Tab bar */
+.tab-bar {
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  animation: fadeUp 0.4s 0.1s forwards;
+}
+.tab-pill {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid #2a2a2a;
+  color: #666;
+  background: #111;
+}
+.tab-pill.active {
+  background: linear-gradient(135deg, #d4a017, #f0c040);
+  color: #000;
+  border-color: transparent;
+}
+
+/* ─ KPI Cards ─ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  opacity: 0;
+  animation: slideUp 0.5s 0.2s forwards;
+}
+
+.kpi-card {
+  background: #141414;
+  border: 1px solid #232323;
+  border-radius: 16px;
+  padding: 12px 13px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.02));
+  pointer-events: none;
+}
+
+.kpi-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.kpi-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.kpi-trend {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 20px;
+}
+.trend-up   { background: #052e16; color: #4ade80; }
+.trend-down { background: #2d0707; color: #f87171; }
+
+.kpi-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #555;
+  margin-bottom: 3px;
+}
+.kpi-value {
+  font-size: 20px;
+  font-weight: 900;
+  tabular-nums: true;
+}
+.val-green  { color: #4ade80; }
+.val-orange { color: #fb923c; }
+.val-red    { color: #f87171; }
+.val-gold   { color: #f0c040; }
+
+/* ─ Payment row ─ */
+.pay-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  opacity: 0;
+  animation: slideUp 0.5s 0.45s forwards;
+}
+.pay-card {
+  background: #111;
+  border: 1px solid #1e1e1e;
+  border-radius: 12px;
+  padding: 9px 5px;
+  text-align: center;
+}
+.pay-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  margin: 0 auto 5px;
+}
+.pay-label { font-size: 9px; font-weight: 700; color: #555; text-transform: uppercase; margin-bottom: 2px; }
+.pay-value { font-size: 12px; font-weight: 900; color: #ccc; }
+
+/* ─ Gráfico mini ─ */
+.chart-section {
+  background: #141414;
+  border: 1px solid #232323;
+  border-radius: 16px;
+  padding: 13px;
+  opacity: 0;
+  animation: slideUp 0.5s 0.65s forwards;
+}
+.chart-title {
+  font-size: 10px;
+  font-weight: 800;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.chart-svg { width: 100%; height: 70px; overflow: visible; }
+.chart-legend {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+.legend-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.legend-label { font-size: 9px; color: #555; font-weight: 600; }
+
+/* ─ Estoque alerta ─ */
+.stock-section {
+  opacity: 0;
+  animation: slideUp 0.5s 0.85s forwards;
+}
+.stock-alert {
+  background: #1a0a0a;
+  border: 1px solid #5a1a1a;
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.stock-alert-icon { font-size: 16px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.5; } }
+.stock-alert-text { font-size: 11px; font-weight: 700; color: #f87171; }
+
+.stock-items { display: flex; flex-direction: column; gap: 6px; }
+.stock-item {
+  background: #141414;
+  border: 1px solid #232323;
+  border-radius: 10px;
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.stock-item.low { border-color: #5a1a1a; background: #1a0a0a; }
+.stock-name { flex: 1; font-size: 12px; font-weight: 700; color: #ccc; }
+.stock-badge-low {
+  font-size: 8px;
+  font-weight: 900;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: #5a1a1a;
+  color: #f87171;
+  text-transform: uppercase;
+}
+.stock-qty {
+  font-size: 16px;
+  font-weight: 900;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.qty-low  { background: #3a0a0a; color: #f87171; }
+.qty-ok   { background: #0a2a0a; color: #4ade80; }
+
+/* ══════════════════════════════════
+   CENA 3 — RESULTADO (8s–10s)
+══════════════════════════════════ */
+#scene3 {
+  background: linear-gradient(160deg, #0a0600 0%, #1a0f00 40%, #2a1800 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px;
+  gap: 18px;
+  animation: s3 10s ease forwards;
+}
+
+@keyframes s3 {
+  0%  { opacity: 0; }
+  80% { opacity: 0; }
+  85% { opacity: 1; }
+  100%{ opacity: 1; }
+}
+
+.r-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  animation: fadeUp 0.5s 0.1s forwards;
+}
+.r-logo-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #d4a017, #f0c040);
+  border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 900; color: #000;
+}
+.r-logo-name { font-size: 20px; font-weight: 900; color: #fff; line-height: 1.1; }
+.r-logo-name small { display: block; font-size: 11px; color: #d4a017; font-weight: 700; letter-spacing: 1px; }
+
+.r-tag {
+  background: rgba(212,160,23,0.12);
+  border: 1px solid rgba(212,160,23,0.3);
+  color: #d4a017;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 16px;
+  border-radius: 20px;
+  opacity: 0;
+  animation: fadeUp 0.5s 0.25s forwards;
+  text-align: center;
+}
+
+.r-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  width: 100%;
+  opacity: 0;
+  animation: fadeUp 0.5s 0.4s forwards;
+}
+.r-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.r-card-icon { font-size: 28px; flex-shrink: 0; }
+.r-card-body { flex: 1; }
+.r-card-num { font-size: 20px; font-weight: 900; color: #fff; line-height: 1.1; }
+.r-card-label { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 1px; }
+.r-card-badge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(212,160,23,0.2);
+  color: #f0c040;
+  flex-shrink: 0;
+}
+
+.r-cta {
+  background: linear-gradient(135deg, #d4a017, #f0c040);
+  color: #000;
+  font-size: 14px;
+  font-weight: 900;
+  padding: 15px 0;
+  border-radius: 14px;
+  text-align: center;
+  width: 100%;
+  box-shadow: 0 8px 30px rgba(212,160,23,0.4);
+  opacity: 0;
+  animation: popIn 0.5s 0.8s forwards;
+}
+.r-cta small { display: block; font-size: 10px; font-weight: 600; opacity: 0.7; margin-top: 2px; }
+
+/* ─── KEYFRAMES GLOBAIS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ─── BOTÃO ─── */
+.controls {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.btn-restart {
+  background: #d4a017;
+  color: #000;
+  border: none;
+  padding: 11px 28px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.btn-restart:hover { background: #f0c040; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="progress-bar" id="pb"></div>
+
+  <!-- ════════ CENA 1: PROBLEMA ════════ -->
+  <div class="scene" id="scene1">
+    <div class="prob-label">⚠️ Você ainda faz isso?</div>
+    <div class="prob-title">Controle financeiro<br>do salão em <span>planilha?</span></div>
+
+    <!-- Planilha Excel simulada -->
+    <div class="excel-sheet">
+      <div class="excel-header">
+        <div class="excel-th">Cliente</div>
+        <div class="excel-th">Serviço</div>
+        <div class="excel-th">Valor</div>
+        <div class="excel-th">Pgto</div>
+      </div>
+      <div class="excel-row">
+        <div class="excel-cell name">Mariana</div>
+        <div class="excel-cell">Corte</div>
+        <div class="excel-cell green">120</div>
+        <div class="excel-cell">PIX</div>
+      </div>
+      <div class="excel-row">
+        <div class="excel-cell name">Julia???</div>
+        <div class="excel-cell">Color.</div>
+        <div class="excel-cell red">???</div>
+        <div class="excel-cell red">-</div>
+      </div>
+      <div class="excel-row">
+        <div class="excel-cell name">Ana</div>
+        <div class="excel-cell">Escova</div>
+        <div class="excel-cell green">80</div>
+        <div class="excel-cell">Din.</div>
+      </div>
+      <div class="excel-row">
+        <div class="excel-cell name">TOTAL</div>
+        <div class="excel-cell"></div>
+        <div class="excel-cell red">#ERRO!</div>
+        <div class="excel-cell"></div>
+      </div>
+      <div class="excel-mess">
+        <span>⚠️ Estoque de tintura acabando — anotação no caderno</span>
+      </div>
+    </div>
+
+    <div class="prob-pain">
+      <div class="pain-item">
+        <span>❌ Não sabe o lucro real do mês</span>
+      </div>
+      <div class="pain-item">
+        <span>❌ Estoque perdido, produto acaba sem avisar</span>
+      </div>
+      <div class="pain-item">
+        <span>❌ Relatório para o contador? Nunca</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ CENA 2: DASHBOARD ════════ -->
+  <div class="scene" id="scene2">
+    <!-- Status bar -->
+    <div class="s2-statusbar">
+      <div class="nf-logo">
+        <div class="nf-logo-icon">N</div>
+        <div class="nf-logo-text">Neuro<span>Flux</span></div>
+      </div>
+      <div class="s2-month">Março 2026</div>
+    </div>
+
+    <div class="s2-body">
+
+      <!-- Tabs -->
+      <div class="tab-bar">
+        <div class="tab-pill active">Financeiro</div>
+        <div class="tab-pill">Agenda</div>
+        <div class="tab-pill">Estoque</div>
+        <div class="tab-pill">Clientes</div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="background:#052e16">💰</div>
+            <span class="kpi-trend trend-up">↑ 12%</span>
+          </div>
+          <div class="kpi-label">Receita Total</div>
+          <div class="kpi-value val-green">R$ 8,4k</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="background:#1c1407">📉</div>
+            <span class="kpi-trend trend-down">↓ 3%</span>
+          </div>
+          <div class="kpi-label">Custos</div>
+          <div class="kpi-value val-orange">R$ 1,2k</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="background:#2d0707">🧾</div>
+            <span class="kpi-trend trend-down">↑ 5%</span>
+          </div>
+          <div class="kpi-label">Despesas</div>
+          <div class="kpi-value val-red">R$ 820</div>
+        </div>
+        <div class="kpi-card" style="border-color:#2a2000">
+          <div class="kpi-top">
+            <div class="kpi-icon" style="background:#2a1800">✨</div>
+            <span class="kpi-trend trend-up">↑ 18%</span>
+          </div>
+          <div class="kpi-label">Lucro Líquido</div>
+          <div class="kpi-value val-gold">R$ 6,3k</div>
+        </div>
+      </div>
+
+      <!-- Formas de pagamento -->
+      <div class="pay-row">
+        <div class="pay-card">
+          <div class="pay-icon" style="background:#0a1a3a">💳</div>
+          <div class="pay-label">Cartão</div>
+          <div class="pay-value">3,1k</div>
+        </div>
+        <div class="pay-card">
+          <div class="pay-icon" style="background:#1a1400">📱</div>
+          <div class="pay-label">Pix</div>
+          <div class="pay-value">3,8k</div>
+        </div>
+        <div class="pay-card">
+          <div class="pay-icon" style="background:#0a2a0a">💵</div>
+          <div class="pay-label">Dinheiro</div>
+          <div class="pay-value">1,1k</div>
+        </div>
+        <div class="pay-card">
+          <div class="pay-icon" style="background:#1a0a2a">🤝</div>
+          <div class="pay-label">Parcerias</div>
+          <div class="pay-value">400</div>
+        </div>
+      </div>
+
+      <!-- Gráfico de evolução -->
+      <div class="chart-section">
+        <div class="chart-title">Evolução — últimos 6 meses</div>
+        <svg class="chart-svg" viewBox="0 0 320 70">
+          <!-- Grid lines -->
+          <line x1="0" y1="60" x2="320" y2="60" stroke="#222" stroke-width="1"/>
+          <line x1="0" y1="40" x2="320" y2="40" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="0" y1="20" x2="320" y2="20" stroke="#1a1a1a" stroke-width="1"/>
+          <!-- Receita area -->
+          <defs>
+            <linearGradient id="gR" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#4ade80" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="gL" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f0c040" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#f0c040" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Receita path -->
+          <path d="M0,52 C20,50 50,42 80,38 C110,34 130,30 160,26 C190,22 220,18 250,14 C280,10 300,8 320,5"
+                fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round"/>
+          <path d="M0,52 C20,50 50,42 80,38 C110,34 130,30 160,26 C190,22 220,18 250,14 C280,10 300,8 320,5 L320,70 L0,70 Z"
+                fill="url(#gR)"/>
+          <!-- Lucro path -->
+          <path d="M0,58 C20,56 50,52 80,48 C110,44 130,40 160,36 C190,32 220,26 250,20 C280,14 300,12 320,10"
+                fill="none" stroke="#f0c040" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 2"/>
+          <!-- Pontos finais -->
+          <circle cx="320" cy="5" r="3" fill="#4ade80"/>
+          <circle cx="320" cy="10" r="3" fill="#f0c040"/>
+          <!-- Valores -->
+          <text x="318" y="3" font-size="8" fill="#4ade80" text-anchor="end">8,4k</text>
+          <text x="318" y="8" font-size="8" fill="#f0c040" text-anchor="end" dy="8">6,3k</text>
+          <!-- Labels meses -->
+          <text x="0"   y="68" font-size="8" fill="#444" text-anchor="middle">Out</text>
+          <text x="64"  y="68" font-size="8" fill="#444" text-anchor="middle">Nov</text>
+          <text x="128" y="68" font-size="8" fill="#444" text-anchor="middle">Dez</text>
+          <text x="192" y="68" font-size="8" fill="#444" text-anchor="middle">Jan</text>
+          <text x="256" y="68" font-size="8" fill="#444" text-anchor="middle">Fev</text>
+          <text x="320" y="68" font-size="8" fill="#d4a017" text-anchor="middle" font-weight="bold">Mar</text>
+        </svg>
+        <div class="chart-legend">
+          <span><span class="legend-dot" style="background:#4ade80"></span><span class="legend-label">Receita</span></span>
+          <span><span class="legend-dot" style="background:#f0c040"></span><span class="legend-label">Lucro</span></span>
+        </div>
+      </div>
+
+      <!-- Estoque -->
+      <div class="stock-section">
+        <div class="stock-alert">
+          <span class="stock-alert-icon">⚠️</span>
+          <span class="stock-alert-text">2 produtos com estoque BAIXO</span>
+        </div>
+        <div class="stock-items">
+          <div class="stock-item low">
+            <span class="stock-name">Tintura Louro 8.0</span>
+            <span class="stock-badge-low">BAIXO</span>
+            <div class="stock-qty qty-low">2</div>
+          </div>
+          <div class="stock-item">
+            <span class="stock-name">Shampoo Hidratante</span>
+            <div class="stock-qty qty-ok">14</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════ CENA 3: RESULTADO ════════ -->
+  <div class="scene" id="scene3">
+    <div class="r-logo">
+      <div class="r-logo-icon">N</div>
+      <div class="r-logo-name">
+        NeuroFlux
+        <small>AGENDAMENTO</small>
+      </div>
+    </div>
+
+    <div class="r-tag">Sistema Completo de Controle para Salões</div>
+
+    <div class="r-cards">
+      <div class="r-card">
+        <div class="r-card-icon">💰</div>
+        <div class="r-card-body">
+          <div class="r-card-num">Lucro real no bolso</div>
+          <div class="r-card-label">Dashboard financeiro completo: receita, custo, despesas e lucro líquido em tempo real</div>
+        </div>
+      </div>
+      <div class="r-card">
+        <div class="r-card-icon">📦</div>
+        <div class="r-card-body">
+          <div class="r-card-num">Estoque inteligente</div>
+          <div class="r-card-label">Alerta automático quando produto está acabando</div>
+        </div>
+        <div class="r-card-badge">NOVO</div>
+      </div>
+      <div class="r-card">
+        <div class="r-card-icon">📅</div>
+        <div class="r-card-body">
+          <div class="r-card-num">Agenda + Financeiro</div>
+          <div class="r-card-label">Agendamentos geram lançamentos financeiros automaticamente</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="r-cta">
+      Quero controlar meu salão de verdade
+      <small>neuroflux.app/agendamento</small>
+    </div>
+  </div>
+
+</div>
+
+<div class="controls">
+  <button class="btn-restart" onclick="restart()">▶ Reiniciar (10s)</button>
+</div>
+
+<script>
+function restart() {
+  const els = document.querySelectorAll('.scene, .progress-bar');
+  els.forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  });
+  // Re-trigger child animations in scene2
+  document.querySelectorAll('#scene2 [style*="animation"], #scene1 [style*="animation"]').forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  });
+  // Easier: reload
+  location.reload();
+}
+</script>
+</body>
+</html>

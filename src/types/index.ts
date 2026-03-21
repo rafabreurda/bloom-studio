@@ -212,6 +212,7 @@ export interface SystemConfig {
   pixKey: string;
   payLink: string;
   lowStockThreshold: number;
+  bronzeGoal?: number;
   admins: AdminUser[];
   clientTags: ClientTag[];
   whatsappTemplates: WhatsAppTemplate[];

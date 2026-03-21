@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, TrendingUp, TrendingDown, MessageSquare, Crown, AlertTriangle } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, MessageSquare, Crown, AlertTriangle, Flame } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { Client, Appointment, WhatsAppTemplate } from '@/types';
@@ -10,6 +10,7 @@ interface BestClientsViewProps {
   inactivityDays: number;
   onInactivityDaysChange: (days: number) => void;
   whatsappTemplates: WhatsAppTemplate[];
+  bronzeGoal?: number;
 }
 
 interface ClientStats {
@@ -21,7 +22,7 @@ interface ClientStats {
   isInactive: boolean;
 }
 
-export function BestClientsView({ clients, appointments, inactivityDays, onInactivityDaysChange, whatsappTemplates }: BestClientsViewProps) {
+export function BestClientsView({ clients, appointments, inactivityDays, onInactivityDaysChange, whatsappTemplates, bronzeGoal = 10 }: BestClientsViewProps) {
   const [search, setSearch] = useState('');
   const [view, setView] = useState<'top' | 'inactive'>('top');
 
@@ -113,15 +114,23 @@ export function BestClientsView({ clients, appointments, inactivityDays, onInact
 
       {/* Client stats list */}
       <div className="space-y-2">
-        {displayedClients.map((cs, i) => (
-          <BronzeCard key={cs.client.id} className={`bg-secondary/50 p-3 flex items-center gap-3 ${cs.isInactive && view === 'inactive' ? 'border-l-4 border-l-destructive' : ''}`}>
+        {displayedClients.map((cs, i) => {
+          const bronzeProgress = Math.min(cs.totalSessions / bronzeGoal, 1);
+          const reachedGoal = cs.totalSessions >= bronzeGoal;
+          return (
+          <BronzeCard key={cs.client.id} className={`bg-secondary/50 p-3 flex items-center gap-3 ${cs.isInactive && view === 'inactive' ? 'border-l-4 border-l-destructive' : ''} ${reachedGoal && view === 'top' ? 'border-l-4 border-l-amber-500' : ''}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${view === 'top' && i < 3 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
               {view === 'top' ? i + 1 : <AlertTriangle size={14} />}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-black text-sm truncate">{cs.client.name}</p>
-              <div className="flex gap-3 text-[10px] text-muted-foreground">
-                <span className="flex items-center gap-1"><TrendingUp size={10} /> {cs.totalSessions} sessões</span>
+              <div className="flex items-center gap-1">
+                <p className="font-black text-sm truncate">{cs.client.name}</p>
+                {reachedGoal && <Flame size={14} className="text-amber-500 shrink-0" title={`Meta de ${bronzeGoal} bronzes atingida!`} />}
+              </div>
+              <div className="flex gap-3 text-[10px] text-muted-foreground mb-1">
+                <span className="flex items-center gap-1 font-bold text-foreground">
+                  <TrendingUp size={10} /> {cs.totalSessions} bronzes
+                </span>
                 <span>R$ {cs.totalSpent.toFixed(0)}</span>
                 {cs.lastSessionDate && (
                   <span className="flex items-center gap-1">
@@ -131,6 +140,23 @@ export function BestClientsView({ clients, appointments, inactivityDays, onInact
                   </span>
                 )}
               </div>
+              {/* Bronze progress bar */}
+              {view === 'top' && (
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${bronzeProgress * 100}%`,
+                        backgroundColor: reachedGoal ? '#f59e0b' : 'hsl(var(--primary))',
+                      }}
+                    />
+                  </div>
+                  <span className={`text-[9px] font-black shrink-0 ${reachedGoal ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                    {reachedGoal ? '🏆 Meta!' : `${cs.totalSessions}/${bronzeGoal}`}
+                  </span>
+                </div>
+              )}
             </div>
             {view === 'inactive' && cs.client.phone && (
               <button
@@ -142,7 +168,8 @@ export function BestClientsView({ clients, appointments, inactivityDays, onInact
               </button>
             )}
           </BronzeCard>
-        ))}
+          );
+        })}
 
         {displayedClients.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">

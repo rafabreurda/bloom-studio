@@ -390,9 +390,10 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
         )}
 
         {activeSection === 'pagamentos' && (
+          <>
           <BronzeCard className="bg-secondary/50 space-y-6">
             <h3 className="text-lg font-black uppercase text-primary">Configurações de Pagamento</h3>
-            
+
             {/* PIX Key */}
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
@@ -421,6 +422,29 @@ export function ConfigView({ config, onConfigChange, onExportBackup, onUploadLog
               />
             </div>
           </BronzeCard>
+
+          <BronzeCard className="bg-secondary/50 space-y-4 mt-6">
+            <div>
+              <h3 className="text-lg font-black uppercase text-primary">Meta de Bronzes 🏆</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Defina quantos bronzes a cliente precisa fazer para atingir a meta da sua campanha. Você receberá um aviso quando uma cliente chegar nesse número.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                Quantidade de Bronzes para a Meta
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={999}
+                value={config.bronzeGoal ?? 10}
+                onChange={(e) => onConfigChange({ ...config, bronzeGoal: Math.max(1, Number(e.target.value)) })}
+                className="input-bronze w-32"
+              />
+            </div>
+          </BronzeCard>
+          </>
         )}
 
 
