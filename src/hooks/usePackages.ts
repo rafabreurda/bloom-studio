@@ -86,7 +86,7 @@ export function usePackages() {
 
   const updatePackage = async (pkg: Package) => {
     try {
-      const { error } = await supabase
+      let query = supabase
         .from('packages')
         .update({
           client_name: pkg.clientName,
@@ -98,6 +98,8 @@ export function usePackages() {
           notes: pkg.notes,
         })
         .eq('id', pkg.id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 
@@ -119,13 +121,12 @@ export function usePackages() {
     const isComplete = newUsed >= pkg.totalSessions;
 
     try {
-      const { error } = await supabase
+      let query = supabase
         .from('packages')
-        .update({
-          used_sessions: newUsed,
-          status: isComplete ? 'completed' : 'active',
-        })
+        .update({ used_sessions: newUsed, status: isComplete ? 'completed' : 'active' })
         .eq('id', packageId);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 
@@ -146,10 +147,9 @@ export function usePackages() {
 
   const deletePackage = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('packages')
-        .delete()
-        .eq('id', id);
+      let query = supabase.from('packages').delete().eq('id', id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 

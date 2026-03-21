@@ -94,7 +94,7 @@ export function useFinances() {
         isoDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
       }
 
-      const { error } = await supabase
+      let query = supabase
         .from('finances')
         .update({
           date: isoDate,
@@ -104,6 +104,8 @@ export function useFinances() {
           category: finance.category,
         })
         .eq('id', finance.id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 
@@ -118,10 +120,9 @@ export function useFinances() {
 
   const deleteFinance = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('finances')
-        .delete()
-        .eq('id', id);
+      let query = supabase.from('finances').delete().eq('id', id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 

@@ -213,9 +213,13 @@ export function AgendaView({
                       const client = clients.find(c => c.phone === appointment.phone)
                         || clients.find(c => c.name.toLowerCase() === appointment.clientName.toLowerCase());
                       if (client) {
+                        const complement = (client.addressType === 'apto' || client.addressType === 'comercial')
+                          ? client.address
+                          : undefined;
                         const parts = [
                           client.addressStreet,
                           client.addressNumber,
+                          complement,
                           client.addressNeighborhood,
                           client.addressCity,
                           client.addressState,

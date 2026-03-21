@@ -509,7 +509,7 @@ export function ClientModal({ client, tags, partnerships = [], bronzeCount, bron
               {(addressStreet || addressCity) && (
                 <div className="flex gap-2">
                   <a
-                    href={`https://waze.com/ul?q=${encodeURIComponent([addressStreet, addressNumber, addressNeighborhood, addressCity, addressState].filter(Boolean).join(', '))}`}
+                    href={`https://waze.com/ul?q=${encodeURIComponent([addressStreet, addressNumber, (addressType === 'apto' || addressType === 'comercial') ? address : undefined, addressNeighborhood, addressCity, addressState].filter(Boolean).join(', '))}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#33ccff]/10 text-[#00a3cc] text-xs font-bold hover:bg-[#33ccff]/20 transition-colors"
@@ -518,7 +518,7 @@ export function ClientModal({ client, tags, partnerships = [], bronzeCount, bron
                     Waze
                   </a>
                   <a
-                    href={`https://maps.google.com/?q=${encodeURIComponent([addressStreet, addressNumber, addressNeighborhood, addressCity, addressState].filter(Boolean).join(', '))}`}
+                    href={`https://maps.google.com/?q=${encodeURIComponent([addressStreet, addressNumber, (addressType === 'apto' || addressType === 'comercial') ? address : undefined, addressNeighborhood, addressCity, addressState].filter(Boolean).join(', '))}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 text-xs font-bold hover:bg-emerald-500/20 transition-colors"

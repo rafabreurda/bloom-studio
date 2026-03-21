@@ -100,10 +100,9 @@ export function useBlocks() {
 
   const deleteBlock = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('blocks')
-        .delete()
-        .eq('id', id);
+      let query = (supabase.from('blocks' as any) as any).delete().eq('id', id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 

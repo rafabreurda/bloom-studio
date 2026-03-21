@@ -70,14 +70,12 @@ export function useSuppliers() {
 
   const updateSupplier = async (supplier: Supplier) => {
     try {
-      const { error } = await supabase
+      let query = supabase
         .from('suppliers')
-        .update({
-          name: supplier.name,
-          contact: supplier.contact,
-          products: supplier.products,
-        })
+        .update({ name: supplier.name, contact: supplier.contact, products: supplier.products })
         .eq('id', supplier.id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 
@@ -92,10 +90,9 @@ export function useSuppliers() {
 
   const deleteSupplier = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('suppliers')
-        .delete()
-        .eq('id', id);
+      let query = supabase.from('suppliers').delete().eq('id', id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 

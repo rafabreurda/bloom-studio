@@ -73,7 +73,7 @@ export function useStock() {
 
   const updateStock = async (item: StockItem) => {
     try {
-      const { error } = await supabase
+      let query = supabase
         .from('stock')
         .update({
           name: item.name,
@@ -82,6 +82,8 @@ export function useStock() {
           min_stock: item.minStock,
         })
         .eq('id', item.id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 
@@ -96,10 +98,9 @@ export function useStock() {
 
   const deleteStock = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('stock')
-        .delete()
-        .eq('id', id);
+      let query = supabase.from('stock').delete().eq('id', id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 
@@ -117,12 +118,11 @@ export function useStock() {
     if (!item) return;
 
     const newQuantity = Math.max(0, item.quantity + delta);
-    
+
     try {
-      const { error } = await supabase
-        .from('stock')
-        .update({ quantity: newQuantity })
-        .eq('id', id);
+      let query = supabase.from('stock').update({ quantity: newQuantity }).eq('id', id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 

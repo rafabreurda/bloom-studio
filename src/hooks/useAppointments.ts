@@ -177,7 +177,7 @@ export function useAppointments() {
       const dateParts = appointment.date.split('/');
       const isoDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
 
-      const { error } = await supabase
+      let query = supabase
         .from('appointments')
         .update({
           client_name: appointment.clientName,
@@ -204,6 +204,12 @@ export function useAppointments() {
         })
         .eq('id', appointment.id);
 
+      if (!isAdminChefe && currentAdmin) {
+        query = query.eq('owner_id', currentAdmin.id);
+      }
+
+      const { error } = await query;
+
       if (error) throw error;
 
       setAppointments(prev => prev.map(a => a.id === appointment.id ? appointment : a));
@@ -217,10 +223,9 @@ export function useAppointments() {
 
   const deleteAppointment = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('appointments')
-        .delete()
-        .eq('id', id);
+      let query = supabase.from('appointments').delete().eq('id', id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 

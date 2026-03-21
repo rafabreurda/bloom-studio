@@ -70,14 +70,12 @@ export function usePartnerships() {
 
   const updatePartnership = async (partnership: Partnership) => {
     try {
-      const { error } = await supabase
+      let query = supabase
         .from('partnerships')
-        .update({
-          name: partnership.name,
-          discount: partnership.discount,
-          contact: partnership.contact,
-        })
+        .update({ name: partnership.name, discount: partnership.discount, contact: partnership.contact })
         .eq('id', partnership.id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 
@@ -92,10 +90,9 @@ export function usePartnerships() {
 
   const deletePartnership = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('partnerships')
-        .delete()
-        .eq('id', id);
+      let query = supabase.from('partnerships').delete().eq('id', id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 

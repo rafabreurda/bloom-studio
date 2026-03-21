@@ -4,6 +4,7 @@ import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { Appointment } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ReceiptModalProps {
   appointment: Appointment;
@@ -21,23 +22,25 @@ interface ReceiptConfig {
 }
 
 export function ReceiptModal({ appointment, onClose }: ReceiptModalProps) {
+  const { currentAdmin } = useAuth();
   const [config, setConfig] = useState<ReceiptConfig>({
-    studioName: 'Sole Mio Bronzeamento Saudável',
+    studioName: '',
     cpfCnpj: '',
     address: '',
     whatsapp: '',
     email: '',
     footerMessage: '',
-    signerName: 'Rosangela Stapasolla',
+    signerName: '',
   });
   const [logo, setLogo] = useState<string | null>(null);
   const receiptRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Load receipt config and logo
+    if (!currentAdmin?.id) return;
+    // Load receipt config and logo scoped to current user
     Promise.all([
-      supabase.from('system_config').select('value').eq('key', 'receipt_config'),
-      supabase.from('system_config').select('value').eq('key', 'studio_logo'),
+      supabase.from('system_config').select('value').eq('key', 'receipt_config').eq('owner_id', currentAdmin.id),
+      supabase.from('system_config').select('value').eq('key', 'studio_logo').eq('owner_id', currentAdmin.id),
     ]).then(([configRes, logoRes]) => {
       if (configRes.data?.[0]?.value) {
         setConfig(prev => ({ ...prev, ...(configRes.data[0].value as unknown as ReceiptConfig) }));
@@ -46,7 +49,7 @@ export function ReceiptModal({ appointment, onClose }: ReceiptModalProps) {
         setLogo(logoRes.data[0].value as string);
       }
     });
-  }, []);
+  }, [currentAdmin?.id]);
 
   const now = new Date();
   const generatedAt = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });

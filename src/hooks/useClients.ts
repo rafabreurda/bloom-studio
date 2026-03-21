@@ -133,7 +133,7 @@ export function useClients() {
 
   const updateClient = async (client: Client) => {
     try {
-      const { error } = await supabase
+      let query = supabase
         .from('clients')
         .update({
           name: client.name,
@@ -161,6 +161,8 @@ export function useClients() {
           history: (client.history || []) as unknown as Json,
         } as any)
         .eq('id', client.id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 
@@ -175,10 +177,9 @@ export function useClients() {
 
   const deleteClient = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('clients')
-        .delete()
-        .eq('id', id);
+      let query = supabase.from('clients').delete().eq('id', id);
+      if (!isAdminChefe && currentAdmin) query = query.eq('owner_id', currentAdmin.id);
+      const { error } = await query;
 
       if (error) throw error;
 
