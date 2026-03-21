@@ -12,11 +12,13 @@ interface ClientModalProps {
   client: Client | null;
   tags: ClientTag[];
   partnerships?: Partnership[];
+  bronzeCount?: number;
+  bronzeGoal?: number;
   onClose: () => void;
   onSave: (client: Omit<Client, 'id' | 'createdAt' | 'history'>) => void;
 }
 
-export function ClientModal({ client, tags, partnerships = [], onClose, onSave }: ClientModalProps) {
+export function ClientModal({ client, tags, partnerships = [], bronzeCount, bronzeGoal = 10, onClose, onSave }: ClientModalProps) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -219,7 +221,7 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
   return (
     <>
       <BronzeCard className="w-full max-w-2xl bg-card border-primary/30 overflow-y-auto max-h-[90vh] custom-scrollbar rounded-t-[32px] md:rounded-3xl p-6">
-        <div className="flex justify-between items-center mb-6 text-foreground border-b border-border pb-4">
+        <div className="flex justify-between items-center mb-4 text-foreground border-b border-border pb-4">
           <h3 className="text-xl font-black uppercase">
             {client ? 'Editar Cliente' : 'Novo Cliente'}
           </h3>
@@ -227,6 +229,35 @@ export function ClientModal({ client, tags, partnerships = [], onClose, onSave }
             <X size={24} />
           </button>
         </div>
+
+        {/* Bronze progress — only for existing clients */}
+        {client && bronzeCount !== undefined && (() => {
+          const reached = bronzeCount >= bronzeGoal;
+          const progress = Math.min(bronzeCount / bronzeGoal, 1);
+          return (
+            <div className={`mb-4 p-3 rounded-2xl border ${reached ? 'bg-amber-50 border-amber-200' : 'bg-secondary border-border/30'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-1.5">
+                  ☀️ Bronzes no Período
+                </span>
+                <span className={`text-sm font-black ${reached ? 'text-amber-600' : 'text-foreground'}`}>
+                  {reached ? `🏆 Meta Atingida! ${bronzeCount} bronzes` : `${bronzeCount} / ${bronzeGoal}`}
+                </span>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ${reached ? 'bg-amber-400' : 'bg-primary'}`}
+                  style={{ width: `${progress * 100}%` }}
+                />
+              </div>
+              {reached && (
+                <p className="text-[10px] text-amber-600 font-bold mt-1.5">
+                  🎉 Esta cliente atingiu a meta de {bronzeGoal} bronzes! Hora de premiar!
+                </p>
+              )}
+            </div>
+          );
+        })()}
 
         <form onSubmit={handleSubmit}>
           <Tabs defaultValue="dados" className="w-full">

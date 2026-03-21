@@ -453,6 +453,8 @@ const MainApp = () => {
             clients={clients}
             partnerships={partnerships}
             serviceTypes={systemConfig.serviceTypes || []}
+            appointments={appointments}
+            bronzeGoal={systemConfig.bronzeGoal}
           />
         </div>
       )}

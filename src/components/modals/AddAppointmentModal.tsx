@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Star, CheckCircle2, ShoppingCart, Handshake, UserPlus, Sparkles, Plus } from 'lucide-react';
+import { X, Star, CheckCircle2, ShoppingCart, Handshake, UserPlus, Sparkles } from 'lucide-react';
 import { BronzeCard } from '@/components/ui/BronzeCard';
 import { BronzeButton } from '@/components/ui/BronzeButton';
 import { ClientSearchCombobox } from './ClientSearchCombobox';
@@ -15,17 +15,21 @@ interface AddAppointmentModalProps {
   clients: Client[];
   partnerships: Partnership[];
   serviceTypes: ServiceType[];
+  appointments?: Appointment[];
+  bronzeGoal?: number;
 }
 
-export function AddAppointmentModal({ 
-  selectedDate, 
-  defaultTime, 
-  onClose, 
+export function AddAppointmentModal({
+  selectedDate,
+  defaultTime,
+  onClose,
   onAdd,
   stock,
   clients,
   partnerships,
   serviceTypes,
+  appointments = [],
+  bronzeGoal = 10,
 }: AddAppointmentModalProps) {
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
@@ -39,6 +43,7 @@ export function AddAppointmentModal({
   const [isNewClient, setIsNewClient] = useState(false);
   const [selectedTime, setSelectedTime] = useState(defaultTime || '08:00');
   const [isSaving, setIsSaving] = useState(false);
+  const [clientBronzeCount, setClientBronzeCount] = useState<number | null>(null);
 
   const activeServices = serviceTypes.filter(s => s.isActive);
 
@@ -65,7 +70,7 @@ export function AddAppointmentModal({
 
   const selectedPartnership = partnerships.find(p => p.id === selectedPartnershipId);
   const productsTotal = selectedProducts.reduce((acc, curr) => acc + Number(curr.price), 0);
-  
+
   // Para parcerias 100%, cobra apenas produtos
   const isFullPartnership = isPartnership && selectedPartnership?.discount === 100;
   const chargedValue = isFullPartnership ? productsTotal : Number(sessionValue) + productsTotal;
@@ -82,6 +87,17 @@ export function AddAppointmentModal({
     setIsVIP(data.isVIP);
     setIsManualPhone(data.source === 'manual');
     setIsNewClient(data.source === 'manual');
+
+    // Calcular contagem de bronzes ao selecionar cliente
+    if (data.source !== 'manual' && data.name) {
+      const count = appointments.filter(a =>
+        a.clientName.toLowerCase() === data.name.toLowerCase() ||
+        (data.phone && a.phone === data.phone)
+      ).length;
+      setClientBronzeCount(count);
+    } else {
+      setClientBronzeCount(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -139,6 +155,9 @@ export function AddAppointmentModal({
     setSelectedProducts(selectedProducts.filter((_, i) => i !== index));
   };
 
+  const clientReachedGoal = clientBronzeCount !== null && clientBronzeCount >= bronzeGoal;
+  const clientNearGoal = clientBronzeCount !== null && !clientReachedGoal && clientBronzeCount === bronzeGoal - 1;
+
   return (
     <BronzeCard className="w-full max-w-2xl bg-card border-primary/30 overflow-y-auto max-h-[90vh] custom-scrollbar rounded-t-[32px] md:rounded-3xl p-6">
       {/* Header */}
@@ -158,26 +177,79 @@ export function AddAppointmentModal({
             value={clientName}
             onSelect={handleClientSelect}
           />
-          <input 
-            name="phone" 
-            type="text" 
-            placeholder="WhatsApp (opcional)" 
-            className="input-bronze" 
+          <input
+            name="phone"
+            type="text"
+            placeholder="WhatsApp (opcional)"
+            className="input-bronze"
             value={clientPhone}
             onChange={e => setClientPhone(e.target.value)}
           />
         </div>
 
+        {/* Celebração — Meta Atingida */}
+        {clientReachedGoal && (
+          <div className="relative overflow-hidden rounded-3xl border-2 border-amber-400 bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 p-4">
+            {/* Emojis flutuantes decorativos */}
+            <span className="absolute top-1 left-4 text-xl animate-bounce" style={{ animationDelay: '0ms' }}>🏆</span>
+            <span className="absolute top-1 right-8 text-lg animate-bounce" style={{ animationDelay: '150ms' }}>⭐</span>
+            <span className="absolute bottom-1 left-12 text-lg animate-bounce" style={{ animationDelay: '300ms' }}>✨</span>
+            <span className="absolute bottom-1 right-4 text-xl animate-bounce" style={{ animationDelay: '100ms' }}>🌟</span>
+            <span className="absolute top-2 left-1/2 text-base animate-bounce" style={{ animationDelay: '200ms' }}>🎉</span>
+
+            <div className="relative text-center py-2">
+              <p className="text-2xl font-black text-amber-600 animate-pulse">
+                🏆 META ATINGIDA!
+              </p>
+              <p className="text-sm font-bold text-amber-700 mt-1">
+                {clientName} já fez <span className="text-lg font-black">{clientBronzeCount}</span> bronzes!
+              </p>
+              <p className="text-[11px] text-amber-600 mt-1 font-semibold">
+                🎁 Hora de oferecer um mimo especial para ela!
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Aviso — Quase na meta */}
+        {clientNearGoal && (
+          <div className="flex items-center gap-3 p-3 rounded-2xl border border-amber-300 bg-amber-50">
+            <span className="text-2xl">☀️</span>
+            <div>
+              <p className="text-xs font-black text-amber-700">
+                Quase lá! {clientName} está no bronze {clientBronzeCount}/{bronzeGoal}
+              </p>
+              <p className="text-[10px] text-amber-600">Este será o último bronze para atingir a meta! 🏆</p>
+            </div>
+          </div>
+        )}
+
+        {/* Contador simples para clientes sem meta */}
+        {clientBronzeCount !== null && !clientReachedGoal && !clientNearGoal && (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary border border-border/30">
+            <span className="text-base">☀️</span>
+            <span className="text-xs font-bold text-muted-foreground">
+              {clientName} — {clientBronzeCount} de {bronzeGoal} bronzes
+            </span>
+            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden ml-1">
+              <div
+                className="h-full bg-primary rounded-full transition-all"
+                style={{ width: `${Math.min((clientBronzeCount / bronzeGoal) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Date & Time */}
         <div className="grid grid-cols-2 gap-4 items-start">
           <div>
             <label className="text-[9px] font-black uppercase text-muted-foreground mb-1 block">Data</label>
-            <input 
-              name="date" 
-              type="date" 
-              className="input-bronze w-full" 
-              defaultValue={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`} 
-              required 
+            <input
+              name="date"
+              type="date"
+              className="input-bronze w-full"
+              defaultValue={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`}
+              required
             />
           </div>
           <div>
@@ -234,11 +306,11 @@ export function AddAppointmentModal({
           <p className="text-[10px] font-black uppercase text-foreground flex items-center gap-2">
             <ShoppingCart size={14} /> Itens Extras
           </p>
-          <select 
-            onChange={(e) => { 
-              addProduct(e.target.value); 
-              e.target.value = ""; 
-            }} 
+          <select
+            onChange={(e) => {
+              addProduct(e.target.value);
+              e.target.value = "";
+            }}
             className="w-full p-3 bg-background border border-border rounded-xl text-xs font-bold text-foreground"
           >
             <option value="">Adicionar produto...</option>
@@ -248,15 +320,15 @@ export function AddAppointmentModal({
           </select>
           <div className="flex flex-wrap gap-2">
             {selectedProducts.map((p, i) => (
-              <span 
-                key={i} 
+              <span
+                key={i}
                 className="px-3 py-1 bg-background rounded-lg text-[10px] border border-border flex items-center gap-2 text-foreground"
               >
-                {p.name} 
-                <X 
-                  size={12} 
-                  className="cursor-pointer text-destructive" 
-                  onClick={() => removeProduct(i)} 
+                {p.name}
+                <X
+                  size={12}
+                  className="cursor-pointer text-destructive"
+                  onClick={() => removeProduct(i)}
                 />
               </span>
             ))}
@@ -274,11 +346,11 @@ export function AddAppointmentModal({
         {/* VIP, Confirmed & Partnership */}
         <div className="grid grid-cols-3 gap-3">
           <label className="flex items-center gap-2 p-3 md:p-4 bg-secondary rounded-3xl border border-border/10 cursor-pointer hover:bg-muted transition-all">
-            <input 
-              type="checkbox" 
-              className="hidden" 
-              checked={isVIP} 
-              onChange={e => setIsVIP(e.target.checked)} 
+            <input
+              type="checkbox"
+              className="hidden"
+              checked={isVIP}
+              onChange={e => setIsVIP(e.target.checked)}
             />
             <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full border-2 flex items-center justify-center transition-all ${
               isVIP ? 'bg-primary border-primary shadow-xl' : 'border-muted-foreground'
@@ -289,13 +361,13 @@ export function AddAppointmentModal({
               VIP
             </span>
           </label>
-          
+
           <label className="flex items-center gap-2 p-3 md:p-4 bg-secondary rounded-3xl border border-border/10 cursor-pointer transition-all hover:bg-muted">
-            <input 
-              type="checkbox" 
-              className="hidden" 
-              checked={isConfirmed} 
-              onChange={e => setIsConfirmed(e.target.checked)} 
+            <input
+              type="checkbox"
+              className="hidden"
+              checked={isConfirmed}
+              onChange={e => setIsConfirmed(e.target.checked)}
             />
             <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full border-2 flex items-center justify-center transition-all ${
               isConfirmed ? 'bg-success border-success text-success-foreground' : 'border-muted-foreground'
@@ -308,14 +380,14 @@ export function AddAppointmentModal({
           </label>
 
           <label className="flex items-center gap-2 p-3 md:p-4 bg-secondary rounded-3xl border border-border/10 cursor-pointer transition-all hover:bg-muted">
-            <input 
-              type="checkbox" 
-              className="hidden" 
-              checked={isPartnership} 
+            <input
+              type="checkbox"
+              className="hidden"
+              checked={isPartnership}
               onChange={e => {
                 setIsPartnership(e.target.checked);
                 if (!e.target.checked) setSelectedPartnershipId('');
-              }} 
+              }}
             />
             <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full border-2 flex items-center justify-center transition-all ${
               isPartnership ? 'bg-violet-500 border-violet-500 text-white' : 'border-muted-foreground'
@@ -334,7 +406,7 @@ export function AddAppointmentModal({
             <p className="text-[10px] font-black uppercase text-violet-700 flex items-center gap-2">
               <Handshake size={14} /> Selecione a Parceria
             </p>
-            <select 
+            <select
               value={selectedPartnershipId}
               onChange={(e) => setSelectedPartnershipId(e.target.value)}
               className="w-full p-3 bg-white border border-violet-200 rounded-xl text-xs font-bold text-foreground"
@@ -384,8 +456,8 @@ export function AddAppointmentModal({
             )}
           </div>
           <div className="text-right">
-            <select 
-              name="status" 
+            <select
+              name="status"
               className="bg-gray-800 text-white font-black uppercase text-[10px] rounded-xl p-3 border-none focus:ring-0"
             >
               <option>Aguardando Sinal</option>

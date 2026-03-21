@@ -47,6 +47,17 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
     return letters;
   }, [clients]);
 
+  const clientBronzeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    clients.forEach(client => {
+      counts[client.id] = appointments.filter(a =>
+        a.clientName.toLowerCase() === client.name.toLowerCase() ||
+        (a.phone && a.phone === client.phone)
+      ).length;
+    });
+    return counts;
+  }, [clients, appointments]);
+
   const filteredClients = useMemo(() => {
     let result = [...clients];
     if (search) {
@@ -187,11 +198,15 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
         <div className="flex-1 overflow-y-auto custom-scrollbar pb-20 space-y-2 sm:space-y-3 pr-1 sm:pr-2">
           {filteredClients.map(client => {
             const linkedPartnership = client.partnershipId ? getPartnershipById(client.partnershipId) : null;
+            const bronzeCount = clientBronzeCounts[client.id] ?? 0;
+            const goal = bronzeGoal ?? 10;
+            const reachedGoal = bronzeCount >= goal;
+            const bronzeProgress = Math.min(bronzeCount / goal, 1);
             return (
-              <BronzeCard key={client.id} className={`bg-secondary/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 ${client.isVIP ? 'vip-border vip-glow' : linkedPartnership ? 'border-l-4 border-l-violet-500' : ''}`}>
+              <BronzeCard key={client.id} className={`bg-secondary/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 ${client.isVIP ? 'vip-border vip-glow' : linkedPartnership ? 'border-l-4 border-l-violet-500' : reachedGoal ? 'border-l-4 border-l-amber-400' : ''}`}>
                 <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 ${client.isVIP ? 'bg-primary' : linkedPartnership ? 'bg-violet-100' : 'bg-muted'}`}>
-                    {client.isVIP ? <Star size={18} className="text-primary-foreground" fill="currentColor" /> : linkedPartnership ? <Handshake size={18} className="text-violet-600" /> : <User size={18} className="text-muted-foreground" />}
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 ${client.isVIP ? 'bg-primary' : linkedPartnership ? 'bg-violet-100' : reachedGoal ? 'bg-amber-100' : 'bg-muted'}`}>
+                    {client.isVIP ? <Star size={18} className="text-primary-foreground" fill="currentColor" /> : linkedPartnership ? <Handshake size={18} className="text-violet-600" /> : reachedGoal ? <span className="text-lg">🏆</span> : <User size={18} className="text-muted-foreground" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <button onClick={() => setViewingClient(client)} className="font-black text-sm sm:text-base text-foreground hover:text-primary transition-colors text-left truncate block w-full">
@@ -201,6 +216,18 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
                     </button>
                     <p className="text-[11px] sm:text-xs text-muted-foreground truncate">{client.phone}</p>
                     {client.tags?.length > 0 && <div className="flex flex-wrap gap-1 mt-1">{client.tags.slice(0, 3).map(tagId => { const tag = getTagById(tagId); return tag ? <span key={tagId} className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold text-white" style={{ backgroundColor: tag.color }}>{tag.name}</span> : null; })}</div>}
+                    {/* Bronze progress bar */}
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden max-w-[120px]">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${reachedGoal ? 'bg-amber-400' : 'bg-primary'}`}
+                          style={{ width: `${bronzeProgress * 100}%` }}
+                        />
+                      </div>
+                      <span className={`text-[10px] font-black ${reachedGoal ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                        {reachedGoal ? `🏆 ${bronzeCount} bronzes` : `☀️ ${bronzeCount}/${goal}`}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2 shrink-0">
@@ -231,7 +258,7 @@ export function ClientsView({ clients, tags, partnerships, appointments, whatsap
       </>
       )}
 
-      {showModal && <div className="fixed inset-0 bg-black/80 z-[100] flex items-end md:items-center justify-center"><ClientModal client={editingClient} tags={tags} partnerships={partnerships} onClose={() => { setShowModal(false); setEditingClient(null); }} onSave={handleSave} /></div>}
+      {showModal && <div className="fixed inset-0 bg-black/80 z-[100] flex items-end md:items-center justify-center"><ClientModal client={editingClient} tags={tags} partnerships={partnerships} bronzeCount={editingClient ? (clientBronzeCounts[editingClient.id] ?? 0) : undefined} bronzeGoal={bronzeGoal} onClose={() => { setShowModal(false); setEditingClient(null); }} onSave={handleSave} /></div>}
       {viewingClient && <ClientHistoryModal client={viewingClient} tags={tags} onClose={() => setViewingClient(null)} />}
       
       {showDeleteAll && (
