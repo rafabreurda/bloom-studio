@@ -55,8 +55,8 @@ export function useAutoClose({ appointments, onUpdateAppointment, onAddFinance, 
         try {
           await onUpdateAppointment({ ...appo, status: 'Concluído' });
 
-          // Only create finance if not already created by manual payment confirmation
-          if (appo.chargedValue > 0 && appo.paymentMethod && !isFinanceProcessed(appo.id)) {
+          // Only create finance if not already created (check DB flag first, then session cache)
+          if (appo.chargedValue > 0 && appo.paymentMethod && !appo.financeCreated && !isFinanceProcessed(appo.id)) {
             markFinanceProcessed(appo.id);
             await onAddFinance({
               date: appo.date,

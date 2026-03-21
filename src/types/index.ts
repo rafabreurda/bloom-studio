@@ -22,6 +22,7 @@ export interface Appointment {
   services?: AppointmentService[];
   createdAt: Date;
   products?: AppointmentProduct[];
+  financeCreated?: boolean;
 }
 
 export interface AppointmentProduct {

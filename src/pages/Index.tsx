@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { markFinanceProcessed } from '@/lib/financeTracker';
+import { markFinanceProcessed, seedFinanceTrackerFromAppointments } from '@/lib/financeTracker';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoginScreen } from '@/components/auth/LoginScreen';
 import { Sidebar } from '@/components/layout/Sidebar';
@@ -123,6 +123,13 @@ const MainApp = () => {
     };
     checkBirthdays();
   }, [isAdminChefe]);
+
+  // Seed finance tracker from DB on appointments load (survives page refresh)
+  useEffect(() => {
+    if (appointments.length > 0) {
+      seedFinanceTrackerFromAppointments(appointments);
+    }
+  }, [appointments]);
 
   // Auto-close appointments when next appointment time arrives
   useAutoClose({

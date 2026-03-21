@@ -51,6 +51,7 @@ export function useAppointments() {
           services: (a.services as unknown as AppointmentService[]) || [],
           products: (a.products as unknown as AppointmentProduct[]) || [],
           createdAt: new Date(a.created_at),
+          financeCreated: (a as any).finance_created || false,
         };
       }) || []);
     } catch (error) {
